@@ -9,6 +9,7 @@ import jpl.Term;
 import jpl.Util;
 
 import org.logicobjects.adapter.TermToObjectAdapter;
+import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.AbstractTypeWrapper;
 import org.reflectiveutils.AbstractTypeWrapper.ArrayTypeWrapper;
@@ -20,13 +21,13 @@ public class TermToArrayAdapter extends TermToObjectAdapter<Object[]> {
 	}
 
 
-	public Object[] adapt(Term listTerm, Type type, Field field) {
+	public Object[] adapt(Term listTerm, Type type, AdaptingContext adaptingContext) {
 		ArrayTypeWrapper typeWrapper = new ArrayTypeWrapper(type);
 		Type componentType = typeWrapper.getComponentType();
 		Term[] termItems= LogicUtil.listToTermArray(listTerm);
 		Object array = createArray(componentType, termItems.length);
 		for(int i=0; i<termItems.length; i++) {
-			Array.set(array, i, new TermToObjectAdapter().adapt(termItems[i], componentType, field));
+			Array.set(array, i, new TermToObjectAdapter().adapt(termItems[i], componentType, adaptingContext));
 		}
 		return (Object[]) array;
 	}

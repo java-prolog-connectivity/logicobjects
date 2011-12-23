@@ -7,6 +7,7 @@ import java.util.List;
 
 import jpl.Term;
 
+import org.logicobjects.adapter.adaptingcontext.AccessibleObjectAdaptingContext;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.core.LogtalkObject;
 
@@ -45,7 +46,7 @@ public class LogtalkObjectAdapter extends Adapter<Object, LogtalkObject> {
 				Term term = null;
 				Object propertyValue = Properties.getBeanPropertyByName(propertyName, object).getValue();
 				Field field = Properties.getPropertyByName(object, propertyName).getField();
-				term = new ObjectToTermAdapter().adapt(propertyValue, field);
+				term = new ObjectToTermAdapter().adapt(propertyValue, new AccessibleObjectAdaptingContext(field));
 				parameters.add(term);
 			} catch(Exception e) {
 				throw new RuntimeException(e);

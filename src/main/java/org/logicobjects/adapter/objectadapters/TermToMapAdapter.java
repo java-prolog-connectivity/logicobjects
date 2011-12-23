@@ -10,6 +10,7 @@ import jpl.Compound;
 import jpl.Term;
 
 import org.logicobjects.adapter.TermToObjectAdapter;
+import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.AbstractTypeWrapper.SingleTypeWrapper;
 
@@ -20,19 +21,19 @@ public class TermToMapAdapter extends TermToObjectAdapter<Map> {
 	}
 	
 	@Override
-	public Map adapt(Term listTerm, Type type, Field field) {
+	public Map adapt(Term listTerm, Type type, AdaptingContext adaptingContext) {
 		Map map = (Map) ImplementationMap.getDefault().instantiateObject(type);
-		fillMap(listTerm, type, field, map);//this does not seem to be the right type
+		fillMap(listTerm, type, adaptingContext, map);//this does not seem to be the right type
 		return map;
 	}
 
 	
-	public Map fillMap(Term listTerm, Type type, Field field, Map map) {
+	public Map fillMap(Term listTerm, Type type, AdaptingContext adaptingContext, Map map) {
 		//SingleTypeWrapper typeWrapper = (SingleTypeWrapper) AbstractTypeWrapper.wrap(type);
 		Type entryType = getEntryType(map);
 		//Type[] mapTypeParameters = AbstractTypeWrapper.unwrap(new GenericsUtil().findParametersInstantiations(Map.class, type));
 		for(Term termItem : LogicUtil.listToTermArray(listTerm)) {
-			Entry entry = (Entry) new TermToObjectAdapter().adapt(termItem, entryType, field);
+			Entry entry = (Entry) new TermToObjectAdapter().adapt(termItem, entryType, adaptingContext);
 			map.put(entry.getKey(), entry.getValue());
 		}
 		return map;
@@ -52,9 +53,9 @@ public class TermToMapAdapter extends TermToObjectAdapter<Map> {
 			return adapt(term, Object.class, Object.class, null);
 		}
 		
-		public Entry adapt(Compound term, Type keyType, Type valueType, Field field) {
+		public Entry adapt(Compound term, Type keyType, Type valueType, AdaptingContext adaptingContext) {
 			Hashtable hash = new Hashtable();
-			hash.put(new TermToObjectAdapter().adapt(term.arg(1), keyType, field), adapt(term.arg(2), valueType, field));
+			hash.put(new TermToObjectAdapter().adapt(term.arg(1), keyType, adaptingContext), adapt(term.arg(2), valueType, adaptingContext));
 			return (Entry)hash.entrySet().toArray()[0];
 		}
 		

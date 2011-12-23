@@ -5,6 +5,8 @@ import java.util.Map.Entry;
 
 import jpl.Atom;
 import jpl.Term;
+
+import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
 import org.logicobjects.adapter.objectadapters.ImplementationMap;
 
 import org.logicobjects.adapter.objectadapters.AnyCollectionToTermAdapter;
@@ -24,72 +26,61 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 	}
 
 
-	public Term adapt(From object, Field field) {
-		if(field != null) {
-			LTermAdapter termAdapterAnnotation = field.getAnnotation(LTermAdapter.class);
-			if(termAdapterAnnotation != null) {
-				Class termAdapterClazz = termAdapterAnnotation.adapter();
-				try {
-					if(AbstractTypeWrapper.wrap(Adapter.fromType(termAdapterClazz)).asClass().isAssignableFrom(object.getClass())) //if the wrapper is compatible with the object use it
-						return asTerm(object, termAdapterAnnotation);
-					else { //in the current implementation, an Adapter annotation overrides any LogicObjectAnnotation (even if it was not used because the adapter is not compatible with the object type)
-						LObject logicObjectAnnotation = field.getAnnotation(LObject.class);
-						if(logicObjectAnnotation != null) {
-							return new LogtalkObjectAdapter().asLogtalkObject(object, logicObjectAnnotation).asTerm();
-						}
-					}
-				} catch(ObjectToTermException e) {
-					if(!ImplementationMap.isCollectionObject(object)) //if the object is a collection and the adapter did not know how to adapt it to a term, then the adapter will be applied if possible to the members of the collection
-						throw e; 
-				}
+	public Term adapt(From object, AdaptingContext adaptingContext) {
+		if(adaptingContext != null && adaptingContext.canAdaptToTerm()) {
+			try {
+				return adaptingContext.adaptToTerm(object);
+			} catch(RuntimeException e) {
+				if(!ImplementationMap.isCollectionObject(object))
+					throw e;
 			}
-			
-		}
-
-		if(object instanceof String){
-			String text = object.toString();
-			/*
-			//check if the string represents a variable (the first character a '?', after a capital letter and some printable characters later
-			if(text.matches("\\"+VARIABLE_PREFIX+"[A-Z][\\w]*"))  //TODO verify if VARIABLE_PREFIX needs escaping with '\\'or not (this -weak- code assumes than yes)
-				return new Variable(text.substring(1, text.length()));
-			*/
-			return new Atom(text);
-		} else if(object.getClass().equals(java.lang.Integer.class)) { //better full class name to avoid confusions here ;)
-			return new jpl.Integer(java.lang.Integer.class.cast(object).intValue());
-		}  else if(object.getClass().equals(java.lang.Long.class)) { //better full class name to avoid confusions here ;)
-			return new jpl.Integer(java.lang.Long.class.cast(object).longValue());
-		}  else if(object.getClass().equals(java.lang.Float.class)) { 
-			return new jpl.Float(java.lang.Float.class.cast(object).floatValue());
-		} else if(object.getClass().equals(java.lang.Double.class)) { 
-			return new jpl.Float(java.lang.Double.class.cast(object).doubleValue());
-		} else if(Primitives.isWrapperType(object.getClass())) {  //any other primitive
-			return new Atom(object.toString());
-		}
-		Class guidingClass = findGuidingClass(object.getClass());
-		if(guidingClass != null) {
-			if(isTermObjectClass(guidingClass))
-				return ((ITermObject)object).asTerm();
-			
-			LTermAdapter termAdapterAnnotation = (LTermAdapter)guidingClass.getAnnotation(LTermAdapter.class);
-			if(termAdapterAnnotation!=null) 
-				return asTerm(object, termAdapterAnnotation);
-			
-			LObject logicObjectAnnotation = (LObject)guidingClass.getAnnotation(LObject.class);
-			if(logicObjectAnnotation!=null) 
-				return new LogtalkObjectAdapter().asLogtalkObject(object, logicObjectAnnotation).asTerm();
-
-			throw new ObjectToTermException(object);  //if we arrive here something went wrong
-		} else if(object instanceof Term) {
-			return (Term)object;
-		} else if(object instanceof ITermObject) {
-			return ((ITermObject)object).asTerm();
-		} else if(ImplementationMap.isCollectionObject(object)) {
-			return new AnyCollectionToTermAdapter().adapt(object, field);
-		} else if(object instanceof Entry) {
-			return new EntryToTermAdapter().adapt((Entry) object, field);
 		} else {
-			throw new ObjectToTermException(object); //no idea how to adapt that object
+			if(object instanceof String){
+				String text = object.toString();
+				/*
+				//check if the string represents a variable (the first character a '?', after a capital letter and some printable characters later
+				if(text.matches("\\"+VARIABLE_PREFIX+"[A-Z][\\w]*"))  //TODO verify if VARIABLE_PREFIX needs escaping with '\\'or not (this -weak- code assumes than yes)
+					return new Variable(text.substring(1, text.length()));
+				*/
+				return new Atom(text);
+			} else if(object.getClass().equals(java.lang.Integer.class)) { //better full class name to avoid confusions here ;)
+				return new jpl.Integer(java.lang.Integer.class.cast(object).intValue());
+			}  else if(object.getClass().equals(java.lang.Long.class)) { //better full class name to avoid confusions here ;)
+				return new jpl.Integer(java.lang.Long.class.cast(object).longValue());
+			}  else if(object.getClass().equals(java.lang.Float.class)) { 
+				return new jpl.Float(java.lang.Float.class.cast(object).floatValue());
+			} else if(object.getClass().equals(java.lang.Double.class)) { 
+				return new jpl.Float(java.lang.Double.class.cast(object).doubleValue());
+			} else if(Primitives.isWrapperType(object.getClass())) {  //any other primitive
+				return new Atom(object.toString());
+			}
+			Class guidingClass = findGuidingClass(object.getClass());
+			if(guidingClass != null) {
+				if(isTermObjectClass(guidingClass))
+					return ((ITermObject)object).asTerm();
+				
+				LTermAdapter termAdapterAnnotation = (LTermAdapter)guidingClass.getAnnotation(LTermAdapter.class);
+				if(termAdapterAnnotation!=null) 
+					return asTerm(object, termAdapterAnnotation);
+				
+				LObject logicObjectAnnotation = (LObject)guidingClass.getAnnotation(LObject.class);
+				if(logicObjectAnnotation!=null) 
+					return new LogtalkObjectAdapter().asLogtalkObject(object, logicObjectAnnotation).asTerm();
+
+				throw new ObjectToTermException(object);  //if we arrive here something went wrong
+			} else if(object instanceof Term) {
+				return (Term)object;
+			} else if(object instanceof ITermObject) {
+				return ((ITermObject)object).asTerm();
+			} else if(object instanceof Entry) {
+				return new EntryToTermAdapter().adapt((Entry) object, adaptingContext);
+			} 
 		}
+
+		if(ImplementationMap.isCollectionObject(object)) 
+			return new AnyCollectionToTermAdapter().adapt(object, adaptingContext);
+		
+		throw new ObjectToTermException(object); //no idea how to adapt the object
 	}
 
 	

@@ -16,7 +16,7 @@ public class SimpleLContext extends AbstractLContext {
 
 	private Set<Class<?>> logicClasses;
 	private Set<Class<? extends SolutionCompositionAdapter>> compositionAdapters;
-	
+
 	private Reflections reflections;
 	
 	public SimpleLContext(Reflections reflections) {
@@ -29,18 +29,18 @@ public class SimpleLContext extends AbstractLContext {
 	
 	public Set<Class<?>> getLogicClasses() {
 		if(reflections == null) {
-			LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for user logic classes without having provided a filter");
-			return new HashSet<Class<?>>();
-		} else
-			return logicClasses;
+			LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for user logic classes without having provided a filter. Looking for classes in the static and context class loader.");
+			addSearchUrls(ClasspathHelper.forClassLoader().toArray(new URL[] {}));
+		} 
+		return logicClasses;
 	}
 	
 	public Set<Class<? extends SolutionCompositionAdapter>> getCompositionAdapters() {
 		if(reflections == null) {
-			LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for user composition adapters without having provided a filter");
-			return new HashSet<Class<? extends SolutionCompositionAdapter>>();
-		} else
-			return compositionAdapters;
+			LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for user composition adapters without having provided a filter. Looking for classes in the static and context class loader.");
+			addSearchUrls(ClasspathHelper.forClassLoader().toArray(new URL[] {}));
+		} 
+		return compositionAdapters;
 	}
 	
 	public void addSearchFilter(String packageName) {
@@ -54,13 +54,13 @@ public class SimpleLContext extends AbstractLContext {
 	} 
 	
 	public void addSearchUrlFromClass(Class clazz) {
-		addSearchUrl(ClasspathHelper.forClass(clazz));
+		addSearchUrls(ClasspathHelper.forClass(clazz));
 	} 
 	
-	public void addSearchUrl(URL url) {
+	public void addSearchUrls(URL... urls) {
 		Reflections reflections_url;
 		ConfigurationBuilder config = new ConfigurationBuilder();
-		config.addUrls(url);
+		config.addUrls(urls);
 		reflections_url =  new Reflections(config);
 		if(reflections == null) {
 			reflections = reflections_url;
@@ -77,5 +77,6 @@ public class SimpleLContext extends AbstractLContext {
 		compositionAdapters = new HashSet<Class<? extends SolutionCompositionAdapter>>();
 		updateAdapters(unfilteredAdapters, compositionAdapters);
 	}
+	
 	
 }

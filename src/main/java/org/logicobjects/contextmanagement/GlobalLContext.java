@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import jpl.Term;
+import jpl.Variable;
 
 import org.logicobjects.adapter.methodresult.solutioncomposition.SolutionCompositionAdapter;
 import org.logicobjects.annotation.LObject;
@@ -42,7 +43,7 @@ public class GlobalLContext extends AbstractLContext {
 	}
 	
 	public void addSearchUrl(URL url) {
-		userContext.addSearchUrl(url);
+		userContext.addSearchUrls(url);
 	}
 	
 	public Set<Class<?>> getLogicClasses() {
@@ -76,11 +77,11 @@ public class GlobalLContext extends AbstractLContext {
 	}
 	
 	public Class findLogicClass(Term term) {
+		if( term instanceof Variable || term instanceof jpl.Integer || term instanceof jpl.Float )
+			return null;
 		return findLogicClass(term.name(), term.args().length);
 	}
 
-
-	
 	public static void main(String[] args) {
 		
 		Set<Class<?>> allLogicClasses = new GlobalLContext().getLogicClasses();
