@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>jpl</groupId>
+	<artifactId>jpl</artifactId>
+	<version>3.1.4-alpha</version>
+
+	<distributionManagement>
+	    <downloadUrl>file:///Volumes/Media/maven/remote-repository/repository</downloadUrl>
+	</distributionManagement>
+	
+
+	<repositories>
+	    <repository>
+	      <id>logicobjects-repository</id>
+	      <url>file:///Volumes/Media/maven/remote-repository/repository</url>
+	    </repository>
+	</repositories>
+
+
+</project>
+

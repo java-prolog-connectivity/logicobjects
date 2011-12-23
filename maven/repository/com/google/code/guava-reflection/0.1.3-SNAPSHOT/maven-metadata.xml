@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata modelVersion="1.1.0">
+  <groupId>com.google.code</groupId>
+  <artifactId>guava-reflection</artifactId>
+  <version>0.1.3-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <timestamp>20111221.205415</timestamp>
+      <buildNumber>1</buildNumber>
+    </snapshot>
+    <lastUpdated>20111221205415</lastUpdated>
+    <snapshotVersions>
+      <snapshotVersion>
+        <extension>jar</extension>
+        <value>0.1.3-20111221.205415-1</value>
+        <updated>20111221205415</updated>
+      </snapshotVersion>
+      <snapshotVersion>
+        <extension>pom</extension>
+        <value>0.1.3-20111221.205415-1</value>
+        <updated>20111221205415</updated>
+      </snapshotVersion>
+    </snapshotVersions>
+  </versioning>
+</metadata>
