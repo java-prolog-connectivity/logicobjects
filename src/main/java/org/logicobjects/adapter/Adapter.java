@@ -7,7 +7,7 @@ import org.reflectiveutils.AbstractTypeWrapper;
 import org.reflectiveutils.GenericsUtil;
 
 /*
- * Abstract adapter
+ * An abstract adapter with convenient methods for finding out their generic types at runtime
  * 
  */
 public abstract class Adapter<From, To> {

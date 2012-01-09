@@ -4,12 +4,12 @@ import java.lang.reflect.Type;
 
 import jpl.Term;
 
-import org.logicobjects.adapter.ObjectToTermAdapter;
-import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LObjectAdapter;
 import org.logicobjects.annotation.LTermAdapter;
-import org.logicobjects.core.LogtalkObjectFactory;
+import org.logicobjects.core.LogicObject;
+import org.logicobjects.core.LogicObjectFactory;
+import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.AbstractTypeWrapper;
 
 public class ClassAdaptingContext extends AdaptingContext {
@@ -20,40 +20,45 @@ public class ClassAdaptingContext extends AdaptingContext {
 		this.clazz = clazz;
 	}
 	
-	public Class getContextClass() {
+	public Class getContext() {
 		return clazz;
 	}
 	
 	@Override
 	public LObjectAdapter getTermToObjectAdapterAnnotation() {
-		return (LObjectAdapter) getContextClass().getAnnotation(LObjectAdapter.class);
+		return (LObjectAdapter) getContext().getAnnotation(LObjectAdapter.class);
 	}
 	
 	@Override
 	public LTermAdapter getObjectToTermAdapterAnnotation() {
-		return (LTermAdapter) getContextClass().getAnnotation(LTermAdapter.class);
+		return (LTermAdapter) getContext().getAnnotation(LTermAdapter.class);
 	}
 
 	@Override
 	public LObject getLogicObjectAnnotation() {
-		return (LObject) getContextClass().getAnnotation(LObject.class);
+		return (LObject) getContext().getAnnotation(LObject.class);
 	}
 	
 	public Object createLObjectFromAnnotation(Term term, Type type, LObject lObjectAnnotation) {
 		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
 		try {
 			Object lObject = null;
-			if(typeWrapper.isAssignableFrom(getContextClass())) {
-				lObject = LogtalkObjectFactory.getDefault().create(getContextClass());
+			if(typeWrapper.isAssignableFrom(getContext())) {
+				lObject = LogicObjectFactory.getDefault().create(getContext());
 			} else {
 				lObject = typeWrapper.asClass().newInstance();  //type wrapper should be below in the hierarchy of lObjectClass
 			}
-			setParams(lObject, term, lObjectAnnotation.params());
+			LogicObject.setParams(lObject, term, lObjectAnnotation.params());
 			
 			return lObject;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	public String infereLogicObjectName() {
+		return LogicUtil.javaClassNameToProlog(clazz.getSimpleName());
 	}
 
 }

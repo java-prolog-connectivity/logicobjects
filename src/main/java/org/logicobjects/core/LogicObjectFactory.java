@@ -8,21 +8,21 @@ import java.util.Set;
 
 import javassist.ClassPool;
 
-import org.logicobjects.contextmanagement.GlobalLContext;
+import org.logicobjects.context.GlobalLContext;
 import org.logicobjects.instrumentation.LogicObjectInstrumentation;
 
-public class LogtalkObjectFactory {
+public class LogicObjectFactory {
 /*
 	static {
 		LogicEngine.prepare();  //TODO delete this, since everything will pass by the logic engine
 	}
 */
 	
-	private static LogtalkObjectFactory factory;
+	private static LogicObjectFactory factory;
 	
-	public static LogtalkObjectFactory getDefault() {
+	public static LogicObjectFactory getDefault() {
 		if(factory == null)
-			factory = new LogtalkObjectFactory();
+			factory = new LogicObjectFactory();
 		return factory;
 	}
 	
@@ -33,7 +33,7 @@ public class LogtalkObjectFactory {
 	private GlobalLContext context;
 	private ClassPool classPool;
 	
-	private LogtalkObjectFactory() {
+	private LogicObjectFactory() {
 		scheduledSearchFilters = new HashSet<String>();
 		scheduledSearchUrls = new HashSet<URL>();
 		//context = new LContext();
@@ -157,7 +157,7 @@ public class LogtalkObjectFactory {
 			LogicObjectInstrumentation instrumentation = new LogicObjectInstrumentation(clazz, getClassPool());
 			//instrumentation.run(); //instrument class and its ancestors
 			if(!instrumentation.isExtendingClassLoaded())
-				LogtalkObject.loadDependencies(clazz); //load the dependencies in the Prolog engine
+				LogicClass.loadDependencies(clazz); //load the dependencies in the Prolog engine
 			instantiatingClass = instrumentation.getExtendingClass(); //create an extending class
 		} else
 			instantiatingClass = clazz;

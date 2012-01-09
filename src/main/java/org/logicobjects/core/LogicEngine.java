@@ -14,13 +14,11 @@ import jpl.Query;
 import jpl.Term;
 import jpl.Util;
 import jpl.Variable;
-import org.logicobjects.adapter.ObjectToTermException;
-import org.logicobjects.adapter.methodresult.eachsolution.SolutionToLObjectAdapter;
 
+import org.logicobjects.adapter.ObjectToTermException;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.method.LMethod;
-import org.logicobjects.annotation.method.LParameters;
-import org.logicobjects.annotation.method.LSolutionAdapter;
+import org.logicobjects.annotation.method.LSolution;
 import org.logicobjects.flags.LogtalkFlag;
 import org.logicobjects.util.LogicObjectsPreferences;
 import org.slf4j.Logger;
@@ -41,7 +39,7 @@ public abstract class LogicEngine {
 	private static LogicEngine bootstrapEngine;
 	private static LogicObjectsPreferences preferences;
 
-	
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //BOOTSTRAPPING
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -78,7 +76,7 @@ public abstract class LogicEngine {
 					initialize(new LogicObjectsPreferences());
 				getBootstrapEngine().loadLogtalk();
 				//getBootstrapEngine().setLogtalkFlag(LogtalkFlag.REPORT, LogtalkFlag.REPORT.OFF); //currently this is set in the settings.lgt file
-				coreEngine = LogtalkObjectFactory.getDefault().create(LogicEngine.class);
+				coreEngine = LogicObjectFactory.getDefault().create(LogicEngine.class);
 				bootstrapping = false;
 				bootstrapEngine = null;
 				long endTime = System.nanoTime();
@@ -388,9 +386,8 @@ public abstract class LogicEngine {
 //INSTRUMENTED METHODS
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@LSolutionAdapter(adapter=SolutionToLObjectAdapter.class, args="FlagValue")
-	@LParameters({"$1", "FlagValue"})
-	@LMethod(name="current_prolog_flag")
+	@LSolution("FlagValue")
+	@LMethod(name="current_prolog_flag", parameters={"$1", "FlagValue"})
 	public abstract String currentPrologFlag(String flagName);
 
 }

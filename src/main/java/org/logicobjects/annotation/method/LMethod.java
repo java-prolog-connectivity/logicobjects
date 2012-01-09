@@ -11,6 +11,7 @@ import java.lang.annotation.Target;
 public @interface LMethod {
 	
 	String name() default "";
+	String[] parameters() default {};
 	//boolean userMethod() default false;
 	
 

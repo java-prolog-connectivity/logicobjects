@@ -8,31 +8,35 @@ import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LObjectAdapter;
 import org.logicobjects.annotation.LTermAdapter;
 
-public class AccessibleObjectAdaptingContext extends AdaptingContext {
+public abstract class AccessibleObjectAdaptingContext extends AdaptingContext {
 
-	private AccessibleObject accessibleObject;
-	
+	//private AccessibleObject accessibleObject;
+	/*
 	public AccessibleObjectAdaptingContext(AccessibleObject accessibleObject) {
 		this.accessibleObject = accessibleObject;
 	}
-	
-	public AccessibleObject getContextAccessibleObject() {
+	*/
+	/*
+	public AccessibleObject getContext() {
 		return accessibleObject;
 	}
+	*/
+	
+	public abstract AccessibleObject getContext();
 	
 	@Override
 	public LObjectAdapter getTermToObjectAdapterAnnotation() {
-		return (LObjectAdapter) getContextAccessibleObject().getAnnotation(LObjectAdapter.class);
+		return (LObjectAdapter) getContext().getAnnotation(LObjectAdapter.class);
 	}
 
 	@Override
 	public LTermAdapter getObjectToTermAdapterAnnotation() {
-		return (LTermAdapter) getContextAccessibleObject().getAnnotation(LTermAdapter.class);
+		return (LTermAdapter) getContext().getAnnotation(LTermAdapter.class);
 	}
 
 	@Override
 	public LObject getLogicObjectAnnotation() {
-		return (LObject) getContextAccessibleObject().getAnnotation(LObject.class);
+		return (LObject) getContext().getAnnotation(LObject.class);
 	}
 
 }

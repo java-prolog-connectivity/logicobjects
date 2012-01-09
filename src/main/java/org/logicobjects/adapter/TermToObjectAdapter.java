@@ -16,9 +16,9 @@ import org.logicobjects.adapter.objectadapters.TermToArrayAdapter;
 import org.logicobjects.adapter.objectadapters.TermToCollectionAdapter;
 import org.logicobjects.adapter.objectadapters.TermToMapAdapter;
 import org.logicobjects.adapter.objectadapters.TermToMapAdapter.TermToEntryAdapter;
+import org.logicobjects.core.LogicClass;
 import org.logicobjects.core.LogicEngine;
-import org.logicobjects.core.LogtalkObject;
-import org.logicobjects.core.LogtalkObjectFactory;
+import org.logicobjects.core.LogicObjectFactory;
 import org.reflectiveutils.AbstractTypeWrapper;
 import org.reflectiveutils.AbstractTypeWrapper.ArrayTypeWrapper;
 import org.reflectiveutils.AbstractTypeWrapper.SingleTypeWrapper;
@@ -39,6 +39,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 	 * (non-Javadoc)
 	 * @see logicobjects.adapter.Adapter#adapt(java.lang.Object)
 	 */
+	
 	@Override
 	public To adapt(Term term) {
 		return adapt(term, Object.class);
@@ -62,7 +63,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 			}
 		} else {
 			try {
-				Class logicObjectClass = LogtalkObjectFactory.getDefault().getContext().findLogicClass(term);  
+				Class logicObjectClass = LogicObjectFactory.getDefault().getContext().findLogicClass(term);  
 
 				/*
 				 * find out if the term could be mapped to a logic object
@@ -77,7 +78,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 				//System.out.println(typeWrapper.getClass());
 				if( typeWrapper instanceof SingleTypeWrapper ) { //the type is not an array and not an erased type
 					SingleTypeWrapper singleTypeWrapper = SingleTypeWrapper.class.cast(typeWrapper);
-					logicObjectClass = LogtalkObject.findLogicClass(singleTypeWrapper.asClass());  //find out if the expected type is a logic object
+					logicObjectClass = LogicClass.findLogicClass(singleTypeWrapper.asClass());  //find out if the expected type is a logic object
 					if( logicObjectClass != null ) 
 						return (To) new ClassAdaptingContext(logicObjectClass).adaptToLObject(term, type);
 					

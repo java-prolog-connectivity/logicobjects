@@ -5,15 +5,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.logicobjects.adapter.methodresult.eachsolution.SolutionToLObjectAdapter;
 
-/*
- * Provides a Composition Adapter for this method. Composition adapters abstract many common usage patterns of logic methods 
- */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface LSolutionAdapter {
-
-	Class adapter();
-	String[] args() default {};
-	
+public @interface LSolution {
+	Class adapter() default SolutionToLObjectAdapter.class;
+	String value() default "";
 }

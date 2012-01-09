@@ -1,6 +1,9 @@
 package org.logicobjects.adapter;
 
-
+/*
+ * Parent of all logic adapters (adapters that convert to/from terms) in the system
+ * 
+ */
 public abstract class LogicAdapter<From, To> extends Adapter<From, To> {
 	//public static final String VARIABLE_PREFIX = "?";  //to review this ...
 	
@@ -20,7 +23,7 @@ public abstract class LogicAdapter<From, To> extends Adapter<From, To> {
 		return parameters;
 	}
 
-	public void setParameters(Object[] parameters) {
+	public void setParameters(Object ...parameters) {
 		this.parameters = parameters;
 	}
 

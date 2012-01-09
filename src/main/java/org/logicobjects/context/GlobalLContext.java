@@ -1,4 +1,4 @@
-package org.logicobjects.contextmanagement;
+package org.logicobjects.context;
 
 import java.net.URL;
 import java.util.HashSet;
@@ -7,8 +7,9 @@ import java.util.Set;
 import jpl.Term;
 import jpl.Variable;
 
-import org.logicobjects.adapter.methodresult.solutioncomposition.SolutionCompositionAdapter;
+import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.annotation.LObject;
+import org.logicobjects.core.LogicClass;
 import org.reflections.Reflections;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
@@ -55,11 +56,11 @@ public class GlobalLContext extends AbstractLContext {
 		return setCombination;
 	}
 	
-	public Set<Class<? extends SolutionCompositionAdapter>> getCompositionAdapters() {
-		Set<Class<? extends SolutionCompositionAdapter>> setCombination = new HashSet<Class<? extends SolutionCompositionAdapter>>(); //a new set needs to be defined since the system and user sets are Immutable collections
-		setCombination.addAll(systemContext.getCompositionAdapters());
+	public Set<Class<? extends WrapperAdapter>> getWrapperAdapters() {
+		Set<Class<? extends WrapperAdapter>> setCombination = new HashSet<Class<? extends WrapperAdapter>>(); //a new set needs to be defined since the system and user sets are Immutable collections
+		setCombination.addAll(systemContext.getWrapperAdapters());
 		if(userContext != null) {
-			setCombination.addAll(userContext.getCompositionAdapters());
+			setCombination.addAll(userContext.getWrapperAdapters());
 		}
 		return setCombination;
 	}
@@ -69,8 +70,8 @@ public class GlobalLContext extends AbstractLContext {
 	public Class findLogicClass(String logicName, int args) {
 		Set<Class<?>> set = getLogicClasses();
 		for(Class clazz : set) {
-			LObject lObjectAnnotation = (LObject) clazz.getAnnotation(LObject.class);
-			if(lObjectAnnotation.name().equals(logicName) && lObjectAnnotation.params().length == args) 
+			LogicClass logicClass = new LogicClass(clazz);
+			if(logicClass.getLogicName().equals(logicName) && logicClass.getParameters().length == args)
 				return clazz;
 		}
 		return null;

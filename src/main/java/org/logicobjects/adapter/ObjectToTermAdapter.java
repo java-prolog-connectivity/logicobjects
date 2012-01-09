@@ -1,31 +1,30 @@
 package org.logicobjects.adapter;
 
-import java.lang.reflect.Field;
 import java.util.Map.Entry;
 
 import jpl.Atom;
 import jpl.Term;
 
 import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
-import org.logicobjects.adapter.objectadapters.ImplementationMap;
-
 import org.logicobjects.adapter.objectadapters.AnyCollectionToTermAdapter;
+import org.logicobjects.adapter.objectadapters.ImplementationMap;
 import org.logicobjects.adapter.objectadapters.MapToTermAdapter.EntryToTermAdapter;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.core.ITermObject;
-import org.reflectiveutils.AbstractTypeWrapper;
+import org.logicobjects.core.LogicClass;
 
 import com.google.common.primitives.Primitives;
 
 public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
-
+	
+	
 	@Override
 	public Term adapt(From object) {
 		return adapt(object, null);
 	}
 
-
+	
 	public Term adapt(From object, AdaptingContext adaptingContext) {
 		if(adaptingContext != null && adaptingContext.canAdaptToTerm()) {
 			try {
@@ -61,11 +60,14 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 				
 				LTermAdapter termAdapterAnnotation = (LTermAdapter)guidingClass.getAnnotation(LTermAdapter.class);
 				if(termAdapterAnnotation!=null) 
-					return asTerm(object, termAdapterAnnotation);
+					return create(termAdapterAnnotation).adapt(object);
 				
 				LObject logicObjectAnnotation = (LObject)guidingClass.getAnnotation(LObject.class);
-				if(logicObjectAnnotation!=null) 
-					return new LogtalkObjectAdapter().asLogtalkObject(object, logicObjectAnnotation).asTerm();
+				if(logicObjectAnnotation!=null) {
+					LogicClass logicClass = new LogicClass(guidingClass);
+					return new LogicObjectAdapter().asLogicObject(object, logicClass.getLogicName(), logicClass.getParameters()).asTerm();
+				}
+					
 
 				throw new ObjectToTermException(object);  //if we arrive here something went wrong
 			} else if(object instanceof Term) {
@@ -90,19 +92,15 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 	}
 	
 
-	
-	public static Term asTerm(Object object, LTermAdapter termAdapterAnnotation) {
+	public static ObjectToTermAdapter create (LTermAdapter termAdapterAnnotation) {
 		try {
 			ObjectToTermAdapter termAdapter = (ObjectToTermAdapter)termAdapterAnnotation.adapter().newInstance();
 			termAdapter.setParameters(termAdapterAnnotation.args());
-			return termAdapter.adapt(object);
+			return termAdapter;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
-		} 
+		}
 	}
-
-
-	
 	
 	
 	/*

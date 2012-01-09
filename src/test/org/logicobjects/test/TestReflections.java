@@ -10,6 +10,7 @@ import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 
+
 public class TestReflections /*extends TestCase*/ {
 
 	@Test
@@ -19,7 +20,7 @@ public class TestReflections /*extends TestCase*/ {
 		
 		
 		FilterBuilder fb = new FilterBuilder();
-		fb.include(FilterBuilder.prefix("logicobjects"));
+		fb.include(FilterBuilder.prefix("org.logicobjects"));
 		//fb.include(FilterBuilder.prefix("iv4e"));
 		//fb.include(FilterBuilder.prefix("bin"));
 		config.filterInputsBy(fb);
@@ -29,12 +30,9 @@ public class TestReflections /*extends TestCase*/ {
 		//config.addUrls(ClasspathHelper.forClassLoader());
 		
 		//config.setUrls(ClasspathHelper.forPackage("logicobjects"));
-		config.setUrls(ClasspathHelper.forPackage("logicobjects"));
+		config.setUrls(ClasspathHelper.forPackage("org.logicobjects"));
 		
-		System.out.println("printing urls");
-		for(URL url : ClasspathHelper.forPackage("iv4e")) {
-			System.out.println(url);
-		}
+
 		
 
 		Reflections system_reflections = new Reflections(config);

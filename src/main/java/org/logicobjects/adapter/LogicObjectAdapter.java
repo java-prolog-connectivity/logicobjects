@@ -7,36 +7,41 @@ import java.util.List;
 
 import jpl.Term;
 
-import org.logicobjects.adapter.adaptingcontext.AccessibleObjectAdaptingContext;
-import org.logicobjects.annotation.LObject;
-import org.logicobjects.core.LogtalkObject;
+import org.logicobjects.adapter.adaptingcontext.FieldAdaptingContext;
+import org.logicobjects.core.LogicObject;
 
 import com.google.code.guava.beans.Properties;
 
-public class LogtalkObjectAdapter extends Adapter<Object, LogtalkObject> {
+public class LogicObjectAdapter extends Adapter<Object, LogicObject> {
 
 	@Override
-	public LogtalkObject adapt(Object source) {
-		return asLogtalkObject(source);
+	public LogicObject adapt(Object source) {
+		return asLogicObject(source);
 	}
 	
 
 	
-	public LogtalkObject asLogtalkObject(Object object) {
-		if(object instanceof LogtalkObject) {
-			return (LogtalkObject)object;
+	public LogicObject asLogicObject(Object object) {
+		if(object instanceof LogicObject) {
+			return (LogicObject)object;
 		}	
 		else {
-			return new LogtalkObject(new ObjectToTermAdapter().adapt(object));
+			return new LogicObject(new ObjectToTermAdapter().adapt(object));
 		}
 	}
 	
-	
-	public LogtalkObject asLogtalkObject(Object object, LObject logicObjectAnnotation) {
+	/*
+	public LogicObject asLogicObject(Object object, LObject logicObjectAnnotation) {
 		String objectName = logicObjectAnnotation.name();
 		String[] propertyNames = logicObjectAnnotation.params();
 		Term[] parameters = getParameters(object, propertyNames);
-		return new LogtalkObject(objectName, parameters);
+		return new LogicObject(objectName, parameters);
+	}
+	*/
+	
+	public LogicObject asLogicObject(Object object, String objectName, String[] propertyNames) {
+		Term[] parameters = getParameters(object, propertyNames);
+		return new LogicObject(objectName, parameters);
 	}
 	
 	private Term[] getParameters(Object object, String[] propertyNames) {
@@ -46,7 +51,7 @@ public class LogtalkObjectAdapter extends Adapter<Object, LogtalkObject> {
 				Term term = null;
 				Object propertyValue = Properties.getBeanPropertyByName(propertyName, object).getValue();
 				Field field = Properties.getPropertyByName(object, propertyName).getField();
-				term = new ObjectToTermAdapter().adapt(propertyValue, new AccessibleObjectAdaptingContext(field));
+				term = new ObjectToTermAdapter().adapt(propertyValue, new FieldAdaptingContext(field));
 				parameters.add(term);
 			} catch(Exception e) {
 				throw new RuntimeException(e);

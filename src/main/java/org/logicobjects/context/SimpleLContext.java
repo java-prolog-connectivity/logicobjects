@@ -1,4 +1,4 @@
-package org.logicobjects.contextmanagement;
+package org.logicobjects.context;
 
 import java.net.URL;
 import java.util.HashSet;
@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.logicobjects.adapter.Adapter;
 import org.logicobjects.adapter.methodresult.solutioncomposition.SolutionCompositionAdapter;
+import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.annotation.LObject;
 import org.reflections.Reflections;
 import org.reflections.util.ClasspathHelper;
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class SimpleLContext extends AbstractLContext {
 
 	private Set<Class<?>> logicClasses;
-	private Set<Class<? extends SolutionCompositionAdapter>> compositionAdapters;
+	private Set<Class<? extends WrapperAdapter>> compositionAdapters;
 
 	private Reflections reflections;
 	
@@ -35,9 +36,9 @@ public class SimpleLContext extends AbstractLContext {
 		return logicClasses;
 	}
 	
-	public Set<Class<? extends SolutionCompositionAdapter>> getCompositionAdapters() {
+	public Set<Class<? extends WrapperAdapter>> getWrapperAdapters() {
 		if(reflections == null) {
-			LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for user composition adapters without having provided a filter. Looking for classes in the static and context class loader.");
+			LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for user wrapper adapters without having provided a filter. Looking for classes in the static and context class loader.");
 			addSearchUrls(ClasspathHelper.forClassLoader().toArray(new URL[] {}));
 		} 
 		return compositionAdapters;
@@ -72,10 +73,11 @@ public class SimpleLContext extends AbstractLContext {
 	
 	//this could be optimized indeed ...
 	private void refresh() {
-		logicClasses = filterLogicClasses(reflections.getTypesAnnotatedWith(LObject.class));
+		logicClasses = new HashSet<Class<?>>();
+		filterLogicClasses(reflections.getTypesAnnotatedWith(LObject.class), logicClasses);
 		Set<Class<? extends Adapter>> unfilteredAdapters = reflections.getSubTypesOf(Adapter.class);
-		compositionAdapters = new HashSet<Class<? extends SolutionCompositionAdapter>>();
-		updateAdapters(unfilteredAdapters, compositionAdapters);
+		compositionAdapters = new HashSet<Class<? extends WrapperAdapter>>();
+		filterAdapters(unfilteredAdapters, compositionAdapters);
 	}
 	
 	

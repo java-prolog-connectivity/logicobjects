@@ -6,11 +6,11 @@ import java.util.List;
 
 import jpl.Query;
 
-import org.logicobjects.core.SolutionEnumeration;
 import org.reflectiveutils.AbstractTypeWrapper;
 import org.reflectiveutils.AbstractTypeWrapper.ArrayTypeWrapper;
+import org.reflectiveutils.GenericsUtil;
 
-public class ArrayCompositionAdapter<LogicAnswerType> extends SolutionCompositionAdapter<LogicAnswerType[], LogicAnswerType>  {
+public class ArrayCompositionAdapter<LogicAnswerType> extends WrapperAdapter<LogicAnswerType[], LogicAnswerType>  {
 
 	@Override
 	public LogicAnswerType[] adapt(Query query) {

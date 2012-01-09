@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 
 
 import org.logicobjects.annotation.method.LMethod;
-import org.logicobjects.core.LogtalkObject;
+import org.logicobjects.core.LogicObject;
 import org.logicobjects.experimental.LogtalkObjectProxy;
 
 
@@ -19,7 +19,7 @@ public class LogtalkObjectProxy implements InvocationHandler {
 				new LogtalkObjectProxy(obj));
 	}
 	
-	public static <T> T newInstance(Class<T> c, LogtalkObject logtalkObject) {
+	public static <T> T newInstance(Class<T> c, LogicObject logtalkObject) {
 		return (T)java.lang.reflect.Proxy.newProxyInstance(c.getClassLoader(), new Class[] {c},
 				new LogtalkObjectProxy(logtalkObject));
 	}

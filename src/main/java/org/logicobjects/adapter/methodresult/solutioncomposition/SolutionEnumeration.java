@@ -1,4 +1,4 @@
-package org.logicobjects.core;
+package org.logicobjects.adapter.methodresult.solutioncomposition;
 
 import java.util.ArrayList;
 import java.util.Enumeration;

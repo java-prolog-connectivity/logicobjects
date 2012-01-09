@@ -1,27 +1,19 @@
 package org.logicobjects.adapter.adaptingcontext;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-
 import jpl.Term;
-
-import org.logicobjects.adapter.Adapter;
-import org.logicobjects.adapter.LogtalkObjectAdapter;
+import org.logicobjects.adapter.LogicObjectAdapter;
 import org.logicobjects.adapter.ObjectToTermAdapter;
-import org.logicobjects.adapter.ObjectToTermException;
 import org.logicobjects.adapter.TermToObjectAdapter;
-import org.logicobjects.adapter.objectadapters.ImplementationMap;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LObjectAdapter;
 import org.logicobjects.annotation.LTermAdapter;
+import org.logicobjects.core.LogicObject;
 import org.reflectiveutils.AbstractTypeWrapper;
-
-import com.google.code.guava.beans.Properties;
-import com.google.code.guava.beans.Property;
 
 public abstract class AdaptingContext {
 	
-	public static TermToObjectAdapter getTermToObjectAdapter(LObjectAdapter annotation) {
+	protected static TermToObjectAdapter getTermToObjectAdapter(LObjectAdapter annotation) {
 		try {
 			TermToObjectAdapter objectAdapter = (TermToObjectAdapter)annotation.adapter().newInstance();
 			objectAdapter.setParameters(annotation.args());
@@ -31,7 +23,7 @@ public abstract class AdaptingContext {
 		}
 	}
 	
-	public static ObjectToTermAdapter getObjectToTermAdapter(LTermAdapter annotation) {
+	protected static ObjectToTermAdapter getObjectToTermAdapter(LTermAdapter annotation) {
 		try {
 			ObjectToTermAdapter objectAdapter = (ObjectToTermAdapter)annotation.adapter().newInstance();
 			objectAdapter.setParameters(annotation.args());
@@ -41,15 +33,19 @@ public abstract class AdaptingContext {
 		}
 	}
 	
-	public abstract LObject getLogicObjectAnnotation();
+	protected abstract LObject getLogicObjectAnnotation();
 	
-	public abstract LObjectAdapter getTermToObjectAdapterAnnotation();
+	protected abstract LObjectAdapter getTermToObjectAdapterAnnotation();
 
-	public abstract LTermAdapter getObjectToTermAdapterAnnotation();
+	protected abstract LTermAdapter getObjectToTermAdapterAnnotation();
 	
-	public boolean hasLogicObjectAnnotation() {
+	protected boolean hasLogicObjectAnnotation() {
 		return getLogicObjectAnnotation() != null;
 	}
+	
+	public abstract Object getContext();
+	
+	public abstract String infereLogicObjectName();
 	
 	public boolean hasTermToObjectAdapter() {
 		return getTermToObjectAdapterAnnotation() != null;
@@ -75,14 +71,17 @@ public abstract class AdaptingContext {
 	
 	public Term adaptToTerm(Object object) {
 		LTermAdapter termAdapterAnnotation = getObjectToTermAdapterAnnotation();
-
-		Class termAdapterClazz = termAdapterAnnotation.adapter();
-
-		if(AbstractTypeWrapper.wrap(Adapter.fromType(termAdapterClazz)).asClass().isAssignableFrom(object.getClass())) //if the wrapper is compatible with the object use it
-			return ObjectToTermAdapter.asTerm(object, termAdapterAnnotation);
+		if(termAdapterAnnotation != null) {
+			Class termAdapterClazz = termAdapterAnnotation.adapter();
+			//if(AbstractTypeWrapper.wrap(Adapter.fromType(termAdapterClazz)).asClass().isAssignableFrom(object.getClass())) //if the wrapper is compatible with the object use it
+				return ObjectToTermAdapter.create(termAdapterAnnotation).adapt(object);
+		}
 		else { //in the current implementation, an Adapter annotation overrides any LogicObjectAnnotation (even if it was not used because the adapter is not compatible with the object type)
 			LObject logicObjectAnnotation = getLogicObjectAnnotation();
-			return new LogtalkObjectAdapter().asLogtalkObject(object, logicObjectAnnotation).asTerm();
+			String logicObjectName = logicObjectAnnotation.name();
+			if(logicObjectName.isEmpty())
+				logicObjectName = infereLogicObjectName();
+			return new LogicObjectAdapter().asLogicObject(object, logicObjectName, logicObjectAnnotation.params()).asTerm();
 		}
 	}
 	
@@ -110,31 +109,17 @@ public abstract class AdaptingContext {
 	 * This method transform a term in a logic object of a specified class using the information present in a logic object annotation.
 	 * The annotation is not necessarily found in the instantiating class, but in a super class
 	 */
-	public Object createLObjectFromAnnotation(Term term, Type type, LObject lObjectAnnotation) {
+	protected Object createLObjectFromAnnotation(Term term, Type type, LObject lObjectAnnotation) {
 		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
 		try {
 			Object lObject = typeWrapper.asClass().newInstance();
-			setParams(lObject, term, lObjectAnnotation.params());
+			LogicObject.setParams(lObject, term, lObjectAnnotation.params());
 			return lObject;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	public void setParams(Object lObject, Term term , String[] params) {
-		for(int i=0; i<params.length; i++) {
-			String propertyName = params[i];
-			//Field field = lObject.getClass().getField(propertyName);  //remember, the commented out code fails for private fields
-			Property property = Properties.getPropertyByName(lObject, propertyName);
-			Field field = property.getField();
-			Object fieldValue = new TermToObjectAdapter().adapt(term.arg(i+1), field.getGenericType(), new AccessibleObjectAdaptingContext(field));
-			//field.set(lObject, fieldValue); ////remember, the commented out code fails for private fields
-			try {
-				property.setValueWithSetter(lObject, fieldValue); //try to use the setter if any
-			} catch(NullPointerException e) { //setter no defined
-				property.setFieldValue(lObject, fieldValue);
-			}
-		}
-	}
+
 
 }

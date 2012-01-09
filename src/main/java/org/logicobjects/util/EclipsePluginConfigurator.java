@@ -9,7 +9,7 @@ import javassist.LoaderClassPath;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Plugin;
 import org.logicobjects.core.LogicEngine;
-import org.logicobjects.core.LogtalkObjectFactory;
+import org.logicobjects.core.LogicObjectFactory;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.vfs.Vfs;
 import org.reflectiveutils.reflections4eclipse.BundleUrlType;
@@ -21,7 +21,7 @@ public abstract class EclipsePluginConfigurator {
 	public static void configure(Plugin plugin) {
 		String logicFilesPath = null;
 		URL urlPlugin = ClasspathHelper.forClass(plugin.getClass());
-		LogtalkObjectFactory.getDefault().addSearchUrl(urlPlugin);  //adding all the classes in the plugin to the search path
+		LogicObjectFactory.getDefault().addSearchUrl(urlPlugin);  //adding all the classes in the plugin to the search path
 		try {
 			logicFilesPath = FileLocator.toFileURL(urlPlugin).getPath();
 		} catch (IOException e) {
@@ -34,6 +34,6 @@ public abstract class EclipsePluginConfigurator {
 		ClassPool classPool;
 		classPool = ClassPool.getDefault();
 		classPool.appendClassPath(new LoaderClassPath(plugin.getClass().getClassLoader()));
-		LogtalkObjectFactory.getDefault().setClassPool(classPool);
+		LogicObjectFactory.getDefault().setClassPool(classPool);
 	}
 }

@@ -7,7 +7,7 @@ import jpl.Term;
 
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
-import org.logicobjects.core.LogtalkObjectFactory;
+import org.logicobjects.core.LogicObjectFactory;
 
 import com.google.code.guava.beans.Properties;
 import com.google.code.guava.beans.Property;

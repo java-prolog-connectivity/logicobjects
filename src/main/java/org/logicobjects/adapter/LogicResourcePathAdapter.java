@@ -6,8 +6,13 @@ import jpl.Term;
 
 import org.logicobjects.core.LogicEngine;
 
+/*
+ * Adapt a String path as a term representation
+ * The path can be expressed in java style: dir1.dir2.dir3
+ * or in Prolog style dir1(dir2(dir3))
+ */
 
-public class LogtalkResourcePathAdapter extends Adapter<String, Term> {
+public class LogicResourcePathAdapter extends LogicAdapter<String, Term> {
 
 	@Override
 	public Term adapt(String classPathFileName) {

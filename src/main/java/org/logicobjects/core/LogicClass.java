@@ -8,129 +8,55 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import jpl.Atom;
-import jpl.Compound;
-import jpl.Query;
 import jpl.Term;
-import org.logicobjects.adapter.LogtalkResourcePathAdapter;
-import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
 
+import org.logicobjects.adapter.LogicResourcePathAdapter;
 import org.logicobjects.annotation.LObject;
+import org.logicobjects.util.LogicUtil;
 
-
-public class LogtalkObject implements ITermObject {
-/*
-	public static void configureAll() {
-		LogicUtil.prepareEngine();  
-		LogtalkUtil.loadLogtalk(); //load logtalk if needed, will do nothing is logtalk is already loaded
-		IVUtil.loadAll();
-	}
-	*/
+public class LogicClass {
 	
-	public static final String LOGTALK_OPERATOR = "::";
+	private Class clazz;
 	
-	public static Compound logtalkMessage(Term object, String messageName, Term[] messageArguments) {
-		Term rightTerm = messageArguments.length > 0 ? new Compound(messageName, messageArguments) : new Atom(messageName);
-		return new Compound(LOGTALK_OPERATOR, new Term[] {object, rightTerm});
+	public LogicClass(Class clazz) {
+		this.clazz = clazz;
 	}
 	
-	
-	private String name;
-	private Object[] objectParams;
-	private Term[] termParams;
-	//private Term asTerm;
-	
-	public LogtalkObject(String name) {
-		this(name, new Object[]{});
+	public Class getWrappedClass() {
+		return clazz;
 	}
 	
-	public LogtalkObject(Term term) {
-		this(term.name(), term.args());
-	}
-	
-	public LogtalkObject(String name, Object[] objectParams) {
-		setName(name);
-		if(objectParams == null)
-			objectParams = new Object[]{};
-		setObjectParams(objectParams);
-	}
-
-
-
-	/*
-	public LogtalkObject(Atom atom) {
-		this(atom.toString());
-	}
-	
-	public LogtalkObject(Compound compound) {
-		this(compound.name(), compound.args());
-	}
-	*/
-	
-
-
-	
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public Object[] getObjectParams() {
-		return objectParams;
-	}
-
-	public void setObjectParams(Object[] objectParams) {
-		setTermParams(ArrayToTermAdapter.arrayAsTerms(objectParams));		
-		this.objectParams = objectParams;
-	}
-
-	public Term[] getTermParams() {
-		return termParams;
-	}
-
-	public void setTermParams(Term[] termParams) {
-		this.termParams = termParams;
-	}
-
-	@Override
-	public Term asTerm() {
-		if( parametrizedObject() )
-			return new Compound(getName(), getTermParams());
+	public String getLogicName() {
+		LObject lObjectAnnotation = (LObject) clazz.getAnnotation(LObject.class);
+		String name = lObjectAnnotation.name();
+		if(!name.isEmpty())
+			return name;
 		else
-			return new Atom(getName());
+			return LogicUtil.javaClassNameToProlog(clazz.getSimpleName());
+	}
+	
+	public String[] getParameters() {
+		LObject lObjectAnnotation = (LObject) clazz.getAnnotation(LObject.class);
+		return lObjectAnnotation.params();
+	}
+	
+	public String[] getImports() {
+		LObject lObjectAnnotation = (LObject) clazz.getAnnotation(LObject.class);
+		return lObjectAnnotation.imports();
+	}
+	
+	public String[] getModules() {
+		LObject lObjectAnnotation = (LObject) clazz.getAnnotation(LObject.class);
+		return lObjectAnnotation.modules();
+	}
+	
+	public boolean automaticImport() {
+		LObject lObjectAnnotation = (LObject) clazz.getAnnotation(LObject.class);
+		return lObjectAnnotation.automaticImport();
 	}
 	
 	
-	public boolean parametrizedObject() {
-		return getTermParams().length > 0;
-	}
-	
-	public Query invokeMethod(String methodName, Object[] messageArgs) {
-		Compound compound = logtalkMessage(asTerm(), methodName, ArrayToTermAdapter.arrayAsTerms(messageArgs));
-		Query query = new Query(compound);
-		return query;
-	}
-	
-	/*
-	 * Returns the first class in the hierarchy annotated with LogicObject
-	 */
-	public static Class getAnnotatedClass(Class clazz) {
-		if(clazz.equals(Object.class))
-			return null;
-		else if(clazz.getAnnotation(LObject.class) != null)
-			return clazz;
-		else
-			return getAnnotatedClass(clazz.getSuperclass());
-	}
-	
-	public static LObject getLogicObjectAnnotation(Class clazz) {
-		Class annotatedClass = getAnnotatedClass(clazz);
-		return (LObject)annotatedClass.getAnnotation(LObject.class);
-	}
-	
+
 	/*
 	 * Return a boolean indicating if all the modules and objects were loaded correctly
 	 */
@@ -154,7 +80,7 @@ public class LogtalkObject implements ITermObject {
 		
 		
 		List<Term> moduleTerms = new ArrayList<Term>();
-		new LogtalkResourcePathAdapter().adapt(allModules, moduleTerms);
+		new LogicResourcePathAdapter().adapt(allModules, moduleTerms);
 		
 		result = LogicEngine.getDefault().ensureLoaded(moduleTerms);
 		
@@ -172,7 +98,7 @@ public class LogtalkObject implements ITermObject {
 		
 
 		List<Term> importTerms = new ArrayList<Term>();
-		new LogtalkResourcePathAdapter().adapt(allImports, importTerms);
+		new LogicResourcePathAdapter().adapt(allImports, importTerms);
 		
 		return LogicEngine.getDefault().logtalkLoad(importTerms) && result;
 	}
@@ -238,22 +164,36 @@ public class LogtalkObject implements ITermObject {
 		return defaultImports.toArray(new String[] {});
 	}
 	
-/*
-	public static void main(String[] args) {
-		loadDependencies(IntensionalSet.class);
-	}
-	*/
-
-	@Override
-	public String toString() {
-		return asTerm().toString();
-	}
+	
+	
 	
 
+	
+	public static LObject getLogicObjectAnnotation(Class clazz) {
+		Class annotatedClass = findLogicClass(clazz);
+		if(annotatedClass != null)
+			return (LObject)annotatedClass.getAnnotation(LObject.class);
+		else
+			return null;
+	}
 	
 	/*
-	 * This method returns the first class is the hierarchy annotated with the LObject annotation 
-	 * If the class is marked only with the LObjectAdapter annotation it is NOT considered
+	 * Returns the first class in the hierarchy annotated with LogicObject
+	 */
+	/*
+	public static Class getAnnotatedClass(Class clazz) {
+		if(clazz.equals(Object.class))
+			return null;
+		else if(clazz.getAnnotation(LObject.class) != null)
+			return clazz;
+		else
+			return getAnnotatedClass(clazz.getSuperclass());
+	}
+	*/
+	
+	
+	/*
+	 * This method returns the first class or interface is the hierarchy annotated with the LObject annotation 
 	 */
 	public static Class findLogicClass(Class candidateClass) {
 		if(candidateClass.equals(Object.class))
@@ -276,5 +216,6 @@ public class LogtalkObject implements ITermObject {
 		}
 			
 	}
+	
 }
 
