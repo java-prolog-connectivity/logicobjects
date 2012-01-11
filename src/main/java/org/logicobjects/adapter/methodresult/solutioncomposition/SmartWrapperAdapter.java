@@ -1,5 +1,6 @@
 package org.logicobjects.adapter.methodresult.solutioncomposition;
 
+
 import java.util.Set;
 
 import jpl.Query;
@@ -16,6 +17,8 @@ public class SmartWrapperAdapter extends WrapperAdapter<Object, Object>  {
 		if(wrapperAdapterClass!=null) {
 			try {
 				WrapperAdapter wrapperAdapter = wrapperAdapterClass.newInstance();
+				wrapperAdapter.setMethod(getMethod());
+				wrapperAdapter.setEachSolutionAdapter(getEachSolutionAdapter());
 				return wrapperAdapter.adapt(source);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
@@ -25,13 +28,16 @@ public class SmartWrapperAdapter extends WrapperAdapter<Object, Object>  {
 		}
 	}
 	
-	
 	public Class findWrapperAdapterClass() {
-		AbstractTypeWrapper[] typeWrappers = new GenericsUtil().findParametersInstantiations(WrapperAdapter.class, getMethod().getGenericReturnType());
 		Set<Class<? extends WrapperAdapter>> wrapperAdaptersClasses = LogicObjectFactory.getDefault().getContext().getWrapperAdapters();
+		//AbstractTypeWrapper methodType = AbstractTypeWrapper.wrap(getMethod().getGenericReturnType());
+		AbstractTypeWrapper methodTypeWrapper = AbstractTypeWrapper.wrap(getMethodResultType());
+		
 		for(Class wrapperAdaptersClass : wrapperAdaptersClasses) {
-			if(typeWrappers[0].isAssignableFrom(wrapperAdaptersClass));
+			AbstractTypeWrapper wrapperAdapterReturnType = AbstractTypeWrapper.wrap(new GenericsUtil().findAncestorTypeParameters(WrapperAdapter.class, wrapperAdaptersClass)[0]);
+			if(methodTypeWrapper.isAssignableFrom(wrapperAdapterReturnType.getWrappedType()))
 				return wrapperAdaptersClass;
+				
 		}
 		return null;
 	}

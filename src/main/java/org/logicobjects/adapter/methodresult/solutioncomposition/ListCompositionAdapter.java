@@ -21,8 +21,8 @@ public class ListCompositionAdapter<LogicAnswerType> extends
 
 	@Override
 	public Type getEachSolutionType() {
-		AbstractTypeWrapper[] wrapperdParametersTypes = new GenericsUtil().findParametersInstantiations(List.class, getMethodResultType());
-		return wrapperdParametersTypes[0].getWrappedType();
+		//return new GenericsUtil().findAncestorTypeParameters(List.class, getMethodResultType())[0];
+		return new GenericsUtil().findDescendantTypeParameters(getMethodResultType(), List.class)[0];
 	}
 	
 }

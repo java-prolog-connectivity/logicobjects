@@ -33,7 +33,7 @@ public abstract class AbstractLContext {
 	protected void filterAdapters(Set<Class<? extends Adapter>> foundAdapters, Set<Class<? extends WrapperAdapter>> wrapperAdapters) {
 		for(Class<? extends Adapter> adapterClass : foundAdapters) {
 			if(adapterClass.getAnnotation(IgnoreAdapter.class) == null) {
-				if(WrapperAdapter.class.isAssignableFrom(adapterClass) && !Modifier.isAbstract(WrapperAdapter.class.getModifiers()))
+				if(WrapperAdapter.class.isAssignableFrom(adapterClass) && !Modifier.isAbstract(adapterClass.getModifiers()))
 					wrapperAdapters.add((Class<? extends WrapperAdapter>) adapterClass);
 			}
 		}

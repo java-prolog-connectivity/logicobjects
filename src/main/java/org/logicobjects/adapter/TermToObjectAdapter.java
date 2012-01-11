@@ -86,7 +86,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 						return (To) term;
 					
 					if(typeWrapper.isAssignableFrom(Entry.class)) {
-						Type entryParameters[] = AbstractTypeWrapper.unwrap(new GenericsUtil().findParametersInstantiations(Entry.class, singleTypeWrapper.getWrappedType()));
+						Type entryParameters[] = new GenericsUtil().findAncestorTypeParameters(Entry.class, singleTypeWrapper.getWrappedType());
 						return (To) new TermToEntryAdapter().adapt((Compound)term, entryParameters[0], entryParameters[1], adaptingContext);
 					}
 					if(singleTypeWrapper.asClass().isPrimitive() || Primitives.isWrapperType(singleTypeWrapper.asClass())) {

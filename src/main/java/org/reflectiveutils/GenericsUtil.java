@@ -1,17 +1,18 @@
 package org.reflectiveutils;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.reflect.TypeVariable;
+import java.util.Arrays;
+
 import org.reflectiveutils.AbstractTypeWrapper.SingleTypeWrapper;
 import org.reflectiveutils.AbstractTypeWrapper.VariableTypeWrapper;
 
 
 public class GenericsUtil {
 
-
-	
-	
+	/*
+	 * Answer if a descendant reach an ancestor class or interface in a class inheritance chain
+	 */
 	private boolean descendantReachedAncestor(Class descendant, Class ancestor) {
 		if(!descendant.isInterface())
 			return ( descendant.equals(ancestor) || (ancestor.isInterface() && ReflectionUtil.includesInterfaceInHierarchy(descendant, ancestor)) );
@@ -19,29 +20,23 @@ public class GenericsUtil {
 			return descendant.equals(ancestor);
 	}
 	
-	public AbstractTypeWrapper[] getParameterizedTypesInterface(Class clazz, Class interfaze) {
+	/*
+	 * Return the type parameters of a generic interface implemented by a class
+	 */
+	private AbstractTypeWrapper[] getTypeParametersInterface(Class clazz, Class interfaze) {
 		for(Type t : clazz.getGenericInterfaces()) {
 			SingleTypeWrapper interfaceWrapper = new SingleTypeWrapper(t);
 			if(interfaceWrapper.asClass().equals(interfaze)) {
-				AbstractTypeWrapper[] parameterizedTypes = AbstractTypeWrapper.wrap(interfaceWrapper.getParameters());
+				AbstractTypeWrapper[] parameterizedTypes = AbstractTypeWrapper.wrap(interfaceWrapper.getActualTypeArguments());
 				return parameterizedTypes;
 			} 
 		}
 		return null;
 	}
 	
-	public AbstractTypeWrapper[] findParametersInstantiations(Class ancestor, Type descendant) {
-		SingleTypeWrapper descendantTypeWrapper = new SingleTypeWrapper(descendant);
-		if(descendantTypeWrapper.isParameterized()) {
-			return findParametersInstantiations(ancestor, descendantTypeWrapper.asClass(), AbstractTypeWrapper.wrap(descendantTypeWrapper.getParameters()), false);
-		} else {
-			return findParametersInstantiations(ancestor, descendantTypeWrapper.asClass(), null, false);
-		}
-	}
-	
 
 	
-	public AbstractTypeWrapper[] bindingsForAncestor(Class ancestor, Class descendant, AbstractTypeWrapper[] descendantParameterizedTypes, boolean keepVariableNamesAncestor) {
+	private AbstractTypeWrapper[] bindingsForAncestor(Class ancestor, Class descendant, AbstractTypeWrapper[] descendantParameterizedTypes, boolean keepVariableNamesAncestor) {
 		if(descendantParameterizedTypes != null) {
 			return descendantParameterizedTypes;
 		}
@@ -80,32 +75,102 @@ public class GenericsUtil {
 	}
 	*/
 	
-	public AbstractTypeWrapper[] findParametersInstantiations(Class ancestor, Class descendant, AbstractTypeWrapper[] descendantParameterizedTypes, boolean keepVariableNamesAncestor) {
+	
+	public Type[] findAncestorTypeParameters(Type ancestor, Type descendant) {
+		return AbstractTypeWrapper.unwrap(findAncestorTypeParameters(new SingleTypeWrapper(ancestor), new SingleTypeWrapper(descendant)));
+	}
+	
+	
+	/*
+	 * Return the parameter types of an ancestor given a descendant
+	 */
+	private AbstractTypeWrapper[] findAncestorTypeParameters(SingleTypeWrapper ancestorTypeWrapper, SingleTypeWrapper descendantTypeWrapper) {
+		return findAncestorTypeParameters(ancestorTypeWrapper, descendantTypeWrapper, false);
+	}
+	
+	
+	
+	
+	
+	
+	public Type[] findDescendantTypeParameters(Type ancestor, Type descendant) {
+		return AbstractTypeWrapper.unwrap(findDescendantTypeParameters(new SingleTypeWrapper(ancestor), new SingleTypeWrapper(descendant)));
+	}
+	
+	/*
+	 * Return the parameter types of an descendant given a ancestor
+	 */
+	public AbstractTypeWrapper[] findDescendantTypeParameters(SingleTypeWrapper ancestorTypeWrapper, SingleTypeWrapper descendantTypeWrapper) {
+		if(!ancestorTypeWrapper.hasTypeParameters())
+			throw new RuntimeException("Calling findDescendantTypeParameters with an ancestor type without parameters");
+		Type[] ancestorTypes = ancestorTypeWrapper.getTypeParameters();
+		
+		/*if(!ancestorTypeWrapper.hasActualTypeArguments())
+			throw new RuntimeException("Calling findDescendantTypeParameters with an ancestor type without actual arguments");*/
+		Type[] ancestorActualArguments = ancestorTypeWrapper.getActualTypeArguments();
+		
+		if(!descendantTypeWrapper.hasTypeParameters())
+			throw new RuntimeException("Calling findDescendantTypeParameters with a descendant type without parameters");
+		TypeVariable[] descendantTypes = descendantTypeWrapper.getTypeParameters();
+		
+		
+		Type[] descendantTypesResult = new Type[descendantTypes.length];
+		for(int i = 0; i<descendantTypes.length; i++) 
+			descendantTypesResult[i] = descendantTypes[i];
+		
+		
+		SingleTypeWrapper ancestorWithoutParameters = new SingleTypeWrapper(ancestorTypeWrapper.asClass());
+		AbstractTypeWrapper[] ancestorWithDescendantTypes = findAncestorTypeParameters(ancestorWithoutParameters, descendantTypeWrapper, true);
+		
+		for(int i=0; i<ancestorWithDescendantTypes.length; i++) {
+			if(ancestorWithDescendantTypes[i] instanceof VariableTypeWrapper) {
+				VariableTypeWrapper matchedVariableTypeWrapper = (VariableTypeWrapper)ancestorWithDescendantTypes[i];
+				for(int j=0; j<descendantTypes.length; j++) {
+					AbstractTypeWrapper descendantType = AbstractTypeWrapper.wrap(descendantTypes[j]);
+					if(  (descendantType instanceof VariableTypeWrapper)  &&  VariableTypeWrapper.class.cast(descendantType).getName().equals(matchedVariableTypeWrapper.getName()) ) {
+						if(!(ancestorActualArguments.length==0))
+							descendantTypesResult[j] = ancestorActualArguments[i];
+					}
+				}
+			}
+		}
+		return AbstractTypeWrapper.wrap(descendantTypesResult);
+	}
+
+	public AbstractTypeWrapper[] findAncestorTypeParameters(SingleTypeWrapper ancestorTypeWrapper, SingleTypeWrapper descendantTypeWrapper, boolean keepVariableNamesAncestor) {
+		if(descendantTypeWrapper.hasActualTypeArguments()) {
+			return findAncestorTypeParameters(ancestorTypeWrapper.asClass(), descendantTypeWrapper.asClass(), AbstractTypeWrapper.wrap(descendantTypeWrapper.getActualTypeArguments()), keepVariableNamesAncestor);
+		} else {
+			return findAncestorTypeParameters(ancestorTypeWrapper.asClass(), descendantTypeWrapper.asClass(), null, keepVariableNamesAncestor);
+		}
+	}
+	
+	private AbstractTypeWrapper[] findAncestorTypeParameters(Class ancestor, Class descendant, AbstractTypeWrapper[] descendantParameterizedTypes, boolean keepVariableNamesAncestor) {
 		if(!ancestor.isAssignableFrom(descendant))
 			throw new NotAncestorException(ancestor, descendant);
 		if(ancestor.equals(descendant)) {
 			return bindingsForAncestor(ancestor, descendant, descendantParameterizedTypes, keepVariableNamesAncestor);
-		} else if(descendantReachedAncestor(descendant, ancestor)) {  //if we are here descendant is a class and ancestor an interface
+		} else if(descendantReachedAncestor(descendant, ancestor)) {  //if we are here then descendant is a class and ancestor an interface
 			for(Class includedInterface : ReflectionUtil.includedInterfaces(descendant)) {
 				if(ancestor.isAssignableFrom(includedInterface)) {
-					AbstractTypeWrapper[] bindingsInterface = getParameterizedTypesInterface(descendant, includedInterface);
+					AbstractTypeWrapper[] bindingsInterface = getTypeParametersInterface(descendant, includedInterface);
 					AbstractTypeWrapper[] classParametersVar = AbstractTypeWrapper.wrap(descendant.getTypeParameters());
 					for(int i=0; i<bindingsInterface.length; i++) {
 						if(bindingsInterface[i] instanceof VariableTypeWrapper) {
 							VariableTypeWrapper foundVariableType = (VariableTypeWrapper) bindingsInterface[i];
 							for(int j=0; j<classParametersVar.length; j++) {
-								if(foundVariableType.getName().equals(VariableTypeWrapper.class.cast(classParametersVar[j]).getName()))
-									bindingsInterface[i] = descendantParameterizedTypes[j];
+								if(foundVariableType.getName().equals(VariableTypeWrapper.class.cast(classParametersVar[j]).getName()) && descendantParameterizedTypes != null) {
+									if(!(descendantParameterizedTypes[j] instanceof VariableTypeWrapper) || keepVariableNamesAncestor)
+										bindingsInterface[i] = descendantParameterizedTypes[j];
+								}
 							}
-								
 						}
 					}
-					return findParametersInstantiations(ancestor, includedInterface, bindingsInterface, keepVariableNamesAncestor);
+					return findAncestorTypeParameters(ancestor, includedInterface, bindingsInterface, keepVariableNamesAncestor);
 				}
 			}
 			return null;
 		}
-		
 
 		Class superClass = null;
 		if(!descendant.isInterface() && ancestor.isAssignableFrom(descendant.getSuperclass()))
@@ -136,22 +201,10 @@ public class GenericsUtil {
 			}
 		}
 		else*/
-			return findParametersInstantiations(ancestor, superClass, superParameterizedTypes, keepVariableNamesAncestor);
+			return findAncestorTypeParameters(ancestor, superClass, superParameterizedTypes, keepVariableNamesAncestor);
 	}
 	
-	
-	public AbstractTypeWrapper[] superParameterizedTypes(Class clazz, Class superClass) {
-		if(!clazz.isInterface() && clazz.getSuperclass().equals(superClass))
-			return AbstractTypeWrapper.wrap(new SingleTypeWrapper(clazz.getGenericSuperclass()).getParameters());
-		for(Type interfaze : clazz.getGenericInterfaces()) {
-			SingleTypeWrapper interfaceWrapper = new SingleTypeWrapper(interfaze);
-			if(interfaceWrapper.asClass().equals(superClass))
-				return AbstractTypeWrapper.wrap(interfaceWrapper.getParameters());
-		}
-		return null;
-	}
-	
-	public AbstractTypeWrapper[] superParameterizedTypes(AbstractTypeWrapper[] classParameterizedTypesValues, Class clazz, Class superClass, boolean keepVariableNamesAncestor) {
+	private AbstractTypeWrapper[] superParameterizedTypes(AbstractTypeWrapper[] classParameterizedTypesValues, Class clazz, Class superClass, boolean keepVariableNamesAncestor) {
 		AbstractTypeWrapper[] classParameterizedTypes = AbstractTypeWrapper.wrap(clazz.getTypeParameters()); //the parameterized types in the class, as they are declared in the class file
 		AbstractTypeWrapper[] superParameterizedTypes = AbstractTypeWrapper.wrap(superClass.getTypeParameters()); //the parameterized types in the super class, as they are declared in the class file
 		
@@ -163,61 +216,35 @@ public class GenericsUtil {
 				for(int j=0; j<classParameterizedTypes.length; j++) { //finding a variable type in the base class with the same name than superParameterizedType
 					VariableTypeWrapper classParameterizedType = (VariableTypeWrapper) classParameterizedTypes[j];
 					if(superParameterizedType.getName().equals(classParameterizedType.getName())) { //found it
-						if(keepVariableNamesAncestor) { //keep the original type variable names for all the type variables that were not replaced
-							if(classParameterizedTypesValues != null && !(classParameterizedTypesValues[j] instanceof VariableTypeWrapper) ) {
-								superParameterizedTypesValues[i] = classParameterizedTypesValues[j];
-							} else {//it was not possible to replace the type variable with a non variable value in classParameterizedTypesValues[j]
-								superParameterizedTypesValues[i] = superParameterizedTypes[i]; //the variable will be replaced with another value with the same name used in the super class declaration
-							}	
-						} else {  //use the type variable names used by the descendant class
-							if(classParameterizedTypesValues != null) {
-								superParameterizedTypesValues[i] = classParameterizedTypesValues[j];
-							}
+						if(classParameterizedTypesValues != null) {
+							superParameterizedTypesValues[i] = classParameterizedTypesValues[j];
 						}
-					break;
+						if(superParameterizedTypesValues[i] instanceof VariableTypeWrapper && !keepVariableNamesAncestor) {
+							superParameterizedTypesValues[i] = superParameterizedTypes[i]; //the variable will be replaced with another value with the same name used in the super class declaration
+						}
+						break;
 					}
 				}
 			}
 		}
-		
-		
-		/*
-		if(classParameterizedTypes!=null) {
-			TypeVariable[] typeVariables = clazz.getTypeParameters();
-			for(int i=0; i<typeVariables.length; i++) {
-				VariableTypeWrapper variableTypeWrapper  = new VariableTypeWrapper(typeVariables[i]);
-				for(int j=0; j<superParameterizedTypes.length; j++) {
-					if(superParameterizedTypes[j] instanceof VariableTypeWrapper) {
-						VariableTypeWrapper superVariableTypeWrapper = (VariableTypeWrapper)superParameterizedTypes[j];
-						if(variableTypeWrapper.getName().equals(superVariableTypeWrapper.getName())) {
-							//if(! (classParameterizedTypes[i] instanceof VariableTypeWrapper) )
-								superParameterizedTypes[j] = classParameterizedTypes[i];
-						}
-					}
-					
-				}
-			}
-		}
-		*/
-		
 		return superParameterizedTypesValues;
 	}
 	
-	
-	public Class[] getClassesInHieararchy(Class ancestor, Class descendant) {
-		List<Class> hierarchy = new ArrayList<Class>();
-		
-		Class currentDescendant = descendant;
-		while(true) {
-			hierarchy.add(0, currentDescendant);
-			if(currentDescendant.equals(ancestor)) { //done, we reach the ancestor in the hierarchy
-				return hierarchy.toArray(new Class[] {});
-			} else if(currentDescendant.equals(Object.class)) {
-					throw new NotAncestorException(ancestor, descendant);
-			} else {
-				currentDescendant = currentDescendant.getSuperclass();
-			}
+	private AbstractTypeWrapper[] superParameterizedTypes(Class clazz, Class superClass) {
+		if(!clazz.isInterface() && clazz.getSuperclass().equals(superClass))
+			return AbstractTypeWrapper.wrap(new SingleTypeWrapper(clazz.getGenericSuperclass()).getActualTypeArguments());
+		for(Type interfaze : clazz.getGenericInterfaces()) {
+			SingleTypeWrapper interfaceWrapper = new SingleTypeWrapper(interfaze);
+			if(interfaceWrapper.asClass().equals(superClass))
+				return AbstractTypeWrapper.wrap(interfaceWrapper.getActualTypeArguments());
 		}
+		return null;
 	}
+	
+	
+
+	
+	
+
 
 }

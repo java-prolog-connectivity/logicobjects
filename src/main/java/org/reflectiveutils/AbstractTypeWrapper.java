@@ -38,7 +38,7 @@ public abstract class AbstractTypeWrapper {
 	}
 	
 	public abstract Class asClass();
-	public abstract boolean isParameterized();
+	public abstract boolean hasActualTypeArguments();
 	public abstract boolean isAssignableFrom(Type type);
 	
 	public void print() {
@@ -71,6 +71,7 @@ public abstract class AbstractTypeWrapper {
 	}
 	
 	
+	
 	public static class SingleTypeWrapper extends AbstractTypeWrapper {
 		
 		public SingleTypeWrapper(Type wrappedType) {
@@ -86,20 +87,28 @@ public abstract class AbstractTypeWrapper {
 		}
 
 		@Override
-		public boolean isParameterized() {
+		public boolean hasActualTypeArguments() {
 			return ParameterizedType.class.isAssignableFrom(wrappedType.getClass());
 		}
 
-		public Type[] getParameters() {
-			if(isParameterized()) {
+		public Type[] getActualTypeArguments() {
+			if(hasActualTypeArguments()) {
 				return ((ParameterizedType)wrappedType).getActualTypeArguments();
 			} else
 				return new Type[] {};
 		}
 
+		public boolean hasTypeParameters() {
+			return getTypeParameters().length>0;
+		}
+		
+		public TypeVariable[] getTypeParameters() {
+			return asClass().getTypeParameters();
+		}
+		
 		@Override
 		public Class asClass() {
-			if(isParameterized())
+			if(hasActualTypeArguments())
 				return (Class)((ParameterizedType)wrappedType).getRawType();
 			else
 				return (Class)wrappedType;
@@ -110,6 +119,8 @@ public abstract class AbstractTypeWrapper {
 			AbstractTypeWrapper paramWrapper = AbstractTypeWrapper.wrap(type);
 			if(paramWrapper instanceof VariableTypeWrapper)
 				return true;
+			if(!(paramWrapper instanceof SingleTypeWrapper))
+				return false;
 			return asClass().isAssignableFrom(SingleTypeWrapper.class.cast(paramWrapper).asClass());
 		}
 
@@ -123,10 +134,10 @@ public abstract class AbstractTypeWrapper {
 			else
 				System.out.println("Concrete class");
 			System.out.println("Class: "+asClass().getName());
-			if(isParameterized())
-				System.out.println("Parameters: "+getParameters().length);
-			for(int i = 0; i<getParameters().length; i++) {
-				System.out.println("Parameter: "+i+": "+getParameters()[i].toString());
+			if(hasActualTypeArguments())
+				System.out.println("Parameters: "+getActualTypeArguments().length);
+			for(int i = 0; i<getActualTypeArguments().length; i++) {
+				System.out.println("Parameter: "+i+": "+getActualTypeArguments()[i].toString());
 			}
 		}
 
@@ -155,7 +166,7 @@ public abstract class AbstractTypeWrapper {
 		}
 		
 		@Override
-		public boolean isParameterized() {
+		public boolean hasActualTypeArguments() {
 			return GenericArrayType.class.isAssignableFrom(wrappedType.getClass());
 		}
 /*
@@ -172,7 +183,7 @@ public abstract class AbstractTypeWrapper {
 */
 		
 		public Type getComponentType() {
-			if(isParameterized()) {
+			if(hasActualTypeArguments()) {
 				return ((GenericArrayType)wrappedType).getGenericComponentType();
 			} else {
 				return ((Class)wrappedType).getComponentType();
@@ -220,7 +231,7 @@ public abstract class AbstractTypeWrapper {
 
 		@Override
 		public Class asClass() {
-			if(!isParameterized())
+			if(!hasActualTypeArguments())
 				return (Class) wrappedType;
 			else {
 				Class componentClass = AbstractTypeWrapper.wrap(getComponentType()).asClass();
@@ -233,7 +244,7 @@ public abstract class AbstractTypeWrapper {
 			super.print();
 			System.out.println("Class: "+asClass().getName());
 			System.out.println("Dimensions: "+dimensions());
-			if(isParameterized())
+			if(hasActualTypeArguments())
 				System.out.println("Parameterized array");
 			System.out.println("Base type: "+getBaseType().toString());
 		}
@@ -249,7 +260,7 @@ public abstract class AbstractTypeWrapper {
 
 
 		@Override
-		public boolean isParameterized() {
+		public boolean hasActualTypeArguments() {
 			if(true) throw new UnsupportedOperationException();
 			return false;
 		}
@@ -322,7 +333,7 @@ public abstract class AbstractTypeWrapper {
 			} else if(typeWrapper instanceof  ArrayTypeWrapper) {
 				ArrayTypeWrapper arrayTypeWrapper = (ArrayTypeWrapper)typeWrapper;
 				System.out.println("Array type ");
-				System.out.println("Parameterized: "+arrayTypeWrapper.isParameterized());
+				System.out.println("Parameterized: "+arrayTypeWrapper.hasActualTypeArguments());
 				System.out.println("Base type: "+arrayTypeWrapper.getBaseType());
 				System.out.println("Dimensions: "+arrayTypeWrapper.dimensions());
 				System.out.println("Info component:");
@@ -332,10 +343,10 @@ public abstract class AbstractTypeWrapper {
 				System.out.println("Simple type: "+simpleTypeWrapper.asClass());
 				System.out.println("Interface: "+simpleTypeWrapper.isInterface());
 				System.out.println("Abstract: "+simpleTypeWrapper.isAbstract());
-				System.out.println("Parameterized: "+simpleTypeWrapper.isParameterized());
-				if(simpleTypeWrapper.isParameterized()) {
+				System.out.println("Parameterized: "+simpleTypeWrapper.hasActualTypeArguments());
+				if(simpleTypeWrapper.hasActualTypeArguments()) {
 					System.out.println("Info parameters:");
-					for(Type t : simpleTypeWrapper.getParameters()) {
+					for(Type t : simpleTypeWrapper.getActualTypeArguments()) {
 						infoType(t);
 					}
 				}

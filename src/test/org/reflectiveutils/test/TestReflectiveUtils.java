@@ -2,12 +2,12 @@ package org.reflectiveutils.test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.util.Map;
+import java.lang.reflect.Type;
 
 import org.junit.Test;
 import org.reflectiveutils.AbstractTypeWrapper;
 import org.reflectiveutils.GenericsUtil;
-import org.reflectiveutils.test.FixtureGenerics.Class6;
+import org.reflectiveutils.test.FixtureGenerics.Class7;
 
 public class TestReflectiveUtils {
 
@@ -37,19 +37,24 @@ public class TestReflectiveUtils {
 			throw new RuntimeException(e);
 		}
 		ParameterizedType pt = (ParameterizedType) f.getGenericType();
-		for(AbstractTypeWrapper wrapper : util.findParametersInstantiations(Map.class, Class6.class) ) {
-		//for(AbstractTypeWrapper wrapper : util.findParametersInstantiations(Class1.class, Class4.class) ) {
-		//for(AbstractTypeWrapper wrapper : util.findParametersInstantiations(Class1.class, (Class)pt.getRawType()) ) {
-		//for(AbstractTypeWrapper wrapper : util.findParametersInstantiations(Map.class, f.getGenericType()) ) {
+		
+/*
+		//for(Type type : util.findTypeParameters(Map.class, Class6.class) ) {
+		for(Type type : util.findAncestorTypeParameters(Class1.class, Class4.class) ) {
+		//for(Type type : util.findTypeParameters(Class1.class, (Class)pt.getRawType()) ) {
+		//for(Type type : util.findTypeParameters(Map.class, f.getGenericType()) ) {
+			AbstractTypeWrapper wrapper = AbstractTypeWrapper.wrap(type);
+			
+			wrapper.print();
+		}
+*/	
+		
+		
+		
+		for(Type type : util.findDescendantTypeParameters(pt, Class7.class) ) {
+			AbstractTypeWrapper wrapper = AbstractTypeWrapper.wrap(type);
 			wrapper.print();
 		}
 		
-		
-		
-		/*
-		for(AbstractTypeWrapper wrapper : util.findParametersInstantiations(Map.class, Class5.class) ) {
-			wrapper.print();
-		}
-		*/
 	}
 }

@@ -27,7 +27,7 @@ public class IteratorCompositionAdapter<LogicAnswerType> extends
 	
 	@Override
 	public Type getEachSolutionType() {
-		AbstractTypeWrapper[] wrapperdParametersTypes = new GenericsUtil().findParametersInstantiations(Iterator.class, getMethodResultType());
-		return wrapperdParametersTypes[0].getWrappedType();
+		//return new GenericsUtil().findAncestorTypeParameters(SolutionEnumeration.class, getMethodResultType())[0];
+		return new GenericsUtil().findDescendantTypeParameters(getMethodResultType(), SolutionEnumeration.class)[0];
 	}
 }

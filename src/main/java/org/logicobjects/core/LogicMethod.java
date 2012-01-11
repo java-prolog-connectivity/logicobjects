@@ -73,9 +73,9 @@ public class LogicMethod {
 			} else {
 				compositionAdapter = (WrapperAdapter)lWrapperAnnotation.adapter().newInstance();
 				compositionAdapter.setParameters(lWrapperAnnotation.value());
-				compositionAdapter.setEachSolutionAdapter(getEachSolutionAdapter());
 				compositionAdapter.setMethod(method);
 			}
+			compositionAdapter.setEachSolutionAdapter(getEachSolutionAdapter());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

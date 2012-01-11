@@ -41,8 +41,12 @@ public class LogicMethodInvoker {
 		}
 		if(!logicMethod.isRawQuery()) {
 			String logicMethodName = logicMethod.getLogicName();
-			LogicObject lo = new LogicObjectAdapter().adapt(targetObject);	
-			params = new TermParametersAdapter().adapt(params);
+			LogicObject lo = new LogicObjectAdapter().adapt(targetObject);
+			if(logicMethod.getParameters().length > 0) {
+				TermParametersAdapter paramsAdapter = new TermParametersAdapter();
+				paramsAdapter.setParameters(logicMethod.getParameters());
+				params = paramsAdapter.adapt(params);
+			}
 			query = lo.invokeMethod(logicMethodName, params);
 		} else {
 			String queryString = logicMethod.getRawQuery();

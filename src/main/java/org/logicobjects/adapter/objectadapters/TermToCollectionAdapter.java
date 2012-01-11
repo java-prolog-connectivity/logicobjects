@@ -32,7 +32,7 @@ public class TermToCollectionAdapter extends TermToObjectAdapter<Collection> {
 		 * However, we need a Collection instance in order to be able to fill in its elements
 		 * (there are not "add" methods in an Iterable)
 		 */
-		Type[] collectionTypeParameters = AbstractTypeWrapper.unwrap(new GenericsUtil().findParametersInstantiations(Iterable.class, type));
+		Type[] collectionTypeParameters = new GenericsUtil().findAncestorTypeParameters(Iterable.class, type);
 		//Type[] typeParameters = typeWrapper.getParameters();
 		for(Term termItem : LogicUtil.listToTermArray(listTerm)) {
 			collection.add(new TermToObjectAdapter().adapt(termItem, collectionTypeParameters[0], adaptingContext));

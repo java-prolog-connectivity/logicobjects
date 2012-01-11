@@ -21,15 +21,15 @@ public abstract class Adapter<From, To> {
 	}
 	
 	public static <A extends Adapter> Type[] types(Class <A> descendantAdapter) {
-		return AbstractTypeWrapper.unwrap(new GenericsUtil().findParametersInstantiations(Adapter.class, descendantAdapter));
+		return new GenericsUtil().findAncestorTypeParameters(Adapter.class, descendantAdapter);
 	}
 	
 	public static <A extends Adapter> Type fromType(Class <A> descendantAdapter) {
-		return new GenericsUtil().findParametersInstantiations(Adapter.class, descendantAdapter)[0].getWrappedType();
+		return new GenericsUtil().findAncestorTypeParameters(Adapter.class, descendantAdapter)[0];
 	}
 	
 	public static <A extends Adapter> Type toType(Class <A> descendantAdapter) {
-		return new GenericsUtil().findParametersInstantiations(Adapter.class, descendantAdapter)[1].getWrappedType();
+		return new GenericsUtil().findAncestorTypeParameters(Adapter.class, descendantAdapter)[1];
 	}
 	
 

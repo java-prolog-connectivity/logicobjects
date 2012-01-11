@@ -47,8 +47,26 @@ public abstract class MethodResultAdapter<MethodResultType> extends LogicAdapter
 		this.method = method;
 	}
 	
+	
+	
+	/*
+	 * This method is a hack. 
+	 * Methods generated with Javassist ignore Generics information, that in this context is useful for introspection.
+	 * Given that here the generated methods are overridden abstract methods, when asked for the method type this method will try to answer the type of the "same" method defined in a super class
+	 * where the method type has the Generics information.
+	 * This could be changed if used another byte code instrumentation library that does not ignore generics (maybe ASM, but not tried it yet)
+	 */
 	public Type getMethodResultType() {
-		return method.getGenericReturnType();
+		try {
+			Class superClass = method.getDeclaringClass().getSuperclass();
+			Method superMethod = superClass.getMethod(method.getName(), method.getParameterTypes());
+			return superMethod.getGenericReturnType();
+		} catch (NoSuchMethodException e) {
+			return method.getGenericReturnType();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+//		return method.getGenericReturnType();
 	}
 	
 

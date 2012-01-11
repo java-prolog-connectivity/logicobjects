@@ -41,7 +41,7 @@ public class TermToMapAdapter extends TermToObjectAdapter<Map> {
 	
 	public Type getEntryType(Map map) {
 		SingleTypeWrapper entrySetType = new SingleTypeWrapper(map.entrySet().getClass().getGenericSuperclass());
-		SingleTypeWrapper entryType = new SingleTypeWrapper(entrySetType.getParameters()[0]);
+		SingleTypeWrapper entryType = new SingleTypeWrapper(entrySetType.getActualTypeArguments()[0]);
 		return entryType.getWrappedType();
 	}
 	

@@ -30,16 +30,16 @@ public class SimpleLContext extends AbstractLContext {
 	
 	public Set<Class<?>> getLogicClasses() {
 		if(reflections == null) {
-			LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for user logic classes without having provided a filter. Looking for classes in the static and context class loader.");
-			addSearchUrls(ClasspathHelper.forClassLoader().toArray(new URL[] {}));
+			LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for user logic classes without having provided a filter. Looking for classes in the static class loader.");
+			addSearchUrls(ClasspathHelper.forClassLoader(ClasspathHelper.getStaticClassLoader()).toArray(new URL[] {}));
 		} 
 		return logicClasses;
 	}
 	
 	public Set<Class<? extends WrapperAdapter>> getWrapperAdapters() {
 		if(reflections == null) {
-			LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for user wrapper adapters without having provided a filter. Looking for classes in the static and context class loader.");
-			addSearchUrls(ClasspathHelper.forClassLoader().toArray(new URL[] {}));
+			LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for user wrapper adapters without having provided a filter. Looking for classes in the static class loader.");
+			addSearchUrls(ClasspathHelper.forClassLoader(ClasspathHelper.getStaticClassLoader()).toArray(new URL[] {}));
 		} 
 		return compositionAdapters;
 	}

@@ -15,8 +15,8 @@ public abstract class WrapperAdapter<MethodResultType, EachSolutionType> extends
 		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(getMethodResultType());
 		if(typeWrapper instanceof SingleTypeWrapper) {
 			SingleTypeWrapper sTypeWrapper = (SingleTypeWrapper) typeWrapper;
-			if(sTypeWrapper.isParameterized())
-				return sTypeWrapper.getParameters()[0];
+			if(sTypeWrapper.hasActualTypeArguments())
+				return sTypeWrapper.getActualTypeArguments()[0];
 		}
 		return null;
 	}

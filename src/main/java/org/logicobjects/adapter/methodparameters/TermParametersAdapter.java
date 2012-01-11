@@ -27,7 +27,7 @@ public class TermParametersAdapter extends ParametersAdapter {
 		
 		LogicEngine engine = LogicEngine.getDefault();
 		
-		String[] newParamStrings = (String[]) getParameters();
+		Object[] newParamStrings = getParameters();
 		String concatenatedParams = "";
 		final String separator = "~~~";
 		for(int i=0; i<newParamStrings.length; i++) {
@@ -45,8 +45,8 @@ public class TermParametersAdapter extends ParametersAdapter {
 
 		
 		List<Term> newTermParams = new ArrayList<Term>();
-		for(String stringTerm : newParamStrings) {
-			newTermParams.add(engine.textToTerm(stringTerm));
+		for(Object stringTerm : newParamStrings) {
+			newTermParams.add(engine.textToTerm(stringTerm.toString()));
 		}
 		return newTermParams.toArray(new Term[] {});
 	}

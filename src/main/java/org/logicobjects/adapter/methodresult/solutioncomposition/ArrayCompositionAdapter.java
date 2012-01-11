@@ -15,7 +15,7 @@ public class ArrayCompositionAdapter<LogicAnswerType> extends WrapperAdapter<Log
 	@Override
 	public LogicAnswerType[] adapt(Query query) {
 		List<LogicAnswerType> list = new SolutionEnumeration(query, getEachSolutionAdapter()).allElements();
-		Class arrayClass = AbstractTypeWrapper.wrap(new ArrayTypeWrapper(getMethod().getGenericReturnType()).getComponentType()).asClass();
+		Class arrayClass = AbstractTypeWrapper.wrap(new ArrayTypeWrapper(getMethodResultType()).getComponentType()).asClass();
 		Object array = Array.newInstance(arrayClass, list.size());
 		for(int i=0; i<list.size(); i++) {
 			Array.set(array, i, list.get(i));
@@ -25,8 +25,7 @@ public class ArrayCompositionAdapter<LogicAnswerType> extends WrapperAdapter<Log
 	
 	@Override
 	public Type getEachSolutionType() {
-		ArrayTypeWrapper typeWrapper = new ArrayTypeWrapper(getMethodResultType());
-		return typeWrapper.getComponentType();
+		return new ArrayTypeWrapper(getMethodResultType()).getComponentType();
 	}
 
 }

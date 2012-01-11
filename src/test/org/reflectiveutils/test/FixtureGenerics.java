@@ -22,4 +22,7 @@ public class FixtureGenerics {
 	public static abstract class Class6 extends Class5 {}
 	
 	public Class4<Iterator<Map<?,String>>> class4;
+	
+	public static abstract class Class7<X, Y> extends Class4<Y> {}
+	
 }

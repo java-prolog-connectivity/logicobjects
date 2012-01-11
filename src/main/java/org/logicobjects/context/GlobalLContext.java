@@ -90,6 +90,11 @@ public class GlobalLContext extends AbstractLContext {
 			System.out.println(clazz);
 		}
 		
+		Set<Class<? extends WrapperAdapter>> allLogicWrappers = new GlobalLContext().getWrapperAdapters();
+		for(Class clazz : allLogicWrappers) {
+			System.out.println(clazz);
+		}
+		
 		/*
 		//Set<Class<? extends SolutionCompositionAdapter>> wrapperAdapters = new LContext().getAllWrapperAdapters();
 		Set<Class<? extends Adapter>> adapters = new LContext().getAllAdapters();
