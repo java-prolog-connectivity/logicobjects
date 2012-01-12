@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import jpl.Atom;
 import jpl.Compound;
 import jpl.Term;
+import jpl.Variable;
 
 import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
 import org.logicobjects.adapter.adaptingcontext.ClassAdaptingContext;
@@ -82,10 +83,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 					if( logicObjectClass != null ) 
 						return (To) new ClassAdaptingContext(logicObjectClass).adaptToLObject(term, type);
 					
-					if(typeWrapper.isAssignableFrom(Term.class))
-						return (To) term;
-					
-					if(typeWrapper.isAssignableFrom(Entry.class)) {
+					if(singleTypeWrapper.asClass().equals(Entry.class)) {
 						Type entryParameters[] = new GenericsUtil().findAncestorTypeParameters(Entry.class, singleTypeWrapper.getWrappedType());
 						return (To) new TermToEntryAdapter().adapt((Compound)term, entryParameters[0], entryParameters[1], adaptingContext);
 					}
@@ -104,6 +102,15 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 						else*/
 							return (To) term.toString();
 					}
+					/*
+					if(Term.class.isAssignableFrom(singleTypeWrapper.asClass())) {
+						if(singleTypeWrapper.asClass().isAssignableFrom(term.getClass() ))
+							return (To) term;
+					}*/
+					if(term instanceof Variable && !Term.class.isAssignableFrom(singleTypeWrapper.asClass())) //found a variable, and the method is not explicitly returning terms
+						return null;
+					if(singleTypeWrapper.isAssignableFrom(Term.class))
+						return (To) term;
 				}
 			} catch(Exception e) {
 				throw new RuntimeException(e);

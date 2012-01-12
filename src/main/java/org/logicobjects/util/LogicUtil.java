@@ -43,11 +43,7 @@ public class LogicUtil {
 		StringBuffer sb = new StringBuffer();
 		while (matcher.find()) {
 			String matched = matcher.group();
-			System.out.println(matched);
 			String replacement = matched.substring(0, 1) + "_" + matched.substring(1);
-			System.out.println("Start index: " + matcher.start());
-			System.out.println(" End index: " + matcher.end() + " ");
-			
 			matcher.appendReplacement(sb,replacement);
 		}
 		matcher.appendTail(sb);
@@ -66,11 +62,7 @@ public class LogicUtil {
 		sb = new StringBuffer();
 		while (matcher.find()) {
 			String matched = matcher.group();
-			System.out.println(matched);
 			String replacement = matched.substring(0, 1) + "_" + matched.substring(1);
-			System.out.println("Start index: " + matcher.start());
-			System.out.println(" End index: " + matcher.end() + " ");
-			
 			matcher.appendReplacement(sb,replacement);
 		}
 		matcher.appendTail(sb);
