@@ -56,13 +56,13 @@ public class BundleDir implements Dir {
 			
 			fullPath = suppressFileProtocol(resolvedURLAsfile);
 			
-			
+			/*
 			System.out.println("bundleFile: "+FileLocator.getBundleFile(bundle));
 			System.out.println("resolvedURL: "+resolvedURL);
 			System.out.println("resolvedURL.getProtocol(): "+resolvedURL.getProtocol());
 			System.out.println("resolvedURLAsfile: "+resolvedURLAsfile);
 			System.out.println("fullPath: "+fullPath);
-			
+			*/
 			
 			
 			
@@ -88,8 +88,7 @@ public class BundleDir implements Dir {
 				
 				path = "/"+fullPath.substring(resolvedBundleRootURLAsfile.length());
 				
-				System.out.println("path: "+path);
-				
+
 				//path = "/"+resolvedURLAsfile.substring(resolvedURLAsfile.indexOf(resolvedBundleRootURLAsfile)+resolvedBundleRootURLAsfile.length());
 			} else {
 				//jarFile = (JarFile) resolvedURL.getContent();

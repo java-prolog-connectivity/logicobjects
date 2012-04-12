@@ -6,6 +6,9 @@ import jpl.Compound;
 import jpl.Term;
 import jpl.Variable;
 
+/**
+ * Replace variables for a given term
+ */
 public class ReplaceVariableVisitor extends TermVisitor {
 	Map<String, Term> map;
 	

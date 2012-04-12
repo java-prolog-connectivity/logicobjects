@@ -20,29 +20,55 @@ public class SimpleLContext extends AbstractLContext {
 
 	private Reflections reflections;
 	
+	public SimpleLContext() {
+	}
+	
 	public SimpleLContext(Reflections reflections) {
 		this.reflections = reflections;
 		refresh();
 	}
 	
-	public SimpleLContext() {
+	
+	private void loadDefaultSearchUrl(String reason) {
+		LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for "+reason+" without having provided a filter.");
+		URL url = findCallerClasspath();
+		LoggerFactory.getLogger(SimpleLContext.class).warn("Looking for classes in the same classpath than the user of the library: "+url);
+		addSearchUrls(url);
+		//addSearchUrls(ClasspathHelper.forClassLoader(ClasspathHelper.getStaticClassLoader()).toArray(new URL[] {}));
 	}
 	
 	public Set<Class<?>> getLogicClasses() {
 		if(reflections == null) {
-			LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for user logic classes without having provided a filter. Looking for classes in the static class loader.");
-			addSearchUrls(ClasspathHelper.forClassLoader(ClasspathHelper.getStaticClassLoader()).toArray(new URL[] {}));
+			loadDefaultSearchUrl("user logic classes");
 		} 
 		return logicClasses;
 	}
 	
 	public Set<Class<? extends WrapperAdapter>> getWrapperAdapters() {
 		if(reflections == null) {
-			LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for user wrapper adapters without having provided a filter. Looking for classes in the static class loader.");
-			addSearchUrls(ClasspathHelper.forClassLoader(ClasspathHelper.getStaticClassLoader()).toArray(new URL[] {}));
+			loadDefaultSearchUrl("user wrapper adapters");
 		} 
 		return compositionAdapters;
 	}
+	
+	private URL findCallerClasspath() {
+		URL logicObjectsURL = ClasspathHelper.forClass(getClass(), null);
+		//The first element in the stack trace is the getStackTrace method, and the second is this method
+		//Then we start at the third member
+		for(int i = 2; i<Thread.currentThread().getStackTrace().length; i++) {
+			StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[i];
+			try {
+				Class callerClass = Class.forName(stackTraceElement.getClassName());
+				URL callerURL = ClasspathHelper.forClass(callerClass, null);
+				if(!callerURL.equals(logicObjectsURL))
+					return callerURL;
+			} catch (ClassNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return null;
+	}
+	
 	
 	public void addSearchFilter(String packageName) {
 		if(reflections == null) {

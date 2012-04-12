@@ -29,7 +29,9 @@ public class LogicUtil {
 		return start.toUpperCase() + javaName.substring(1);
 	}
 	
-	
+	/*
+	 * Transforms from camel case to prolog like names
+	 */
 	public static String javaNameToProlog(String javaName) {
 		/*
 		 * capital letters that do not have at the left:
@@ -96,7 +98,12 @@ public class LogicUtil {
 	}
 	
 	
-	
+	/**
+	 * Surround an atom with a functor
+	 * @param atom
+	 * @param functor
+	 * @return
+	 */
 	protected static String surround(String atom, String functor) {
 		return functor+"("+atom+")";
 	}
@@ -108,7 +115,7 @@ public class LogicUtil {
 	}
 	*/
 
-	
+
 	public static String[] solutionsForVars(Hashtable[] solutions, Variable var) {
 		String[][] allVarSolutionsAux = solutionsForVars(solutions, new Variable[] {var});
 		String[] allVarSolutions = new String[allVarSolutionsAux.length];
@@ -119,6 +126,12 @@ public class LogicUtil {
 		return allVarSolutions;
 	}
 	
+	/**
+	 * Format as a table the solutions given certain variables
+	 * @param solutions
+	 * @param vars
+	 * @return
+	 */
 	public static String[][] solutionsForVars(Hashtable[] solutions, Variable[] vars) {
 		int numberOfSolutions = solutions.length;
 		int numberOfVars = vars.length;
@@ -180,6 +193,10 @@ public class LogicUtil {
 		return Util.atomListToStringArray(t);
 	}
 	
+	/**
+	 * Some basic tests
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		String prologName = "xml_uml_fast_translator";
 		String javaName = "XML_UMLFastTranslator";

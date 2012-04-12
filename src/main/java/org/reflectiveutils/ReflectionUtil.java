@@ -5,15 +5,22 @@ import java.util.List;
 
 public class ReflectionUtil {
 
-	/*
-	 * Answers if a class is adding a interface to its class hierarchy
+	/**
+	 * 
+	 * @param clazz
+	 * @param interfaze
+	 * @return a boolean indicating if a class adds an interface to its class hierarchy
 	 */
 	public static boolean includesInterfaceInHierarchy(Class clazz, Class interfaze) {
 		//Object.class will never answer true to the first condition, so the call to getSuperclass() in the second is safe
 		return (interfaze.isAssignableFrom(clazz) && !interfaze.isAssignableFrom(clazz.getSuperclass()));
 	}
 	
-	
+	/**
+	 * 
+	 * @param clazz
+	 * @return an array with all the interfaces included by {@code clazz}
+	 */
 	public static Class[] includedInterfaces(Class clazz) {
 		List<Class> includedInterfaces = new ArrayList<Class>();
 		for(Class interfaze : clazz.getInterfaces()) {
@@ -23,7 +30,14 @@ public class ReflectionUtil {
 		return includedInterfaces.toArray(new Class[] {});
 	}
 	
-	public static Class[] getClassesInHieararchy(Class ancestor, Class descendant) {
+
+	/**
+	 * @param ancestor
+	 * @param descendant
+	 * @return All the classes between {@code ancestor} and {@code descendant} ({@code ancestor} and {@code descendant} are also included)
+	 * @throws NotAncestorException in case {@code ancestor} is not an ancestor of {@code descendant}
+	 */
+	public static Class[] getClassesInHierarchy(Class ancestor, Class descendant) {
 		List<Class> hierarchy = new ArrayList<Class>();
 		
 		Class currentDescendant = descendant;

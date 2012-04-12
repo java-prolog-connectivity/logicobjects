@@ -5,13 +5,19 @@ import java.util.Properties;
 
 import org.logicobjects.core.LogicEngine;
 
+/**
+ * Keep a hash of preferences
+ * Provides functionality for setting preferences in the hash and for reading them
+ * Alternatively, provides functionality for querying preferences from environmental variables
+ */
 public class LogicObjectsPreferences {
 	public static final String LOGIC_OBJECTS_NAME = "Logic Objects";
-	public static final String[] SUPPORTED_ENGINES = new String[] {"yap", "swi"};
-	public static final String JPLPATH = "JPLPATH";
-	public final static String LOGTALKHOME = "LOGTALKHOME";
-	public final static String LOGTALKUSER = "LOGTALKUSER";
-	//public final static String PROLOG_DIALECT = "PL";
+	public static final String[] SUPPORTED_ENGINES = new String[] {"yap", "swi"};  //supported prolog engines
+	//Properties configuring the framework behaviour
+	public static final String JPLPATH = "JPLPATH"; //path of the JPL library in the host computer. This will determine if the prolog engine is SWI or YAP
+	public final static String LOGTALKHOME = "LOGTALKHOME";  //needed by the framework to find the integration scripts
+	public final static String LOGTALKUSER = "LOGTALKUSER"; //logtalk environment variable TODO: remembering what this variable was for ...
+	//public final static String PROLOG_DIALECT = "PL";  //defines the prolog engine to use (DEPRECATED since this is decided by the JPLPATH environment variable
 
 	private Properties properties;
 	
@@ -50,7 +56,12 @@ public class LogicObjectsPreferences {
 			throw new MissingEnvironmentVariableException(key);
 		return preference;
 	}
-	
+	/**
+	 * Will answer an environment property from the in-memory hash.
+	 * If it is not found it will try to find it from an environment variable
+	 * @param key
+	 * @return
+	 */
 	public String getPreferenceOrEnvironment(String key) {
 		String value = null;
 		try {
@@ -76,6 +87,7 @@ public class LogicObjectsPreferences {
 		Map<String, String> env = System.getenv();
 		return env.get(name);
 	}
+	
 	
 	public static class MissingEnvironmentVariableException extends RuntimeException{
 		private String varName;

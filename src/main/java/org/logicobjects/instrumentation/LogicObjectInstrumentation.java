@@ -145,40 +145,10 @@ public class LogicObjectInstrumentation {
 		try {
 			CtMethod ctCopiedMethod = CtNewMethod.copy(ctMethod, targetClass, null);
 			try {
-				for(Object object : ctMethod.getAnnotations()) {
-					java.lang.annotation.Annotation langAnnotation = (java.lang.annotation.Annotation)object;
-					
-					//System.out.println(langAnnotation.annotationType().getName());
-
-					
-					MethodInfo methodInfo = ctMethod.getMethodInfo();
-					AnnotationsAttribute attr = (AnnotationsAttribute)methodInfo.getAttribute(AnnotationsAttribute.visibleTag);
-					/*
-					for (Annotation a : attr.getAnnotations()) {
-						System.out.println(a.toString());
-					}
-					*/
-					attr = (AnnotationsAttribute)attr.copy(targetClass.getClassFile().getConstPool(), null);
-					/*
-					//((CtBehavior)object).toString();
-					((javassist.bytecode.annotation.Annotation)object).toString();
-					//AnnotationsAttribute attrx = ctMethod.getAttribute(AnnotationsAttribute.visibleTag);
-					//ctMethod.
-					
-					
-					ConstPool constPool = targetClass.getClassFile().getConstPool();
-					AnnotationsAttribute attr = new AnnotationsAttribute(constPool, AnnotationsAttribute.visibleTag);
-					
-					
-					//javassist.bytecode.annotation.Annotation javassistAnnotation = new javassist.bytecode.annotation.Annotation(targetClass.getClassFile().getConstPool(), ClassPool.getDefault().get(langAnnotation.annotationType().getName()));
-					javassist.bytecode.annotation.Annotation javassistAnnotation = new javassist.bytecode.annotation.Annotation(langAnnotation.annotationType().getName(), targetClass.getClassFile().getConstPool());
-					
-					attr.setAnnotation(javassistAnnotation);
-					*/
-					ctCopiedMethod.getMethodInfo().addAttribute(attr);
-					
-				}
-
+				MethodInfo methodInfo = ctMethod.getMethodInfo();
+				AnnotationsAttribute attr = (AnnotationsAttribute)methodInfo.getAttribute(AnnotationsAttribute.visibleTag);
+				attr = (AnnotationsAttribute)attr.copy(targetClass.getClassFile().getConstPool(), null);
+				ctCopiedMethod.getMethodInfo().addAttribute(attr);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

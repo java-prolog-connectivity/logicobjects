@@ -24,14 +24,18 @@ import org.logicobjects.util.LogicObjectsPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@LObject(name = "user")
+/*
+ * A LogicObjects engine
+ * There is just one engine by process (this is constrained by JPL)
+ */
+@LObject(name = "user") //the LogicEngine is itself a logic object. That is the reason of the existence of a BootstrapLogicEngine
 public abstract class LogicEngine {
 
 	private static Logger logger = LoggerFactory.getLogger(LogicEngine.class);
 	
 	//CONSTANTS
-	public static final String VARIABLE_PREFIX = "LOGIC_OBJECTS_";
-	public static final Variable anonymousVar = new Variable("_");
+	protected static final String VARIABLE_PREFIX = "LOGIC_OBJECTS_"; //prefix for generated framework variables 
+	protected static final Variable anonymousVar = new Variable("_");
 
 	//ENGINES AND PREFERENCES STATIC VARIABLES
 	private static boolean bootstrapping;
@@ -40,24 +44,44 @@ public abstract class LogicEngine {
 	private static LogicObjectsPreferences preferences;
 
 
+	private String workingPath;
+	
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //BOOTSTRAPPING
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	
 	protected static LogicObjectsPreferences getPreferences() {
 		return preferences;
 	}
 	
-	public static void configure() {
-		JPL.setNativeLibraryDir(getPreferences().findOrDie(LogicObjectsPreferences.JPLPATH));
+	/**
+	 * The minimum configuration needed to load the framework in memory
+	 */
+	protected static void configure() {
+		JPL.setNativeLibraryDir(getPreferences().findOrDie(LogicObjectsPreferences.JPLPATH)); //configuring the JPL path according to preferences. So a Prolog engine can be started
 	}
 	
-	public static void initialize(LogicObjectsPreferences newPreferences) {
+	public synchronized static void initialize(LogicObjectsPreferences newPreferences) {
 		preferences = newPreferences;
 		configure();
+		//if JPL.init() is not explicitly called, it will be invoked by JPL at the first operation needing the engine
+		boolean alreadyStarted = !JPL.init(); //answers true if the logic engine was not started, false otherwise
+		/*  
+		if(alreadyStarted) {
+			getDefault().halt(); //There is a serious bug with this method (see its comments). So it is not possible to restart the logic engine :(
+			JPL.init();
+			getDefault().resetPath();
+		}
+		*/
 	}
 
-	public static LogicEngine getBootstrapEngine() {
+	/**
+	 * The Bootrap engine does not trigger the initialization of Logtalk
+	 * 
+	 * @return The Bootstrap engine
+	 */
+	public synchronized static LogicEngine getBootstrapEngine() {
 		if(bootstrapEngine == null)
 			bootstrapEngine = new BootstrapLogicEngine();
 		return bootstrapEngine;
@@ -72,8 +96,6 @@ public abstract class LogicEngine {
 				long startTime = System.nanoTime();
 				bootstrapping = true;
 
-				if(getPreferences() == null)
-					initialize(new LogicObjectsPreferences());
 				getBootstrapEngine().loadLogtalk();
 				//getBootstrapEngine().setLogtalkFlag(LogtalkFlag.REPORT, LogtalkFlag.REPORT.OFF); //currently this is set in the settings.lgt file
 				coreEngine = LogicObjectFactory.getDefault().create(LogicEngine.class);
@@ -87,12 +109,21 @@ public abstract class LogicEngine {
 		}
 	}
 
-	
-	public LogicEngine() {
-		if(preferences == null)
+	/**
+	 * The constructor should not be invoked by external classes
+	 */
+	protected LogicEngine() {
+		if(getPreferences() == null)
 			initialize(new LogicObjectsPreferences());
 	}
 
+
+	public boolean resetPath() {
+		if(workingPath != null)
+			return cd(workingPath);
+		return true;
+	}
+	
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //METHODS NEEDED FOR THE BOOTSTRAPPING PROCESS AND FOR SUPPORTING THE ADAPTERS FUNCTIONALITY
 //NONE OF THESE METHODS SHOULD BE INSTRUMENTED, TO PREVENT INFINITE LOOPS
@@ -209,6 +240,18 @@ public abstract class LogicEngine {
 		return text;
 	}
 	
+	//WARNING: apparently there is a bug in JPL that makes the Java process dye at this point.
+	@Deprecated
+	public boolean halt() {
+		logger.info("Shutting down the prolog engine ...");
+		boolean result = new Query("halt").hasSolution();
+		if(result)
+			logger.info("The prolog engine has been shut down.");
+		else
+			logger.warn("Impossible to shut down the prolog engine.");
+		return result;
+	}
+	
 	public boolean ensureLoaded(String fileName) {
 		return ensureLoaded(new Atom(fileName));
 	}
@@ -216,13 +259,11 @@ public abstract class LogicEngine {
 	/*@LSolutionAdapter(adapter=HasSolutionAdapter.class)
 	@LMethod(name="flush_output")*/
 	public boolean flushOutput() {
-		Query query = new Query("flush_output");
-		return query.hasSolution();
+		return new Query("flush_output").hasSolution();
 	}
 	
 	public boolean ensureLoaded(Term term) {
-		Query query = new Query("ensure_loaded", new Term[] { term });
-		return query.hasSolution();
+		return new Query("ensure_loaded", new Term[] { term }).hasSolution();
 	}
 	
 	/*
@@ -242,8 +283,7 @@ public abstract class LogicEngine {
 	}
 	
 	public boolean logtalkLoad(Term term) {
-		Query query = new Query("logtalk_load", new Term[] { term });
-		return query.hasSolution();
+		return new Query("logtalk_load", new Term[] { term }).hasSolution();
 	}
 	/*
 	public boolean logtalkLoad(String fileName, String loadingModifiers) {
@@ -268,14 +308,19 @@ public abstract class LogicEngine {
 		Query query = new Query("cd", new Term[] { new Atom(newDirectory) });
 		try {
 			if(query.hasSolution()) {
-				logger.debug("Change Prolog path to: "+newDirectory);
+				logger.info("Changed Prolog path to: "+newDirectory);
+				workingPath = newDirectory;
 				return true;
+			} else {
+				logger.warn("Impossible to change path to: " + newDirectory);
+				return false;
 			}
-			return false;
+			
 		} catch(Exception e) {
 			throw new RuntimeException("Impossible change to directory "+newDirectory);
 		}
 	}
+	
 	
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //LOGIC METHODS THAT FOR CONVENIENT REASONS HAVE BEEN IMPLEMENTED INSTEAD OF INSTRUMENTED
@@ -362,9 +407,20 @@ public abstract class LogicEngine {
 
 	
 	public static void main(String[] args) {
-		LogicEngine e = getDefault();
+		System.out.println("***********************************");
+		LogicEngine eng = getDefault();
 		String t = "intensional_set(set1_2, '', '.'(var1, []), '.'(A, []), '::(list, member(A, \'.\'(1, \'.\'(2, []))))')";
-		System.out.println(e.textToTerm(t));
+		System.out.println(eng.textToTerm(t));
+		try {
+			eng.halt();
+		} catch(Exception e) {
+			System.out.println(e);
+		}
+		
+		System.out.println("***********************************");
+		//System.out.println(eng.textToTerm(t));
+		System.out.println("***********************************");
+		
 		/*
 		List<Term> termList = Arrays.asList(e.textToTerm("hola(Z,X,Y,s(Z))"), e.textToTerm("(a,b)"));
 		System.out.println("termListToTextSequence: "+ e.termListToTextSequence(termList));

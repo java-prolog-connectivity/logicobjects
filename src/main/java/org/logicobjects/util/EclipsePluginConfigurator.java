@@ -17,23 +17,37 @@ import org.reflectiveutils.reflections4eclipse.BundleUrlType;
 
 public abstract class EclipsePluginConfigurator {
 
-	//prepares an Eclipse plugin to be used with LOGICOBJECTS
+	/**
+	 * prepares an Eclipse plugin to be used with LOGICOBJECTS
+	 * @param plugin
+	 */
 	public static void configure(Plugin plugin) {
-		String logicFilesPath = null;
+		//enabling javassist to work correctly in Eclipse
+		ClassPool classPool = ClassPool.getDefault();
+		classPool.appendClassPath(new LoaderClassPath(plugin.getClass().getClassLoader()));
+		LogicObjectFactory.getDefault().setClassPool(classPool);
+		
+		Vfs.addDefaultURLTypes(new BundleUrlType(plugin.getBundle()));  //enabling the Reflections filters to work in Eclipse
+		
+		String pathLogicFiles = null;
 		URL urlPlugin = ClasspathHelper.forClass(plugin.getClass());
-		LogicObjectFactory.getDefault().addSearchUrl(urlPlugin);  //adding all the classes in the plugin to the search path
+		/**
+		 * adding all the classes in the plugin to the search path
+		 * This line has to be after the call to Vfs.addDefaultURLTypes(...)
+		 */
+		LogicObjectFactory.getDefault().addSearchUrl(urlPlugin);  
 		try {
-			logicFilesPath = FileLocator.toFileURL(urlPlugin).getPath();
+			pathLogicFiles = FileLocator.toFileURL(urlPlugin).getPath();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		LogicEngine.getBootstrapEngine().cd(logicFilesPath);
+		/**
+		 * move to the directory where the plugin is deployed
+		 * This code uses the bootstrap engine since this engine will not trigger the loading of Logtalk
+		 * After we have moved to the location of the plugin files we can load logtalk afterwards
+		 */
+		LogicEngine.getBootstrapEngine().cd(pathLogicFiles); 
 		
-		Vfs.addDefaultURLTypes(new BundleUrlType(plugin.getBundle()));  //enabling the Reflections filters to work in Eclipse
-		//enabling javassist to work correctly in Eclipse
-		ClassPool classPool;
-		classPool = ClassPool.getDefault();
-		classPool.appendClassPath(new LoaderClassPath(plugin.getClass().getClassLoader()));
-		LogicObjectFactory.getDefault().setClassPool(classPool);
+
 	}
 }

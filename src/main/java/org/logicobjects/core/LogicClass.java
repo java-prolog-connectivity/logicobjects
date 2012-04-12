@@ -11,6 +11,7 @@ import java.util.Set;
 import jpl.Term;
 
 import org.logicobjects.adapter.LogicResourcePathAdapter;
+import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.util.LogicUtil;
 
@@ -61,8 +62,12 @@ public class LogicClass {
 	 * Return a boolean indicating if all the modules and objects were loaded correctly
 	 */
 	public static boolean loadDependencies(Class clazz) {
-		//if(true)return true; //TODO delete this
+		clazz = findLogicClass(clazz);
+		if(clazz == null)
+			return false;
+		
 		LObject logicObject = getLogicObjectAnnotation(clazz);
+		
 		if(!logicObject.automaticImport())
 			return false;
 		

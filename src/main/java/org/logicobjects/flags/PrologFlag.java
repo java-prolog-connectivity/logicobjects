@@ -1,6 +1,6 @@
 package org.logicobjects.flags;
 
-public interface PrologFlag {
+public abstract class PrologFlag {
 
 	public final static String DIALECT = "dialect";
 

@@ -6,10 +6,10 @@ import jpl.Compound;
 import jpl.Term;
 import jpl.Variable;
 
-/*
+/**
  * This visitor replace variable names for another one
  * Given that there is not a mutator for the name attribute at the class Variable, this visitor returns a term with new Variable objects
- * (in the current implementation the original term is algo changed, this will be fixed some day)
+ * (in the current implementation the original term is also changed, this will be fixed some day when having time ...)
  */
 public class ChangeVariableNameVisitor extends TermVisitor {
 	Map<String, String> map;
