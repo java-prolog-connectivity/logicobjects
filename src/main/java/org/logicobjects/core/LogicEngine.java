@@ -49,22 +49,26 @@ public abstract class LogicEngine {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //BOOTSTRAPPING
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	
 	protected static LogicObjectsPreferences getPreferences() {
 		return preferences;
 	}
 	
+	public static void configure() {
+		configure(new LogicObjectsPreferences());
+	}
+	
 	/**
 	 * The minimum configuration needed to load the framework in memory
+	 * This method is static since it configures how the logic engine will be instantiated
 	 */
-	protected static void configure() {
-		JPL.setNativeLibraryDir(getPreferences().findOrDie(LogicObjectsPreferences.JPLPATH)); //configuring the JPL path according to preferences. So a Prolog engine can be started
+	protected static void configure(LogicObjectsPreferences preferences) {
+		JPL.setNativeLibraryDir(preferences.findOrDie(LogicObjectsPreferences.JPLPATH)); //configuring the JPL path according to preferences. So a Prolog engine can be started
 	}
 	
 	public synchronized static void initialize(LogicObjectsPreferences newPreferences) {
 		preferences = newPreferences;
-		configure();
+		configure(preferences);
 		//if JPL.init() is not explicitly called, it will be invoked by JPL at the first operation needing the engine
 		boolean alreadyStarted = !JPL.init(); //answers true if the logic engine was not started, false otherwise
 		/*  
@@ -212,32 +216,11 @@ public abstract class LogicEngine {
 	 * Example: the String representation of the term ','(A,B) is "A, B"
 	 */
 	public String termToText(Term term) {
-		String atomVarName = VARIABLE_PREFIX+"Atom";
-		String atomVarName2 = atomVarName+"2";
-		String bindingsVarName = VARIABLE_PREFIX+"Bindings";
-		String bindingsVarName2 = bindingsVarName+"2";
-		//System.out.println("before escaping: "+term.toString());
-		String escapedTerm = term.toString().replace("'", "\\'");
-		//escapedTerm = escapedTerm.replace(".", "\\.");
-		escapedTerm = "'"+escapedTerm+"'";
-		//System.out.println("after escaping: "+escapedTerm);
-		String queryString = atomVarName+" = "+escapedTerm+", atom_to_term("+atomVarName+", "+term+", "+bindingsVarName+"), term_to_atom("+term+", "+atomVarName2+")"+", atom_to_term("+atomVarName2+", "+term+", "+bindingsVarName2+")";
-		Query query = new Query(queryString);
+		String varAtomName = VARIABLE_PREFIX+"Atom";
+		Query query = new Query(new Compound("term_to_atom", new Term[] { term, new Variable(varAtomName)}));
 		Map solution = query.oneSolution();
-		
-		Atom atom = (Atom) solution.get(atomVarName2);
-		Compound bindingListTerm = (Compound) solution.get(bindingsVarName);
-		Compound bindingListTerm2 = (Compound) solution.get(bindingsVarName2);
-
-		Term[] bindings = Util.listToTermArray(bindingListTerm);
-		Term[] bindings2 = Util.listToTermArray(bindingListTerm2);
-		String text = atom.name();
-		for(int i = 0; i<bindings.length; i++) {
-			String expectedVarName = bindings[i].arg(1).name();
-			String currentVarName = bindings2[i].arg(1).name();
-			text = text.replace(currentVarName, expectedVarName);
-		}
-		return text;
+		Atom varMappingTerm = (Atom) solution.get(varAtomName);
+		return varMappingTerm.name();
 	}
 	
 	//WARNING: apparently there is a bug in JPL that makes the Java process dye at this point.
@@ -252,8 +235,14 @@ public abstract class LogicEngine {
 		return result;
 	}
 	
-	public boolean ensureLoaded(String fileName) {
-		return ensureLoaded(new Atom(fileName));
+	public boolean ensureLoaded(String module) {
+		Term term;
+		try {
+			term = textToTerm(module);
+		} catch(Exception e) {
+			term = new Atom(module);
+		}
+		return ensureLoaded(term);
 	}
 	
 	/*@LSolutionAdapter(adapter=HasSolutionAdapter.class)
@@ -278,8 +267,14 @@ public abstract class LogicEngine {
 		return success;
 	}
 	
-	public boolean logtalkLoad(String fileName) {
-		return logtalkLoad(new Atom(fileName));
+	public boolean logtalkLoad(String module) {
+		Term term;
+		try {
+			term = textToTerm(module);
+		} catch(Exception e) {
+			term = new Atom(module);
+		}
+		return logtalkLoad(term);
 	}
 	
 	public boolean logtalkLoad(Term term) {

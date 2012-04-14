@@ -10,6 +10,7 @@ import jpl.Term;
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.FieldAdaptingContext;
 import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
+import org.reflectiveutils.ReflectionUtil;
 
 import com.google.code.guava.beans.Properties;
 import com.google.code.guava.beans.Property;
@@ -102,16 +103,9 @@ public class LogicObject implements ITermObject {
 	public static void setParams(Object lObject, Term term , String[] params) {
 		for(int i=0; i<params.length; i++) {
 			String propertyName = params[i];
-			//Field field = lObject.getClass().getField(propertyName);  //remember, the commented out code fails for private fields
-			Property property = Properties.getPropertyByName(lObject, propertyName);
-			Field field = property.getField();
+			Field field = ReflectionUtil.getField(lObject, propertyName);
 			Object fieldValue = new TermToObjectAdapter().adapt(term.arg(i+1), field.getGenericType(), new FieldAdaptingContext(field));
-			//field.set(lObject, fieldValue); ////remember, the commented out code fails for private fields
-			try {
-				property.setValueWithSetter(lObject, fieldValue); //try to use the setter if any
-			} catch(NullPointerException e) { //setter no defined
-				property.setFieldValue(lObject, fieldValue);
-			}
+			ReflectionUtil.setFieldValue(lObject, propertyName, fieldValue);
 		}
 	}
 	

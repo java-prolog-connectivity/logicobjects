@@ -1,7 +1,11 @@
 package org.reflectiveutils;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.google.code.guava.beans.Properties;
+import com.google.code.guava.beans.Property;
 
 public class ReflectionUtil {
 
@@ -51,5 +55,56 @@ public class ReflectionUtil {
 				currentDescendant = currentDescendant.getSuperclass();
 			}
 		}
+	}
+	
+	public static Field getField(Object target, String propertyName) {
+		return getField(target.getClass(), propertyName);
+	}
+	
+	public static Field getField(Class clazz, String propertyName) {
+		Field field = null;
+		try {
+			field = clazz.getField(propertyName); //this fails if the field is not public
+		} catch (NoSuchFieldException e) {
+			try {
+				Property property = Properties.getPropertyByName(clazz, propertyName); //this fails if there is not a getter
+				field = property.getField();
+			} catch(IllegalStateException e2) { //Unknown property
+				throw new RuntimeException(e2); 
+			}
+		}
+		return field;
+	}
+	
+	public static Object getFieldValue(Object target, String propertyName) {
+		Object value = null;
+		Field field = getField(target, propertyName);
+		if(field != null) {
+			field.setAccessible(true); //otherwise we will get an illegal access exception
+			try {
+				value = field.get(target);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return value;
+	}
+	
+	public static void setFieldValue(Object target, String propertyName, Object value) {
+		Field field = getField(target, propertyName);
+		try {
+			if(field != null) {
+				field.setAccessible(true); //otherwise we will get an illegal access exception
+				field.set(target, value);
+			}
+		} catch (Exception e) {
+			Property property = Properties.getPropertyByName(target, propertyName);
+			try {
+				property.setValueWithSetter(target, value); //try to use the setter if any
+			} catch(NullPointerException e2) { //setter no defined
+				property.setFieldValue(target, value);
+			}
+		} 
+		
 	}
 }

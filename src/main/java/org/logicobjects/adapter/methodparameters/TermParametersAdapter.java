@@ -11,39 +11,60 @@ import java.util.regex.Pattern;
 
 import jpl.Term;
 
+import org.logicobjects.adapter.LogicObjectAdapter;
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.core.LogicEngine;
 
+/**
+ * 
+ * @author sergioc78
+ *
+ */
 public class TermParametersAdapter extends ParametersAdapter {
 
-	private static final String PARAMETERS_PREFIX = "$";
+	private Object targetObject;
 	
+	private static final String INSTANCE_VAR_PREFIX = "@";
+	private static final String INSTANCE_VAR_PREFIX_REX = "\\@";
+	
+	private static final String PARAMETERS_PREFIX = "$";
+	private static final String PARAMETERS_PREFIX_REX = "\\$";
+	
+	private static final String ALL_PARAMS_SUFIX = "*";
+	private static final String ALL_PARAMS_SUFIX_REX = "\\*";
+	
+	private static final String PARAM_SEPARATOR = "~~~";
+	
+	public static final String JAVA_NAME = "([a-zA-Z_\\$][\\w\\$]*)";
+	/*
 	private static final String paramSymbolAsRex(String symbol) {
-		return "\\"+symbol;
+		String sufix = symbol.substring(1);
+		if(sufix.equals(ALL_PARAMS_SUFIX))
+			sufix = ALL_PARAMS_SUFIX_REX;
+		return PARAMETERS_PREFIX_REX+sufix;
+	}
+	*/
+	public TermParametersAdapter(Object targetObject) {
+		this.targetObject = targetObject;
 	}
 	
 	@Override
 	public Object[] adapt(Object[] oldParams) {
-		
 		LogicEngine engine = LogicEngine.getDefault();
-		
-		Object[] newParamStrings = getParameters();
-		String concatenatedParams = "";
-		final String separator = "~~~";
-		for(int i=0; i<newParamStrings.length; i++) {
-			concatenatedParams+=newParamStrings[i];
-			if(i<newParamStrings.length-1)
-				concatenatedParams+=separator;
-		}
 
-		concatenatedParams = replaceParameters(concatenatedParams, oldParams);
-
+		String concatenatedParams = concatenateParams(); //concatenates the adapter parameters
 		
+		/**
+		 * Substitute parameters symbols from their values in the method parameters
+		 * $1 corresponds to the first parameter
+		 * $* corresponds to all the parameters separated by a ','
+		 */
+		String replacedConcatenatedParams = replaceParameters(concatenatedParams, oldParams); 
 		
+		//once the params symbols have been replaced, we split them again
+		Object[] newParamStrings = replacedConcatenatedParams.split(PARAM_SEPARATOR);
 		
-		newParamStrings = concatenatedParams.split(separator);
-
-		
+		//we convert the string representation of every param in a term
 		List<Term> newTermParams = new ArrayList<Term>();
 		for(Object stringTerm : newParamStrings) {
 			newTermParams.add(engine.textToTerm(stringTerm.toString()));
@@ -51,29 +72,54 @@ public class TermParametersAdapter extends ParametersAdapter {
 		return newTermParams.toArray(new Term[] {});
 	}
 
+	/**
+	 * 
+	 * @return a String with all the adapter parameters. Values are separated by PARAM_SEPARATOR
+	 */
+	private String concatenateParams() {
+		Object[] params = getParameters();
+		String concatenatedParams = "";
+		for(int i=0; i<params.length; i++) {
+			concatenatedParams+=params[i];
+			if(i<params.length-1)
+				concatenatedParams+=PARAM_SEPARATOR;
+		}
+		return concatenatedParams;
+	}
 	
-	
-	
-	public static String replaceParameters(String termString, Object[] params) {
+	/**
+	 * 
+	 * @param termString a string with all the new params concatenated
+	 * @param params the method params
+	 * @return
+	 */
+	public String replaceParameters(String termString, Object[] params) {
 		LogicEngine engine = LogicEngine.getDefault();
 		
-		Set<String> setSymbols = getParametersSymbols(termString);
+		Set<String> setSymbols = getParametersSymbols(termString); //find out which are the parameters symbols referred in the parametersString
 
 		//Map<String, Term> parametersDictionary = asTermParametersMap(setSymbols, params);
-		Map<String, String> parametersDictionary = asReplacementMap(params);
+		Map<String, String> parametersDictionary = asReplacementMap(params, setSymbols);
 		
-		for(String paramVar : setSymbols) {			
-			String termObjectString = parametersDictionary.get(paramVar);
-			termString=termString.replaceAll(paramSymbolAsRex(paramVar), termObjectString);
+		for(String symbol : setSymbols) {			
+			String termObjectString = parametersDictionary.get(symbol);
+			//termString=termString.replaceAll(paramSymbolAsRex(paramVar), termObjectString);
+			termString=termString.replaceAll(Pattern.quote(symbol), termObjectString);
 		}
 		
 		return termString;
 	}
 	
-	
-	public static Set<String> getParametersSymbols(String concatenatedParams) {
+	/**
+	 * 
+	 * @param concatenatedParams
+	 * @return A set of symbol params referenced in the string sent as a parameter
+	 */
+	private Set<String> getParametersSymbols(String concatenatedParams) {
 		Set<String> setSymbols = new HashSet<String>();
-		Pattern pattern = Pattern.compile("\\"+PARAMETERS_PREFIX+"[\\d]+"); //warning: weak implementation: this assumes that PARAMETERS_PREFIX needs to be escaped
+		//Pattern pattern = Pattern.compile(PARAMETERS_PREFIX_REX+"[\\d]+");
+		Pattern pattern = Pattern.compile("("+PARAMETERS_PREFIX_REX+"(\\d+|"+ALL_PARAMS_SUFIX_REX+"))|"+INSTANCE_VAR_PREFIX_REX+JAVA_NAME);
+		//Pattern pattern = Pattern.compile("("+PARAMETERS_PREFIX_REX+"(\\d+|"+ALL_PARAMS_SUFIX_REX+"))");
 		Matcher findingMatcher = pattern.matcher(concatenatedParams);
 		while(findingMatcher.find()) {
 			String match = findingMatcher.group();
@@ -82,8 +128,12 @@ public class TermParametersAdapter extends ParametersAdapter {
 		return setSymbols;
 	}
 
-
-	private static Map<String, String> asReplacementMap(Object[] parameters) {
+	/**
+	 * Builds a dictionary of symbol params to values
+	 * @param parameters
+	 * @return
+	 */
+	private Map<String, String> asReplacementMap(Object[] parameters, Set<String> setSymbols) {
 		Map<String, String> dictionary = new HashMap<String, String>();
 		if(parameters.length > 0) {
 			LogicEngine engine = LogicEngine.getDefault();
@@ -97,7 +147,14 @@ public class TermParametersAdapter extends ParametersAdapter {
 				dictionary.put(paramName, termParam.toString());
 				listTerms.add(termParam);
 			}
-			dictionary.put(PARAMETERS_PREFIX+"0", engine.termListToTextSequence(listTerms));
+			dictionary.put(PARAMETERS_PREFIX+ALL_PARAMS_SUFIX, engine.termListToTextSequence(listTerms));
+		}
+		for(String setSymbol : setSymbols) {
+			if(setSymbol.substring(0, 1).equals(INSTANCE_VAR_PREFIX)) {
+				String instanceVarName = setSymbol.substring(1);
+				Term instanceVarAsTerm = LogicObjectAdapter.fieldAsTerm(targetObject, instanceVarName);
+				dictionary.put(setSymbol, instanceVarAsTerm.toString());
+			}
 		}
 		return dictionary;
 	}
@@ -114,18 +171,7 @@ public class TermParametersAdapter extends ParametersAdapter {
 	}
 	*/
 	
-	/*
-	public static void main(String[] args) {
-		LogicEngine e = new BootstrapLogicEngine();
-		Term termSequence = Util.textToTerm("A=B, B=C, 1=D");
-		System.out.println(e.sequenceLength(termSequence));
-		
-		Term[] terms = e.sequenceToTermArray(termSequence);
-		for(Term t : terms) {
-			System.out.println(t.toString());
-		}
-	}
-*/
+	
 	
 }
 

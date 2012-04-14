@@ -66,14 +66,14 @@ public class LogicClass {
 		if(clazz == null)
 			return false;
 		
-		LObject logicObject = getLogicObjectAnnotation(clazz);
+		LObject aLObject = getLogicObjectAnnotation(clazz);
 		
-		if(!logicObject.automaticImport())
+		if(!aLObject.automaticImport())
 			return false;
 		
 		boolean result = true;
 		
-		String[] annotationModules = logicObject.modules();
+		String[] annotationModules = aLObject.modules();
 		String[] bundleModules = getBundleModules(clazz);
 		if(bundleModules == null) {
 			bundleModules = new String[] {};
@@ -87,9 +87,9 @@ public class LogicClass {
 		List<Term> moduleTerms = new ArrayList<Term>();
 		new LogicResourcePathAdapter().adapt(allModules, moduleTerms);
 		
-		result = LogicEngine.getDefault().ensureLoaded(moduleTerms);
+		result = LogicEngine.getDefault().ensureLoaded(moduleTerms); //loading prolog modules
 		
-		String[] annotationImports = logicObject.imports();
+		String[] annotationImports = aLObject.imports();
 		String[] bundleImports = getBundleImports(clazz);
 		if(bundleImports == null) {
 			bundleImports = new String[] {};
@@ -105,11 +105,11 @@ public class LogicClass {
 		List<Term> importTerms = new ArrayList<Term>();
 		new LogicResourcePathAdapter().adapt(allImports, importTerms);
 		
-		return LogicEngine.getDefault().logtalkLoad(importTerms) && result;
+		return LogicEngine.getDefault().logtalkLoad(importTerms) && result; //loading Logtalk objects
 	}
 	
-	private static final String IMPORTS = "imports";
-	private static final String MODULES = "modules";
+	private static final String IMPORTS = "objects"; //"objects" in logicobjects files will be loaded with logtalk_load
+	private static final String MODULES = "modules"; //"modules" in logicobjects files will be loaded with ensure_loaded
 	public static final String BUNDLE_NAME = "logicobjects";
 	
 	public static ResourceBundle getBundle(Class clazz) {

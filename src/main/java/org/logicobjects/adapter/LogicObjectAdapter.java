@@ -9,6 +9,7 @@ import jpl.Term;
 
 import org.logicobjects.adapter.adaptingcontext.FieldAdaptingContext;
 import org.logicobjects.core.LogicObject;
+import org.reflectiveutils.ReflectionUtil;
 
 import com.google.code.guava.beans.Properties;
 
@@ -40,18 +41,15 @@ public class LogicObjectAdapter extends Adapter<Object, LogicObject> {
 	*/
 	
 	public LogicObject asLogicObject(Object object, String objectName, String[] propertyNames) {
-		Term[] parameters = getParameters(object, propertyNames);
+		Term[] parameters = fieldsAsTerms(object, propertyNames);
 		return new LogicObject(objectName, parameters);
 	}
 	
-	private Term[] getParameters(Object object, String[] propertyNames) {
+	private Term[] fieldsAsTerms(Object object, String[] propertyNames) {
 		List<Term> parameters = new ArrayList<Term>();
 		for(String propertyName : propertyNames) {
 			try {
-				Term term = null;
-				Object propertyValue = Properties.getBeanPropertyByName(propertyName, object).getValue();
-				Field field = Properties.getPropertyByName(object, propertyName).getField();
-				term = new ObjectToTermAdapter().adapt(propertyValue, new FieldAdaptingContext(field));
+				Term term = fieldAsTerm(object, propertyName);
 				parameters.add(term);
 			} catch(Exception e) {
 				throw new RuntimeException(e);
@@ -59,23 +57,11 @@ public class LogicObjectAdapter extends Adapter<Object, LogicObject> {
 		}
 		return parameters.toArray(new Term[] {});
 	}
-	/*
-	public static LogtalkObject userObject() {
-		return new LogtalkObject(new ObjectToTermAdapter().adapt("user"));
-	}
-	*/
-	/*
-	static class X {private int i = 10;  int getI(){return i;} }
 	
-	public static void main(String[] args) {
-		X x = new X();
-		Property property = Properties.getPropertyByName(x, "i");
-		//BeanProperty property = Properties.getBeanPropertyByName("i", x);
-		//System.out.println(property.getValue());
-		System.out.println(property.getFieldValue(x));
-		//property.setFieldValue(x, 5);
-		//System.out.println(x.getI());
-		//Field field = Properties.getPropertyByName(x, "i").getField();
-		
-	}*/
+	public static Term fieldAsTerm(Object object, String propertyName) {
+		Object propertyValue = ReflectionUtil.getFieldValue(object, propertyName);
+		Field field = ReflectionUtil.getField(object, propertyName);
+		return new ObjectToTermAdapter().adapt(propertyValue, new FieldAdaptingContext(field));
+	}
+	
 }

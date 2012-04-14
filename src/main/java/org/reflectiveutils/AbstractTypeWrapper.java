@@ -394,10 +394,9 @@ public abstract class AbstractTypeWrapper {
 	*/
 	
 	public static Type getType(Class clazz, String propertyName) {
-		System.out.println("---------- Property name: "+propertyName);
+		//System.out.println("---------- Property name: "+propertyName);
 		try {
-			Property property = Properties.getPropertyByName(clazz, propertyName);
-			Field field = property.getField();
+			Field field = ReflectionUtil.getField(clazz, propertyName);
 			Type type = field.getGenericType();
 			return type;
 

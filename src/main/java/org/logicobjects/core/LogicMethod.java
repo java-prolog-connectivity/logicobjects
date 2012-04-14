@@ -8,6 +8,7 @@ import jpl.Query;
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.methodresult.HasSolutionAdapter;
 import org.logicobjects.adapter.methodresult.MethodResultAdapter;
+import org.logicobjects.adapter.methodresult.NumberOfSolutionsAdapter;
 import org.logicobjects.adapter.methodresult.eachsolution.EachSolutionAdapter;
 import org.logicobjects.adapter.methodresult.solutioncomposition.OneSolutionAdapter;
 import org.logicobjects.adapter.methodresult.solutioncomposition.SolutionCompositionAdapter;
@@ -35,30 +36,41 @@ public class LogicMethod {
 	}
 	
 	public String getLogicName() {
-		LMethod lMethodAnnotation = (LMethod) method.getAnnotation(LMethod.class);
-		String name = lMethodAnnotation.name();
+		LMethod aLMethod = (LMethod) method.getAnnotation(LMethod.class);
+		String name = aLMethod.name(); //method indicated at the annotation
 		if(!name.isEmpty())
 			return name;
 		else
-			return LogicUtil.javaNameToProlog(method.getName());
+			return LogicUtil.javaNameToProlog(method.getName()); //if no name is provided in the annotation, answer the method name after converting it to prolog naming conventions
 	}
 	
+	/**
+	 * 
+	 * @return the method parameters as specified in the annotation
+	 */
 	public String[] getParameters() {
-		LMethod lMethodAnnotation = (LMethod) method.getAnnotation(LMethod.class);
-		return lMethodAnnotation.parameters();
+		LMethod aLMethod = (LMethod) method.getAnnotation(LMethod.class);
+		return aLMethod.parameters();
 	}
 	
 	public MethodResultAdapter getMethodAdapter() {
-		LWrapper lWrapperAnnotation = (LWrapper) method.getAnnotation(LWrapper.class);
+		LWrapper aLWrapper = (LWrapper) method.getAnnotation(LWrapper.class);
 		MethodResultAdapter resultAdapter = null;
-		LSolution lSolutionAnnotation = (LSolution) method.getAnnotation(LSolution.class);
-		if(lSolutionAnnotation == null) {
-			if(lWrapperAnnotation == null) {
+		LSolution aLSolution = (LSolution) method.getAnnotation(LSolution.class);
+		/**
+		 * if this is true, the user has not specified the solution of the method
+		 * By default, the solution will be a Map of variables names to bindings
+		 * Before choosing this default solution, we take a look to the return types of the method to see if another behaviour is probably the desireble one
+		 */
+		if(aLSolution == null) {
+			if(aLWrapper == null) {
 				Class returnType = method.getReturnType();
-				if(returnType.equals(Void.class) || returnType.equals(Boolean.class) || returnType.equals(boolean.class))
-					return new HasSolutionAdapter(method);
 				if(returnType.equals(Query.class))
 					return new MethodResultAdapter.DefaultMethodResultAdapter(method);
+				if(returnType.equals(Void.class) || returnType.equals(Boolean.class) || returnType.equals(boolean.class))
+					return new HasSolutionAdapter(method);
+				if(Number.class.isAssignableFrom(returnType))
+					return new NumberOfSolutionsAdapter(method);
 			}
 		}
 		return getCompositionAdapter();
@@ -66,13 +78,13 @@ public class LogicMethod {
 	
 	public SolutionCompositionAdapter getCompositionAdapter() {
 		SolutionCompositionAdapter compositionAdapter = null;
-		LWrapper lWrapperAnnotation = (LWrapper) method.getAnnotation(LWrapper.class);
+		LWrapper aLWrapper = (LWrapper) method.getAnnotation(LWrapper.class);
 		try {
-			if(lWrapperAnnotation == null) {
+			if(aLWrapper == null) {
 				compositionAdapter = new OneSolutionAdapter(method);
 			} else {
-				compositionAdapter = (WrapperAdapter)lWrapperAnnotation.adapter().newInstance();
-				compositionAdapter.setParameters(lWrapperAnnotation.value());
+				compositionAdapter = (WrapperAdapter)aLWrapper.adapter().newInstance();
+				compositionAdapter.setParameters(aLWrapper.value());
 				compositionAdapter.setMethod(method);
 			}
 			compositionAdapter.setEachSolutionAdapter(getEachSolutionAdapter());
@@ -85,12 +97,12 @@ public class LogicMethod {
 	public EachSolutionAdapter getEachSolutionAdapter() {
 		EachSolutionAdapter eachSolutionAdapter = null;
 		try {
-			LSolution lSolutionAnnotation = (LSolution) method.getAnnotation(LSolution.class);
-			if(lSolutionAnnotation == null) {
+			LSolution aLSolution = (LSolution) method.getAnnotation(LSolution.class);
+			if(aLSolution == null) {
 				eachSolutionAdapter = EachSolutionAdapter.DefaultEachSolutionAdapter.class.newInstance(); //will answer a map of logic variable bindings
 			} else {
-				eachSolutionAdapter = (EachSolutionAdapter)lSolutionAnnotation.adapter().newInstance();
-				eachSolutionAdapter.setParameters(lSolutionAnnotation.value());
+				eachSolutionAdapter = (EachSolutionAdapter)aLSolution.adapter().newInstance();
+				eachSolutionAdapter.setParameters(aLSolution.value());
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -99,24 +111,24 @@ public class LogicMethod {
 	}
 	
 	public ObjectToTermAdapter[] getParameterAdapters() {
-		Annotation[][] parameterAnnotationsTable = method.getParameterAnnotations();
+		Annotation[][] parameterAnnotationsTable = method.getParameterAnnotations(); //a bidimensional array with all the annotations in the method parameters
 		ObjectToTermAdapter[] parametersAdapters = new ObjectToTermAdapter[parameterAnnotationsTable.length];
 		for(int i = 0; i < parameterAnnotationsTable.length; i++) {
 			Annotation[] parameterAnnotations = parameterAnnotationsTable[i];
 			for(Annotation parameterAnnotation : parameterAnnotations) {
-				LParameter lParameterAnnotation =  null;
+				LParameter aLParameter =  null;
 				try {
-					lParameterAnnotation = LParameter.class.cast(parameterAnnotation);
+					aLParameter = LParameter.class.cast(parameterAnnotation);
 				} catch (ClassCastException e) {} //annotations others than LParameter will be ignored here
-				if(lParameterAnnotation != null && !lParameterAnnotation.adapter().equals(NO_ADAPTER.class)) {
-					Class parameterAdapterClass = lParameterAnnotation.adapter();
+				if(aLParameter != null && !aLParameter.adapter().equals(NO_ADAPTER.class)) {
+					Class parameterAdapterClass = aLParameter.adapter();
 					ObjectToTermAdapter parameterAdapter = null;
 					try {
 						parameterAdapter = (ObjectToTermAdapter)parameterAdapterClass.newInstance(); //the parameters should be transformed using an instance of the parametersAdapterClass
 					} catch(Exception e) {
 						throw new RuntimeException(e);
 					}
-					parameterAdapter.setParameters(lParameterAnnotation.value());
+					parameterAdapter.setParameters(aLParameter.value());
 					parametersAdapters[i] = parameterAdapter;
 				}
 			}
@@ -129,10 +141,10 @@ public class LogicMethod {
 	}
 	
 	public String getRawQuery() {
-		LQuery rawQueryAnnotation = (LQuery) method.getAnnotation(LQuery.class);
-		if(rawQueryAnnotation == null)
+		LQuery aLQuery = (LQuery) method.getAnnotation(LQuery.class);
+		if(aLQuery == null)
 			throw new RuntimeException("No raw query has been defined for method "+method.getName());
-		return rawQueryAnnotation.value();
+		return aLQuery.value();
 	}
 	
 }
