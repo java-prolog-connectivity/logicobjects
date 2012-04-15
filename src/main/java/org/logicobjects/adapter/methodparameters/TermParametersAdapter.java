@@ -24,6 +24,8 @@ public class TermParametersAdapter extends ParametersAdapter {
 
 	private Object targetObject;
 	
+	private static final String THIS_OBJECT = "this";
+	
 	private static final String INSTANCE_VAR_PREFIX = "@";
 	private static final String INSTANCE_VAR_PREFIX_REX = "\\@";
 	
@@ -36,6 +38,7 @@ public class TermParametersAdapter extends ParametersAdapter {
 	private static final String PARAM_SEPARATOR = "~~~";
 	
 	public static final String JAVA_NAME = "([a-zA-Z_\\$][\\w\\$]*)";
+	
 	/*
 	private static final String paramSymbolAsRex(String symbol) {
 		String sufix = symbol.substring(1);
@@ -152,7 +155,13 @@ public class TermParametersAdapter extends ParametersAdapter {
 		for(String setSymbol : setSymbols) {
 			if(setSymbol.substring(0, 1).equals(INSTANCE_VAR_PREFIX)) {
 				String instanceVarName = setSymbol.substring(1);
-				Term instanceVarAsTerm = LogicObjectAdapter.fieldAsTerm(targetObject, instanceVarName);
+				Term instanceVarAsTerm;
+				if(instanceVarName.equals(THIS_OBJECT)) {
+					instanceVarAsTerm = new ObjectToTermAdapter().adapt(targetObject);
+				} else {
+					instanceVarAsTerm = LogicObjectAdapter.fieldAsTerm(targetObject, instanceVarName); //TODO this method should be in ObjectToTermAdapter
+				}
+				
 				dictionary.put(setSymbol, instanceVarAsTerm.toString());
 			}
 		}

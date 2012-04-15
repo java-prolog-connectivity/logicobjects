@@ -38,7 +38,7 @@ public class LogicMethodInvoker {
 			query = lo.invokeMethod(logicMethodName, params);
 		} else {
 			String queryString = logicMethod.getRawQuery();
-			queryString = new TermParametersAdapter(null).replaceParameters(queryString, params);
+			queryString = new TermParametersAdapter(targetObject).replaceParameters(queryString, params);
 			query = new Query (engine.textToTerm(queryString) );
 		}
 		

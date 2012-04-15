@@ -201,26 +201,25 @@ public class LogicClass {
 	 * This method returns the first class or interface is the hierarchy annotated with the LObject annotation 
 	 */
 	public static Class findLogicClass(Class candidateClass) {
-		if(candidateClass.equals(Object.class))
+		if(candidateClass.equals(Object.class)) //end of the hierarchy
 			return null;
 		if(candidateClass.getAnnotation(LObject.class) != null)
 			return candidateClass;
 		else {
 			Class logicClass = null;
+			for(Class interfaze : candidateClass.getInterfaces()) { //answers only the interfaces declared by the class, does not include the ones in its superclass
+				logicClass = findLogicClass(interfaze);
+				if(logicClass != null)
+					return logicClass;
+			}
 			if(!candidateClass.isInterface()) {
 				logicClass = findLogicClass(candidateClass.getSuperclass());
 			} 
-			if(logicClass == null){
-				for(Class interfaze : candidateClass.getInterfaces()) {
-					logicClass = findLogicClass(interfaze);
-					if(logicClass != null)
-						break;
-				}
-			}
 			return logicClass;
 		}
 			
 	}
+	 
 	
 }
 

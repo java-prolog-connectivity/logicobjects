@@ -26,7 +26,7 @@ public class AnyCollectionToTermAdapter extends ObjectToTermAdapter<Object> {
 		} else if(object instanceof Enumeration) {
 			return new EnumerationToTermAdapter().adapt((Enumeration) object, adaptingContext);
 		} 
-		throw new ObjectToTermException(object); 
+		throw new ObjectToTermException(object);
 	}
 
 }

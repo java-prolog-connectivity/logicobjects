@@ -34,7 +34,7 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 					throw e;
 			}
 		} else {
-			if(object instanceof String){
+			if(object.getClass().equals(String.class)){
 				String text = object.toString();
 				/*
 				//check if the string represents a variable (the first character a '?', after a capital letter and some printable characters later
@@ -68,17 +68,17 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 					return new LogicObjectAdapter().asLogicObject(object, logicClass.getLogicName(), logicClass.getParameters()).asTerm();
 				}
 					
-
 				throw new ObjectToTermException(object);  //if we arrive here something went wrong
 			} else if(object instanceof Term) {
 				return (Term)object;
 			} else if(object instanceof ITermObject) {
 				return ((ITermObject)object).asTerm();
-			} else if(object instanceof Entry) {
-				return new EntryToTermAdapter().adapt((Entry) object, adaptingContext);
 			} 
 		}
-
+		
+		if(object instanceof Entry) {
+			return new EntryToTermAdapter().adapt((Entry) object, adaptingContext);
+		} 
 		if(ImplementationMap.isCollectionObject(object)) 
 			return new AnyCollectionToTermAdapter().adapt(object, adaptingContext);
 		
