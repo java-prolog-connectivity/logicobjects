@@ -17,6 +17,6 @@ public class FieldAdaptingContext extends AccessibleObjectAdaptingContext {
 
 	@Override
 	public String infereLogicObjectName() {
-		return LogicUtil.javaClassNameToProlog(field.getDeclaringClass().getSimpleName());
+		return LogicUtil.javaClassNameToProlog(field.getType().getSimpleName());
 	}
 }

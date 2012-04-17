@@ -160,7 +160,16 @@ public class LogicUtil {
 		return s.substring(1, s.length()-1);
 	}
 	
-
+	public static String toString(Term term) {
+		if(term instanceof jpl.Integer)
+			return ""+term.longValue();
+		else if(term instanceof jpl.Float)
+			return ""+term.doubleValue();
+		else if(term instanceof jpl.Atom)
+			return term.name();
+		else
+			return term.toString();
+	}
 	
 	
 	

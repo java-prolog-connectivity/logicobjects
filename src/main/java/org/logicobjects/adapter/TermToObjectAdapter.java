@@ -17,9 +17,11 @@ import org.logicobjects.adapter.objectadapters.TermToArrayAdapter;
 import org.logicobjects.adapter.objectadapters.TermToCollectionAdapter;
 import org.logicobjects.adapter.objectadapters.TermToMapAdapter;
 import org.logicobjects.adapter.objectadapters.TermToMapAdapter.TermToEntryAdapter;
+import org.logicobjects.annotation.LObjectAdapter;
 import org.logicobjects.core.LogicClass;
 import org.logicobjects.core.LogicEngine;
 import org.logicobjects.core.LogicObjectFactory;
+import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.AbstractTypeWrapper;
 import org.reflectiveutils.AbstractTypeWrapper.ArrayTypeWrapper;
 import org.reflectiveutils.AbstractTypeWrapper.SingleTypeWrapper;
@@ -29,6 +31,17 @@ import org.reflectiveutils.GenericsUtil;
 import com.google.common.primitives.Primitives;
 
 public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
+	
+	public static TermToObjectAdapter create(LObjectAdapter objectAdapterAnnotation) {
+		try {
+			TermToObjectAdapter objectAdapter = (TermToObjectAdapter)objectAdapterAnnotation.adapter().newInstance();
+			objectAdapter.setParameters(objectAdapterAnnotation.args());
+			return objectAdapter;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	
 	private LogicEngine engine;
 	public TermToObjectAdapter() {
@@ -88,11 +101,11 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 						return (To) new TermToEntryAdapter().adapt((Compound)term, entryParameters[0], entryParameters[1], adaptingContext);
 					}
 					if(singleTypeWrapper.asClass().isPrimitive() || Primitives.isWrapperType(singleTypeWrapper.asClass())) {
-						if(term.isAtom()) {
+						if(term.isAtom() || term.isInteger() || term.isFloat() ) {
 							Class wrapper = singleTypeWrapper.asClass().isPrimitive()?Primitives.wrap(singleTypeWrapper.asClass()):singleTypeWrapper.asClass();
 							Method m = wrapper.getDeclaredMethod("valueOf", String.class);
 							//converting the name of the atom term to a native value
-							return (To) m.invoke(null, term.name()); //it is a static method, so no object needs to be provided
+							return (To) m.invoke(null, LogicUtil.toString(term)); //'m' is a static method, so no object needs to be provided
 						}
 					} else if(singleTypeWrapper.asClass().equals(String.class)) {
 						if(term.isAtom())

@@ -63,7 +63,7 @@ public class LogicObjectFactory {
 		return (T) new TermToObjectAdapter().adapt(term, c);
 	}
 	*/
-	
+
 	public <T> T create(Class<T> clazz) {
 		Class instantiatingClass = null;
 		if(clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
@@ -84,5 +84,5 @@ public class LogicObjectFactory {
 		
 	}
 	
-
 }
+

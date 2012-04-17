@@ -8,7 +8,7 @@ import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LObjectAdapter;
 import org.logicobjects.annotation.LTermAdapter;
 
-public abstract class AccessibleObjectAdaptingContext extends AdaptingContext {
+public abstract class AccessibleObjectAdaptingContext extends AnnotatedAdaptingContext {
 
 	//private AccessibleObject accessibleObject;
 	/*
@@ -35,8 +35,11 @@ public abstract class AccessibleObjectAdaptingContext extends AdaptingContext {
 	}
 
 	@Override
-	public LObject getLogicObjectAnnotation() {
-		return (LObject) getContext().getAnnotation(LObject.class);
+	public LMethodInvokerDescription getMethodInvokerDescription() {
+		LObject aLObject = (LObject) getContext().getAnnotation(LObject.class);
+		if(aLObject != null)
+			return LMethodInvokerDescription.create(aLObject);
+		return null;
 	}
 
 }

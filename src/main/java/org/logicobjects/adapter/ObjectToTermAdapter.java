@@ -53,9 +53,9 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 			} else if(Primitives.isWrapperType(object.getClass())) {  //any other primitive
 				return new Atom(object.toString());
 			}
-			Class guidingClass = findGuidingClass(object.getClass());
+			Class guidingClass = LogicClass.findGuidingClass(object.getClass());
 			if(guidingClass != null) {
-				if(isTermObjectClass(guidingClass))
+				if(LogicClass.isTermObjectClass(guidingClass))
 					return ((ITermObject)object).asTerm();
 				
 				LTermAdapter termAdapterAnnotation = (LTermAdapter)guidingClass.getAnnotation(LTermAdapter.class);
@@ -103,24 +103,6 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 	}
 	
 	
-	/*
-	 * The guiding class is the first class in the hierarchy that either implements TermObject, has a LogicObject annotation, or a LogicTerm annotation
-	 */
-	public static Class findGuidingClass(Class candidateClass) {
-		if(candidateClass.equals(Object.class))
-			return null;
-		if(isTermObjectClass(candidateClass) || candidateClass.getAnnotation(LObject.class) != null || candidateClass.getAnnotation(LTermAdapter.class) != null)
-			return candidateClass;
-		else
-			return findGuidingClass(candidateClass.getSuperclass());
-	}
-	
-	private static boolean isTermObjectClass(Class aClass) {
-		for(Class anInterface : aClass.getInterfaces()) {
-			if(anInterface.equals(ITermObject.class))
-				return true;
-		}
-		return false;
-	}
+
 	
 }

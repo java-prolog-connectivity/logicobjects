@@ -6,6 +6,7 @@ import jpl.Query;
 
 import org.logicobjects.adapter.LogicObjectAdapter;
 import org.logicobjects.adapter.ObjectToTermAdapter;
+import org.logicobjects.adapter.adaptingcontext.MethodInvokerContext;
 import org.logicobjects.adapter.methodparameters.TermParametersAdapter;
 import org.logicobjects.adapter.methodresult.MethodResultAdapter;
 import org.logicobjects.core.LogicEngine;
@@ -19,7 +20,7 @@ public class LogicMethodInvoker {
 
 		LogicEngine engine = LogicEngine.getDefault();
 		Query query = null;
-		
+
 		ObjectToTermAdapter[] parameterAdapters = logicMethod.getParameterAdapters();
 		for(int i = 0; i <  parameterAdapters.length; i++) {
 			ObjectToTermAdapter parameterAdapter = parameterAdapters[i];
@@ -29,7 +30,7 @@ public class LogicMethodInvoker {
 		}
 		if(!logicMethod.isRawQuery()) {
 			String logicMethodName = logicMethod.getLogicName();
-			LogicObject lo = new LogicObjectAdapter().adapt(targetObject);
+			LogicObject lo = new LogicObjectAdapter().adapt(targetObject, new MethodInvokerContext(targetObject.getClass()));
 			if(logicMethod.getParameters().length > 0) {
 				TermParametersAdapter paramsAdapter = new TermParametersAdapter(targetObject);
 				paramsAdapter.setParameters(logicMethod.getParameters());

@@ -11,9 +11,13 @@ import java.util.Set;
 import jpl.Term;
 
 import org.logicobjects.adapter.LogicResourcePathAdapter;
-import org.logicobjects.adapter.ObjectToTermAdapter;
+import org.logicobjects.adapter.adaptingcontext.LMethodInvokerDescription;
 import org.logicobjects.annotation.LObject;
+import org.logicobjects.annotation.LDelegationObject;
+import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.util.LogicUtil;
+import org.reflectiveutils.visitor.FindFirstTypeVisitor;
+import org.reflectiveutils.visitor.TypeVisitor.InterfaceMode;
 
 public class LogicClass {
 	
@@ -62,18 +66,20 @@ public class LogicClass {
 	 * Return a boolean indicating if all the modules and objects were loaded correctly
 	 */
 	public static boolean loadDependencies(Class clazz) {
-		clazz = findLogicClass(clazz);
+		clazz = findDependencyInfoClass(clazz);
 		if(clazz == null)
 			return false;
 		
-		LObject aLObject = getLogicObjectAnnotation(clazz);
+		LMethodInvokerDescription lMethodInvokerDescription = LMethodInvokerDescription.create(clazz);  //look at the annotations of the class and return an object having information about how to load dependencies
 		
-		if(!aLObject.automaticImport())
+		//LObject aLObject = getLogicObjectAnnotation(clazz);
+		
+		if(!lMethodInvokerDescription.automaticImport())
 			return false;
 		
 		boolean result = true;
 		
-		String[] annotationModules = aLObject.modules();
+		String[] annotationModules = lMethodInvokerDescription.modules();
 		String[] bundleModules = getBundleModules(clazz);
 		if(bundleModules == null) {
 			bundleModules = new String[] {};
@@ -83,13 +89,12 @@ public class LogicClass {
 		allModules.addAll(Arrays.asList(bundleModules));
 		allModules.addAll(Arrays.asList(annotationModules));
 		
-		
 		List<Term> moduleTerms = new ArrayList<Term>();
 		new LogicResourcePathAdapter().adapt(allModules, moduleTerms);
 		
 		result = LogicEngine.getDefault().ensureLoaded(moduleTerms); //loading prolog modules
 		
-		String[] annotationImports = aLObject.imports();
+		String[] annotationImports = lMethodInvokerDescription.imports();
 		String[] bundleImports = getBundleImports(clazz);
 		if(bundleImports == null) {
 			bundleImports = new String[] {};
@@ -182,25 +187,38 @@ public class LogicClass {
 			return null;
 	}
 	
+	
+	
 	/*
-	 * Returns the first class in the hierarchy annotated with LogicObject
+	 * The guiding class is the first class in the hierarchy that either implements TermObject, has a LogicObject annotation, or a LogicTerm annotation
 	 */
-	/*
-	public static Class getAnnotatedClass(Class clazz) {
-		if(clazz.equals(Object.class))
+	public static Class findGuidingClass(Class candidateClass) {
+		if(candidateClass.equals(Object.class))
 			return null;
-		else if(clazz.getAnnotation(LObject.class) != null)
-			return clazz;
+		if(isGuidingClass(candidateClass))
+			return candidateClass;
 		else
-			return getAnnotatedClass(clazz.getSuperclass());
+			return findGuidingClass(candidateClass.getSuperclass());
 	}
-	*/
 	
+	public static boolean isGuidingClass(Class candidateClass) {
+		return isTermObjectClass(candidateClass) || candidateClass.getAnnotation(LObject.class) != null || candidateClass.getAnnotation(LTermAdapter.class) != null;
+	}
 	
+	public static boolean isTermObjectClass(Class aClass) {
+		for(Class anInterface : aClass.getInterfaces()) {
+			if(ITermObject.class.isAssignableFrom(anInterface))
+				return true;
+		}
+		return false;
+	}
+
+
 	/*
 	 * This method returns the first class or interface is the hierarchy annotated with the LObject annotation 
 	 */
 	public static Class findLogicClass(Class candidateClass) {
+		/*
 		if(candidateClass.equals(Object.class)) //end of the hierarchy
 			return null;
 		if(candidateClass.getAnnotation(LObject.class) != null)
@@ -217,9 +235,61 @@ public class LogicClass {
 			} 
 			return logicClass;
 		}
-			
+		*/
+		
+		FindFirstTypeVisitor finderVisitor = new FindFirstTypeVisitor(InterfaceMode.EXCLUDE_INTERFACES) {
+			@Override
+			public boolean match(Class clazz) {
+				return clazz.getAnnotation(LObject.class) != null;
+			}
+		};
+		finderVisitor.visit(candidateClass);
+		return finderVisitor.getFoundType();
+		
 	}
-	 
+	
+	/**
+	 * Answers the first class/interface in the class hierarchy specifying the logic object method invoker
+	 * @param candidateClass
+	 * @return
+	 */
+	public static Class findDelegationObjectClass(Class candidateClass) {
+		FindFirstTypeVisitor finderVisitor = new FindFirstTypeVisitor(InterfaceMode.EXCLUDE_INTERFACES) {
+			@Override
+			public boolean doVisit(Class clazz) {
+				boolean shouldContinue = super.doVisit(clazz);
+				if(shouldContinue)
+					shouldContinue = !isGuidingClass(clazz);
+				return shouldContinue;
+			}
+			
+			@Override
+			public boolean match(Class clazz) {
+				return clazz.getAnnotation(LDelegationObject.class) != null;
+			}
+		};
+		finderVisitor.visit(candidateClass);
+		return finderVisitor.getFoundType();
+	}
+	
+	public static Class findDependencyInfoClass(Class candidateClass) {
+		FindFirstTypeVisitor finderVisitor = new FindFirstTypeVisitor(InterfaceMode.EXCLUDE_INTERFACES) {
+			@Override
+			public boolean doVisit(Class clazz) {
+				boolean shouldContinue = super.doVisit(clazz);
+				if(shouldContinue)
+					shouldContinue = !isTermObjectClass(clazz);
+				return shouldContinue;
+			}
+			
+			@Override
+			public boolean match(Class clazz) {
+				return clazz.getAnnotation(LDelegationObject.class) != null || clazz.getAnnotation(LObject.class) != null;
+			}
+		};
+		finderVisitor.visit(candidateClass);
+		return finderVisitor.getFoundType();
+	}
 	
 }
 

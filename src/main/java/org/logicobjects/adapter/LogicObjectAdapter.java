@@ -7,6 +7,7 @@ import java.util.List;
 
 import jpl.Term;
 
+import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
 import org.logicobjects.adapter.adaptingcontext.FieldAdaptingContext;
 import org.logicobjects.core.LogicObject;
 import org.reflectiveutils.ReflectionUtil;
@@ -17,17 +18,23 @@ public class LogicObjectAdapter extends Adapter<Object, LogicObject> {
 
 	@Override
 	public LogicObject adapt(Object source) {
-		return asLogicObject(source);
+		return adapt(source, null);
 	}
 	
-
-	
-	public LogicObject asLogicObject(Object object) {
+	public LogicObject adapt(Object source, AdaptingContext adaptingContext) {
+		return asLogicObject(source, adaptingContext);
+	}
+	/*
+	public Term adapt(Object source, AdaptingContext adaptingContext) {
+		
+	}
+	*/
+	public LogicObject asLogicObject(Object object, AdaptingContext adaptingContext) {
 		if(object instanceof LogicObject) {
 			return (LogicObject)object;
 		}	
 		else {
-			return new LogicObject(new ObjectToTermAdapter().adapt(object));
+			return new LogicObject(new ObjectToTermAdapter().adapt(object, adaptingContext));
 		}
 	}
 	

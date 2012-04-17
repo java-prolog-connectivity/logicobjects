@@ -12,7 +12,7 @@ import org.logicobjects.core.LogicObjectFactory;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.AbstractTypeWrapper;
 
-public class ClassAdaptingContext extends AdaptingContext {
+public class ClassAdaptingContext extends AnnotatedAdaptingContext {
 
 	private Class clazz;
 
@@ -35,31 +35,34 @@ public class ClassAdaptingContext extends AdaptingContext {
 	}
 
 	@Override
-	public LObject getLogicObjectAnnotation() {
-		return (LObject) getContext().getAnnotation(LObject.class);
+	public String infereLogicObjectName() {
+		return LogicUtil.javaClassNameToProlog(clazz.getSimpleName());
+	}
+
+	@Override
+	public LMethodInvokerDescription getMethodInvokerDescription() {
+		LObject aLObject = (LObject) getContext().getAnnotation(LObject.class);
+		if(aLObject != null)
+			return LMethodInvokerDescription.create(aLObject);
+		return null;
 	}
 	
-	public Object createLObjectFromAnnotation(Term term, Type type, LObject lObjectAnnotation) {
+	@Override
+	protected Object adaptToObjectFromDescription(Term term, Type type, LMethodInvokerDescription lMethodInvokerDescription) {
 		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
 		try {
 			Object lObject = null;
 			if(typeWrapper.isAssignableFrom(getContext())) {
-				lObject = LogicObjectFactory.getDefault().create(getContext());
-			} else {
-				lObject = typeWrapper.asClass().newInstance();  //type wrapper should be below in the hierarchy of lObjectClass
-			}
-			LogicObject.setParams(lObject, term, lObjectAnnotation.params());
-			
+                lObject = LogicObjectFactory.getDefault().create(getContext());
+            } else {
+            	lObject = LogicObjectFactory.getDefault().create(typeWrapper.asClass());
+            }
+			LogicObject.setParams(lObject, term, lMethodInvokerDescription.params());
 			return lObject;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
-
-	@Override
-	public String infereLogicObjectName() {
-		return LogicUtil.javaClassNameToProlog(clazz.getSimpleName());
-	}
-
+	
 }
 
