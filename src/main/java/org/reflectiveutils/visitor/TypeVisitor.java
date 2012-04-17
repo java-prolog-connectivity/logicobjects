@@ -17,6 +17,8 @@ public class TypeVisitor {
 	 * Answers true if the visit was never interrupted
 	 */
 	public boolean visit(Class clazz) {
+		if(clazz == null) //remember that super of primitive classes are null
+			return true;
 		if(doVisit(clazz)) {
 			if(!clazz.equals(Object.class)) {//end of the hierarchy
 				if(interfaceMode !=null && interfaceMode.equals(InterfaceMode.EXCLUDE_INTERFACES)) {

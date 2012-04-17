@@ -16,6 +16,10 @@ public abstract class LList<T> extends ArrayList<T> {
 	
 	@LSolution("L")
 	@LMethod(parameters={"@this", "L"})
-	public abstract Integer length();
+	public abstract int length();
+	
+
+	@LMethod(parameters={"@this", "_"})
+	public abstract int member();
 	
 }
