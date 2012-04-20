@@ -2,7 +2,10 @@ package org.logicobjects.instrumentation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
@@ -10,15 +13,33 @@ import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.CtNewMethod;
 import javassist.CtPrimitiveType;
-import javassist.NotFoundException;
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.MethodInfo;
 
+import org.logicobjects.adapter.methodparameters.BadExpressionException;
+import org.logicobjects.adapter.methodparameters.TermParametersAdapter;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.util.JavassistUtil;
+import org.logicobjects.util.JavassistUtil.ObjectConverter;
 
 public class LogicObjectInstrumentation {
+	
+/*
+	private Map<String, String> generatedMethodsToExpressionMap() {
+		Map<String, String> generatedMethodsInfo = new HashMap<String, String>();
+		Method[] methods = methodsToOverride();
+		for(Method method: methods) {
+			LMethod aLMethod = method.getAnnotation(LMethod.class);
+			for(String param : aLMethod.parameters()) {
+				
+			}
+		}
+		return generatedMethodsInfo;
+	}
+
+*/
+	
 	private static final String TEST_DIRECTORY = "/test/";
 	
 	private Class targetClass;
@@ -29,8 +50,10 @@ public class LogicObjectInstrumentation {
 		this.classPool = classPool;
 	}
 	
+	public static final String GENERATED_CLASS_SUFFIX = "_$LogicInstrumented";
+	
 	public static String instrumentedClassName(Class aClass) {
-		return aClass.getName() +"_LogicInstrumented";
+		return aClass.getName() + GENERATED_CLASS_SUFFIX;
 	}
 
 	
@@ -93,7 +116,7 @@ public class LogicObjectInstrumentation {
 			createLogicMethods(newCtClass);
 			
 			JavassistUtil.makeNonAbstract(newCtClass); //Javassist makes a class abstract if an abstract method is added to the class. Then it has to be explicitly changed back to non-abstract
-			//JavassistUtil.createClassFile(TEST_DIRECTORY, newCtClass);  //just to show how the new class looks like
+			JavassistUtil.createClassFile(TEST_DIRECTORY, newCtClass);  //just to show how the new class looks like
 			
 			
 			//Class newClass = newCtClass.toClass();
@@ -108,17 +131,40 @@ public class LogicObjectInstrumentation {
 	
 	private void createLogicMethods(CtClass ctClass) {
 		for(Method m : methodsToOverride()) {
-			overrideMethod(ctClass, JavassistUtil.asCtMethod(m));
+			CtMethod ctMethod = JavassistUtil.asCtMethod(m);
+			createAuxiliaryMethods(ctClass, m);
+			overrideMethod(ctClass, ctMethod);
 		}
 	}
 	
-
+	
+	
+	private void createAuxiliaryMethods(CtClass ctClass, Method method) {
+		final String OBJECT_CONVERSION_METHOD_NAME = "toObject";
+		Map<String, String> auxiliaryMethodsMap = TermParametersAdapter.generatedMethodsMap(method);
+		for(Entry<String, String> methodEntry : auxiliaryMethodsMap.entrySet()) {
+			String methodName = methodEntry.getKey();
+			String methodExpression = methodEntry.getValue();
+			CtMethod ctMethod;
+			try {
+				String code = "public Object "+ methodName + "() { return " + ObjectConverter.class.getCanonicalName() + "." + OBJECT_CONVERSION_METHOD_NAME + "(" + methodExpression + "); }";
+				ctMethod = CtNewMethod.make(code, ctClass);
+				ctClass.addMethod(ctMethod);
+			} catch (CannotCompileException e) {
+				throw new BadExpressionException(methodName, methodExpression);
+			}
+		}
+	}
+	
+	
 	/*
 	 * @return an array of logic methods that should be overridden by the new generated class
 	 */
 	private Method[] methodsToOverride() {
 		return methodsToOverride(targetClass);
 	}
+	
+	
 	
 	private static Method[] methodsToOverride(Class c) {
 		List<Method> methods = new ArrayList<Method>();
@@ -168,7 +214,7 @@ public class LogicObjectInstrumentation {
 		}
 	}
 	
-	
+	/*
 	private void instrumentAsLogicObject(CtClass c) {
 		if(alreadyInstrumented(c))
 			return;
@@ -177,24 +223,6 @@ public class LogicObjectInstrumentation {
 		for(CtMethod m : logicMethods) {
 			instrumentAsLogicMethod(m);
 		}
-
-		/*
-		//System.out.println(logicMethods.length);
-		//System.out.println(getAbstractMethods(c).length);
-		if(logicMethods.length>0 && getAbstractMethods(c).length == 0) {
-			System.out.println("Making class non-abstract");
-			makeNonAbstract(c);  //this only works if the class has not been already loaded !
-		}
-		*/
-		/*
-		try {
-			c.toClass();
-			c.defrost();
-		} catch (CannotCompileException e1) {
-			throw new RuntimeException(e1);
-		}
-		*/
-		
 		CtClass superClass;
 		try {
 			superClass = c.getSuperclass();
@@ -234,6 +262,7 @@ public class LogicObjectInstrumentation {
 		}
 	}
 	
+	
 	//TODO this method is duplicated with methodsToOverride
 	private CtMethod[] getLogicMethods(CtClass c) {
 		List<CtMethod> logicMethods = new ArrayList<CtMethod>();
@@ -248,13 +277,16 @@ public class LogicObjectInstrumentation {
 		return logicMethods.toArray(new CtMethod[] {});
 	}
 	
+	private String newInstanceString(Class toInstantiate, Class cast) {
+		return "("+cast.getCanonicalName()+")"+newInstanceString(toInstantiate);
+	}
+	
+	*/
 	private String newInstanceString(Class toInstantiate) {
 		return toInstantiate.getCanonicalName()+".class.newInstance();";
 	}
 	
-	private String newInstanceString(Class toInstantiate, Class cast) {
-		return "("+cast.getCanonicalName()+")"+newInstanceString(toInstantiate);
-	}
+
 	
 	public static String asNewClassArrayString(CtClass[] classes) {
 		if(classes.length == 0) {   //for some mysterious reason Javassist does not allow to create empty arrays like new Class[] {}

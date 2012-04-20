@@ -60,7 +60,8 @@ public class SimpleLContext extends AbstractLContext {
 			try {
 				Class callerClass = Class.forName(stackTraceElement.getClassName());
 				URL callerURL = ClasspathHelper.forClass(callerClass, null);
-				if(!callerURL.equals(logicObjectsURL))
+				//for generated classes the callerURL will be null.
+				if(callerURL != null && !callerURL.equals(logicObjectsURL))
 					return callerURL;
 			} catch (ClassNotFoundException e) {
 				throw new RuntimeException(e);

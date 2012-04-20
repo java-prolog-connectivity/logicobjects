@@ -90,7 +90,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 				} //else
 					//System.out.println("************* Logic class NOT found !!!");
 				//System.out.println(typeWrapper.getClass());
-				if( typeWrapper instanceof SingleTypeWrapper ) { //the type is not an array and not an erased type
+				if( typeWrapper instanceof SingleTypeWrapper ) { //the type is not an array and not an erased type (but it can be a collection)
 					SingleTypeWrapper singleTypeWrapper = SingleTypeWrapper.class.cast(typeWrapper);
 					logicObjectClass = LogicClass.findLogicClass(singleTypeWrapper.asClass());  //find out if the expected type is a logic object
 					if( logicObjectClass != null ) 

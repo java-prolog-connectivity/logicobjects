@@ -32,14 +32,14 @@ public class LogicMethodInvoker {
 			String logicMethodName = logicMethod.getLogicName();
 			LogicObject lo = new LogicObjectAdapter().adapt(targetObject, new MethodInvokerContext(targetObject.getClass()));
 			if(logicMethod.getParameters().length > 0) {
-				TermParametersAdapter paramsAdapter = new TermParametersAdapter(targetObject);
+				TermParametersAdapter paramsAdapter = new TermParametersAdapter(targetObject, method);
 				paramsAdapter.setParameters(logicMethod.getParameters());
 				params = paramsAdapter.adapt(params);
 			}
 			query = lo.invokeMethod(logicMethodName, params);
 		} else {
 			String queryString = logicMethod.getRawQuery();
-			queryString = new TermParametersAdapter(targetObject).replaceParameters(queryString, params);
+			queryString = new TermParametersAdapter(targetObject, method).replaceSymbolsAndExpressions(queryString, params);
 			query = new Query (engine.textToTerm(queryString) );
 		}
 		

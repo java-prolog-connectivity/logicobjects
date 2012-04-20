@@ -9,7 +9,6 @@ import java.lang.reflect.Modifier;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
-import javassist.Loader;
 import javassist.LoaderClassPath;
 import javassist.NotFoundException;
 import javassist.bytecode.ClassFile;
@@ -93,6 +92,50 @@ public class JavassistUtil {
 
 	public static boolean isAbstract(CtMethod m) {
 		return Modifier.isAbstract(m.getModifiers());
+	}
+	
+	/**
+	 * Utility class to convert primitive types to objects
+	 * Since javassist works with the java 1.4 specification, this is useful in certain method generation routines, where the generated method returns an object from a given expression
+	 *
+	 */
+	public static class ObjectConverter {
+		
+		public static Object toObject(Object o) {
+			return o;
+		}
+		
+		public static Object toObject(boolean o) {
+			return Boolean.valueOf(o);
+		}
+		
+		public static Object toObject(byte o) {
+			return Byte.valueOf(o);
+		}
+		
+		public static Object toObject(char o) {
+			return Character.valueOf(o);
+		}
+		
+		public static Object toObject(short o) {
+			return Short.valueOf(o);
+		}
+		
+		public static Object toObject(int o) {
+			return Integer.valueOf(o);
+		}
+		
+		public static Object toObject(long o) {
+			return Long.valueOf(o);
+		}
+		
+		public static Object toObject(float o) {
+			return Float.valueOf(o);
+		}
+		
+		public static Object toObject(Double o) {
+			return Double.valueOf(o);
+		}
 	}
 	
 }

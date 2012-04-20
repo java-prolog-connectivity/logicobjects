@@ -78,7 +78,7 @@ public class GlobalLContext extends AbstractLContext {
 	}
 	
 	public Class findLogicClass(Term term) {
-		if( term instanceof Variable || term instanceof jpl.Integer || term instanceof jpl.Float )
+		if( term instanceof Variable || term instanceof jpl.Integer || term instanceof jpl.Float || term.name().equals(".") )
 			return null;
 		return findLogicClass(term.name(), term.args().length);
 	}

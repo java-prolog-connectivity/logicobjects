@@ -211,9 +211,11 @@ public abstract class LogicEngine {
 	*/
 	
 	/*
-	 * This method returns the text representation of a Term according to how Prolog will output the term in a console
-	 * Also, variable names are preserved
-	 * Example: the String representation of the term ','(A,B) is "A, B"
+	 * TODO
+	 * change this method so it will return the text representation of a Term according to how Prolog will output the term in a console
+	 * Also, variable names should be preserved
+	 * Example: the String representation of the term ','(A,B) should be "A, B"
+	 * The current implementation does not preserve variable names
 	 */
 	public String termToText(Term term) {
 		String varAtomName = VARIABLE_PREFIX+"Atom";
@@ -323,7 +325,8 @@ public abstract class LogicEngine {
 	
 	public boolean isList(Term term) {
 		if (term instanceof Compound) {
-			return ((Compound) term).name().equals(".");
+			String termName = ((Compound)term).name();
+			return (termName.equals(".") || termName.equals("[]"));
 		}
 		return false;
 	}

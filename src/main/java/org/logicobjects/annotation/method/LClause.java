@@ -5,14 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
+//TODO
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface LMethod {
-	
-	String name() default "";
-	String[] parameters() default {};
-	//boolean userMethod() default false;
+public @interface LClause {
 
-	
 }
