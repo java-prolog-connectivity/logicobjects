@@ -3,15 +3,18 @@ package org.logicobjects.core;
 
 import java.lang.reflect.Modifier;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
 
 import javassist.ClassPool;
 
+import org.logicobjects.context.AbstractLContext;
 import org.logicobjects.context.GlobalLContext;
 import org.logicobjects.instrumentation.LogicObjectInstrumentation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LogicObjectFactory {
+	
+	private static Logger logger = LoggerFactory.getLogger(LogicObjectFactory.class);
 	
 	private static LogicObjectFactory factory;
 	
@@ -22,7 +25,7 @@ public class LogicObjectFactory {
 	}
 
 	
-	private GlobalLContext context;
+	private AbstractLContext context;
 	private ClassPool classPool;
 	
 	/**
@@ -30,9 +33,7 @@ public class LogicObjectFactory {
 	 */
 	private LogicObjectFactory() {
 	}
-	
-	
-	
+
 	public ClassPool getClassPool() {
 		if(classPool == null)
 			classPool = ClassPool.getDefault();
@@ -43,19 +44,23 @@ public class LogicObjectFactory {
 		this.classPool = classPool;
 	}
 
-	public GlobalLContext getContext() {
+	public AbstractLContext getContext() {
 		if(context == null) {
 			context = new GlobalLContext();
 		}
 		return context;
 	}
 
+	public void setContext(AbstractLContext context) {
+		this.context = context;
+	}
+	
 	public void addSearchFilter(String packageName) {
 		getContext().addSearchFilter(packageName);
 	}
 
 	public void addSearchUrl(URL url) {
-		getContext().addSearchUrl(url);
+		getContext().addSearchUrls(url);
 	}
 
 	/*
@@ -69,9 +74,19 @@ public class LogicObjectFactory {
 		if(clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
 			LogicObjectInstrumentation instrumentation = new LogicObjectInstrumentation(clazz, getClassPool());
 			//instrumentation.run(); //instrument class and its ancestors
-			if(!instrumentation.isExtendingClassLoaded())
+			boolean extendingClassLoaded = instrumentation.isExtendingClassLoaded();
+			if(!extendingClassLoaded) { //the extending class has not been generated yet
+				long startTime = System.nanoTime();
 				LogicClass.loadDependencies(clazz); //load the dependencies in the Prolog engine
-			instantiatingClass = instrumentation.getExtendingClass(); //create an extending class
+				long endTimeDependencies = System.nanoTime();
+				instantiatingClass = instrumentation.getExtendingClass(); //answers the extending class. Generates it if needed.
+				long endTimeInstrumentation = System.nanoTime();
+				long timeLoadingDependencies = (endTimeDependencies - startTime)/1000000;
+				long timeInstrumentingClass =  (endTimeInstrumentation - endTimeDependencies)/1000000;
+				logger.info("Extending class" + clazz.getSimpleName() + " with generated class " + instantiatingClass.getSimpleName());
+				logger.info("Loading dependencies time: " + timeLoadingDependencies + " ms. Instrumentation time: " + timeInstrumentingClass + " ms.");
+			} else //the extending class has already been generated
+				instantiatingClass = instrumentation.getExtendingClass(); 
 		} else
 			instantiatingClass = clazz;
 		

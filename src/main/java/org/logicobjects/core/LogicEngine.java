@@ -69,13 +69,24 @@ public abstract class LogicEngine {
 	public synchronized static void initialize(LogicObjectsPreferences newPreferences) {
 		preferences = newPreferences;
 		configure(preferences);
-		//if JPL.init() is not explicitly called, it will be invoked by JPL at the first operation needing the engine
-		boolean alreadyStarted = !JPL.init(); //answers true if the logic engine was not started, false otherwise
-		/*  
-		if(alreadyStarted) {
-			getDefault().halt(); //There is a serious bug with this method (see its comments). So it is not possible to restart the logic engine :(
-			JPL.init();
-			getDefault().resetPath();
+		//the following commented block of code attempts to change the existing Prolog engine configuration according to new preferences
+		//this has not been possible to implement until now. Preferences are only applied if the logic engine has not yet been started.
+		//Left the code commented out instead of deleting it hoping to find something that works in the future.
+		/* 
+		try {
+			//if JPL.init() is not explicitly called, it will be invoked by JPL at the first operation needing the engine
+			 //in theory this method answers true if the logic engine was not started before the call, and false otherwise.
+			 //in practice, if the logic engine has already been started this will throw an unrecoverable exception
+			 //something similar to this problem described here: http://stackoverflow.com/questions/9496617/java-error-native-library-already-loaded-in-another-classloader
+			 boolean alreadyStarted = !JPL.init(); 
+			if(alreadyStarted) {
+				getDefault().halt(); //There is a serious bug with this method (see its comments). So it is not possible to restart the logic engine :(
+				JPL.init();
+				getDefault().resetPath();
+			}
+			
+		} catch(Exception ex) {
+			throw new RuntimeException(ex); //the exception originated when attempting to initialize the logic engine when it was already started, cannot be catched
 		}
 		*/
 	}

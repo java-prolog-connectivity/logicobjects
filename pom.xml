@@ -25,17 +25,19 @@
  		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
-			<version>3.15.0-GA</version>
+			<version>3.16.1-GA</version>
+			<!-- <version>3.15.0-GA</version> -->
 		</dependency>
-
-
 
 
 
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
+			<version>12.0-rc2</version>
+			<!-- 
 			<version>11.0.1</version>
+			 -->
 		</dependency>
 
 		<dependency>
@@ -66,6 +68,7 @@
 					<artifactId>guava</artifactId>
 				</exclusion>
 			</exclusions>
+			
 		</dependency>
 		
 <!--

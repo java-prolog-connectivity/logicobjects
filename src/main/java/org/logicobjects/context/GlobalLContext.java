@@ -1,6 +1,7 @@
 package org.logicobjects.context;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,7 +9,6 @@ import jpl.Term;
 import jpl.Variable;
 
 import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
-import org.logicobjects.annotation.LObject;
 import org.logicobjects.core.LogicClass;
 import org.reflections.Reflections;
 import org.reflections.util.ClasspathHelper;
@@ -20,10 +20,7 @@ public class GlobalLContext extends AbstractLContext {
 	SimpleLContext userContext;
 	
 	public GlobalLContext() {
-		ConfigurationBuilder config = new ConfigurationBuilder();
-		config.addUrls(ClasspathHelper.forClass(this.getClass()));
-		Reflections system_reflections = new Reflections(config);
-		systemContext = new SimpleLContext(system_reflections);
+		systemContext = new SystemLContext();
 		userContext = new SimpleLContext();
 	}
 
@@ -43,8 +40,8 @@ public class GlobalLContext extends AbstractLContext {
 		userContext.addSearchUrlFromClass(clazz);
 	}
 	
-	public void addSearchUrl(URL url) {
-		userContext.addSearchUrls(url);
+	public void addSearchUrls(URL ...urls) {
+		userContext.addSearchUrls(urls);
 	}
 	
 	public Set<Class<?>> getLogicClasses() {
@@ -67,21 +64,7 @@ public class GlobalLContext extends AbstractLContext {
 	
 
 	
-	public Class findLogicClass(String logicName, int args) {
-		Set<Class<?>> set = getLogicClasses();
-		for(Class clazz : set) {
-			LogicClass logicClass = new LogicClass(clazz);
-			if(logicClass.getLogicName().equals(logicName) && logicClass.getParameters().length == args)
-				return clazz;
-		}
-		return null;
-	}
 	
-	public Class findLogicClass(Term term) {
-		if( term instanceof Variable || term instanceof jpl.Integer || term instanceof jpl.Float || term.name().equals(".") )
-			return null;
-		return findLogicClass(term.name(), term.args().length);
-	}
 
 	public static void main(String[] args) {
 

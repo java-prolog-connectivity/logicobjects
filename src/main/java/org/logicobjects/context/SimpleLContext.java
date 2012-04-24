@@ -1,16 +1,18 @@
 package org.logicobjects.context;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.logicobjects.adapter.Adapter;
-import org.logicobjects.adapter.methodresult.solutioncomposition.SolutionCompositionAdapter;
 import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.annotation.LObject;
 import org.reflections.Reflections;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
 import org.slf4j.LoggerFactory;
 
 public class SimpleLContext extends AbstractLContext {
@@ -24,17 +26,19 @@ public class SimpleLContext extends AbstractLContext {
 	}
 	
 	public SimpleLContext(Reflections reflections) {
+		setReflections(reflections);
+	}
+	
+	public void setReflections(Reflections reflections) {
 		this.reflections = reflections;
 		refresh();
 	}
-	
 	
 	private void loadDefaultSearchUrl(String reason) {
 		LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for "+reason+" without having provided a filter.");
 		URL url = findCallerClasspath();
 		LoggerFactory.getLogger(SimpleLContext.class).warn("Looking for classes in the same classpath than the user of the library: "+url);
 		addSearchUrls(url);
-		//addSearchUrls(ClasspathHelper.forClassLoader(ClasspathHelper.getStaticClassLoader()).toArray(new URL[] {}));
 	}
 	
 	public Set<Class<?>> getLogicClasses() {
@@ -73,7 +77,15 @@ public class SimpleLContext extends AbstractLContext {
 	
 	public void addSearchFilter(String packageName) {
 		if(reflections == null) {
-			reflections = new Reflections(packageName);
+			//reflections = new Reflections(packageName);
+			ConfigurationBuilder config = new ConfigurationBuilder();
+			FilterBuilder fb = new FilterBuilder();
+			fb.include(FilterBuilder.prefix(packageName));
+			config.filterInputsBy(fb);
+			Set<URL> urls = ClasspathHelper.forPackage(packageName);
+			urls = filterURLs(urls); //jboss compatibility hack
+			config.setUrls(urls);
+			reflections = new Reflections(config);
 		} else {
 			Reflections newReflections = new Reflections(packageName);
 			reflections.merge(newReflections);
@@ -88,7 +100,12 @@ public class SimpleLContext extends AbstractLContext {
 	public void addSearchUrls(URL... urls) {
 		Reflections reflections_url;
 		ConfigurationBuilder config = new ConfigurationBuilder();
-		config.addUrls(urls);
+		//TODO new ArrayList().;
+		
+		Set<URL>filteredUrls = filterURLs(new HashSet<URL>(Arrays.<URL>asList(urls))); //jboss compatibility hack
+		//System.out.println("************************************* FILTERED URLSs");
+		//System.out.println(filteredUrls);
+		config.addUrls(filteredUrls);
 		reflections_url =  new Reflections(config);
 		if(reflections == null) {
 			reflections = reflections_url;
@@ -106,6 +123,8 @@ public class SimpleLContext extends AbstractLContext {
 		compositionAdapters = new HashSet<Class<? extends WrapperAdapter>>();
 		filterAdapters(unfilteredAdapters, compositionAdapters);
 	}
+	
+	
 	
 	
 }
