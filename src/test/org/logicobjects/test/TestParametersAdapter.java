@@ -1,10 +1,13 @@
 package org.logicobjects.test;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
+import org.logicobjects.adapter.methodparameters.TermParametersAdapter;
 import org.logicobjects.core.LogicObjectFactory;
+import org.logicobjects.lib.LList;
 import org.logicobjects.lib.examples.MyTestList;
 
 
@@ -17,14 +20,19 @@ public class TestParametersAdapter extends AbstractLogicTest {
 
 	@Test
 	public void testAppend() {
+		
 		MyTestList logicList = LogicObjectFactory.getDefault().create(MyTestList.class);
 		System.out.println("append result: " + logicList.append());
+		System.out.println("append result: " + logicList.append01(Arrays.<String>asList("d", "e"), "X"));
+		System.out.println("append result: " + logicList.append02(Arrays.<String>asList("d", "e"), "X"));
+		
 		System.out.println("append result: " + logicList.append1(Arrays.<String>asList("d", "e")));
 		List<List<List<String>>> allResults = logicList.append2(Arrays.<String>asList("a", "b", "c", "d", "e"));
 		System.out.println("all results of append(A, B, [a,b,c,d,e]): " + allResults);
 		for(int i=0; i<allResults.size(); i++) {
 			System.out.println("Result  "+ (i+1) + ": " + allResults.get(i));
 		}
+		
 	}
 
 	/*

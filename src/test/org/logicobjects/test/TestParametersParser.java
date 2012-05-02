@@ -1,16 +1,13 @@
 package org.logicobjects.test;
 
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import junit.framework.TestCase;
-
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.*;
 import org.junit.Test;
 
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.*;
-
 public class TestParametersParser extends AbstractLogicTest {
-
+	
 	@Test
 	public void testParseJavaExpressions() {
 		String beginExp = BEGIN_JAVA_EXPRESSION;
@@ -29,7 +26,7 @@ public class TestParametersParser extends AbstractLogicTest {
 		assertEquals(delimitedExp2, beginExp+"match2"+endExp);
 		assertEquals(exp2, "match2");
 	}
-	
+
 
 	
 	@Test
@@ -51,22 +48,27 @@ public class TestParametersParser extends AbstractLogicTest {
 	}
 	
 	@Test
-	public void testgetAllSymbols() {
-		List<String> symbols = getAllSymbols(INSTANCE_PROPERTY_PREFIX+"this"+" xxx " + PARAMETERS_PREFIX + "1" + " xxx " + INSTANCE_PROPERTY_PREFIX+"this" + " xxx " + PARAMETERS_PREFIX + ALL_PARAMS_SUFFIX);
+	public void testGetAllSymbols() {
+		String beginExp = BEGIN_JAVA_EXPRESSION;
+		String endExp = END_JAVA_EXPRESSION;
+		
+		List<String> symbols = getAllSymbols(
+			INSTANCE_PROPERTY_PREFIX+"this"
+			+" xxx " 
+			+ PARAMETERS_PREFIX + "1" 
+			+ " xxx " 
+			+ INSTANCE_PROPERTY_PREFIX+"this" + //this should be ignored, since the symbol already exists
+			" xxx " 
+			+ PARAMETERS_PREFIX + ALL_PARAMS_SUFFIX
+			+ beginExp + PARAMETERS_PREFIX + "2" + endExp //this should be ignored since it is inside a Java block
+		);
 		assertEquals(symbols.get(0), INSTANCE_PROPERTY_PREFIX+"this");
 		assertEquals(symbols.get(1), PARAMETERS_PREFIX + "1");
 		assertEquals(symbols.get(2), PARAMETERS_PREFIX + ALL_PARAMS_SUFFIX);
+		assertEquals(symbols.size(), 3);
 	}
 	
-/*
-	@Test
-	public void testValidJavaExpressions() {
-		assertFalse(isValidExpression(null));
-		assertFalse(isValidExpression(""));
-		assertFalse(isValidExpression("   "));
-		assertTrue(isValidExpression(" x "));
-	}
-*/
+
 	
 	@Test
 	public void testNormalizeJavaExpressions() {
@@ -99,4 +101,16 @@ public class TestParametersParser extends AbstractLogicTest {
 		//System.out.println(pattern.matcher("_$aName").matches());
 		assertTrue(pattern.matcher("_$aName").matches());
 	}
+	
+	
+	
+	@Test
+	public void testValidJavaExpressions() {
+		assertFalse(isValidJavaExpression(null));
+		assertFalse(isValidJavaExpression(""));
+		assertFalse(isValidJavaExpression(";"));
+		assertFalse(isValidJavaExpression("   "));
+		assertTrue(isValidJavaExpression(" x "));
+	}
+
 }

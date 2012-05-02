@@ -12,7 +12,7 @@ public class TestLogicMethodsInvocation extends AbstractLogicTest {
 	@Test
 	public void testList() {
 		MyTestList logicList = LogicObjectFactory.getDefault().create(MyTestList.class);
-		System.out.println("Length: "+logicList.length());
+		//System.out.println("Length: "+logicList.length());
 	}
 
 

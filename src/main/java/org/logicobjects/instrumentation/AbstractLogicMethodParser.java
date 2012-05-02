@@ -66,7 +66,12 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	
 	public static final String JAVA_NAME_REX = "([a-zA-Z_\\$][\\w\\$]*)";
 	
-	public static final String PARAMETER_JAVA_REX = Pattern.quote(BEGIN_JAVA_EXPRESSION) + "(.*?)" + Pattern.quote(END_JAVA_EXPRESSION);
+	public static final String HIDDEN_EXPRESSION_PREFIX = "~HIDDEN_EXPRESSION~_";
+	
+	/*
+	 * the question mark is to specify a reluctant quantifier, so 'any' characters (the '.') will occur the minimum possible amount of times
+	 */
+	public static final String DELIMITED_JAVA_REX = Pattern.quote(BEGIN_JAVA_EXPRESSION) + "(.*?)" + Pattern.quote(END_JAVA_EXPRESSION);
 	
 	public static final String PARAMETERS_SEPARATOR = "~~~";
 	
@@ -184,6 +189,7 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 		 * A Set is used to avoid duplicates
 		 * LinkedHashSet preserves the insertion order
 		 */
+		concatenatedParams = concatenatedParams.replaceAll(DELIMITED_JAVA_REX, ""); //ignore symbols in java Expressions
 		Set<String> symbolsSet = new LinkedHashSet<String>();
 		Pattern pattern = Pattern.compile("("+Pattern.quote(PARAMETERS_PREFIX)+"(\\d+|"+Pattern.quote(ALL_PARAMS_SUFFIX)+"))|"+Pattern.quote(INSTANCE_PROPERTY_PREFIX)+JAVA_NAME_REX);
 		Matcher findingMatcher = pattern.matcher(concatenatedParams);
@@ -201,7 +207,7 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	 * @return
 	 */
 	public static String getExpressionValue(String delimitedExpression) {
-		Pattern pattern = Pattern.compile(PARAMETER_JAVA_REX);
+		Pattern pattern = Pattern.compile(DELIMITED_JAVA_REX);
 		Matcher findingMatcher = pattern.matcher(delimitedExpression);
 		findingMatcher.find();
 		return findingMatcher.group(1);
@@ -210,9 +216,9 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	/**
 	 * 
 	 * @param expression
-	 * @return true if expression is a valid expression
+	 * @return true if expression is a valid expression (currently the check is very basic, just verify that the expression once normalized is not null)
 	 */
-	private static boolean isValidExpression(String expression) {
+	public static boolean isValidJavaExpression(String expression) {
 		return normalizeExpression(expression) != null;
 	}
 	
@@ -252,10 +258,8 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 		 * LinkedHashSet preserves the insertion order
 		 */
 		Set<String> javaExpressionsSet = new LinkedHashSet<String>(); 
-		/*
-		 * the question mark is to specify a reluctant quantifier, so 'any' characters (the '.') will occur the minimum possible amount of times
-		 */
-		Pattern pattern = Pattern.compile(PARAMETER_JAVA_REX);
+
+		Pattern pattern = Pattern.compile(DELIMITED_JAVA_REX);
 		Matcher findingMatcher = pattern.matcher(expression);
 		while(findingMatcher.find()) {
 			String match = findingMatcher.group();
@@ -280,10 +284,10 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	private static String methodNameForExpression(Method method, int position) {
 		String normalizedMethodName = method.toGenericString();
 		normalizedMethodName = normalizedMethodName.replaceAll(Pattern.quote(LogicObjectInstrumentation.GENERATED_CLASS_SUFFIX), "");
-		normalizedMethodName = normalizedMethodName.replaceAll("<.*>", ""); //suppress generics information from the method name
+		normalizedMethodName = normalizedMethodName.replaceAll("<.*?>", ""); //suppress generics information from the method name
 		normalizedMethodName = normalizedMethodName.replaceAll(" abstract ", "_");
-		normalizedMethodName = normalizedMethodName.replaceAll("\\(|\\)", "");
-		normalizedMethodName = normalizedMethodName.replaceAll(" |\\.", "_");
+		normalizedMethodName = normalizedMethodName.replaceAll("\\(|\\)", "_");
+		normalizedMethodName = normalizedMethodName.replaceAll(" |\\.|,", "_");
 		return generatedMethodsPrefix + normalizedMethodName + "_exp" + position;
 	}
 	
@@ -292,21 +296,48 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 		return methodNameForExpression(getMethod(), position);
 	}
 
+
+	public static String getHiddenExpressionName(int index) {
+		return HIDDEN_EXPRESSION_PREFIX + (index + 1);
+	}
+
+	private String hideExpressions(String logicString, List<String> expressions) {
+		for(int i=0; i<expressions.size(); i++) {
+			logicString = logicString.replaceAll(Pattern.quote(expressions.get(i)), Matcher.quoteReplacement(getHiddenExpressionName(i)));
+		}
+		return logicString;
+	}
+	
+	private String restoreExpressions(String logicString, List<String> expressions) {
+		for(int i=0; i<expressions.size(); i++) {
+			logicString = logicString.replaceAll(Pattern.quote(getHiddenExpressionName(i)) , Matcher.quoteReplacement(expressions.get(i)));
+		}
+		return logicString;
+	}
 	
 	/**
 	 * 
-	 * @param termString a string with all the new params concatenated
+	 * @param logicString a string with all the new params concatenated
 	 * @param oldParams the java method params
 	 * @return
 	 */
-	private String replaceSymbolsAndExpressions(String termString, List<String> setSymbols, Map<String, String> expressionsMap, Object targetObject, Object[] oldParams) {
+	private String replaceSymbolsAndExpressions(String logicString, List<String> setSymbols, Map<String, String> expressionsMap, Object targetObject, Object[] oldParams) {
 		Map<String, String> symbolsMap = symbolsReplacementMap(targetObject, oldParams, setSymbols);
 
+		
+		List<String> expressions = new ArrayList<String>(expressionsMap.keySet());
+		logicString = hideExpressions(logicString, expressions);
+		
 		//replacing symbols
 		for(String symbol : setSymbols) {			
 			String termObjectString = symbolsMap.get(symbol);
-			termString=termString.replaceAll(Pattern.quote(symbol), termObjectString);
+			termObjectString = Matcher.quoteReplacement(termObjectString);//this is necessary if the String contains the symbol "$". Otherwise it will be interpreted as a group in the regular expression
+			logicString=logicString.replaceAll(Pattern.quote(symbol), termObjectString);
 		}
+		
+		
+		logicString = restoreExpressions(logicString, expressions);
+		
 		//replacing java expressions for the result of a method invocation
 		for(Entry<String, String> entry : expressionsMap.entrySet()) {
 			try {
@@ -315,17 +346,19 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 				if(methodName == null || methodName.isEmpty())
 					replacementValue = "";
 				else {
-					Method method = targetObject.getClass().getMethod(methodName);
-					Object expressionResult = method.invoke(targetObject); //result contains the value of the java expression
+					Method helperMethod = targetObject.getClass().getMethod(methodName,logicMethod.getWrappedMethod().getParameterTypes());
+					Object expressionResult = helperMethod.invoke(targetObject, oldParams); //result contains the value of the java expression
 					Term expressionAsTerm = ObjectToTermAdapter.asTerm(expressionResult);
 					replacementValue = expressionAsTerm.toString();
 				}
-				termString=termString.replaceAll(Pattern.quote(entry.getKey()), replacementValue);
+				String delimitedJavaExpression = Pattern.quote(entry.getKey());
+				replacementValue = Matcher.quoteReplacement(replacementValue); //this is necessary if the String contains the symbol "$". Otherwise it will be interpreted as a group in the regular expression
+				logicString=logicString.replaceAll(delimitedJavaExpression, replacementValue);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
-		return termString;
+		return logicString;
 	}
 
 
@@ -374,7 +407,7 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 			String delimitedExpression = delimitedExpressions.get(i);
 			String expression = AbstractLogicMethodParser.getExpressionValue(delimitedExpression);
 			String substitutionValue;
-			if(AbstractLogicMethodParser.isValidExpression(expression)) {
+			if(AbstractLogicMethodParser.isValidJavaExpression(expression)) {
 				substitutionValue = methodNameForExpression(i + 1);//i+1 to work with a 1-based index
 			} else {
 				logger.warn("The expression: " + delimitedExpression + "in the method "+ getMethod().toGenericString()+" is not valid. It will be ignored.");
@@ -391,7 +424,7 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 		for(Entry<String, String> entry : expressionsReplacementMap.entrySet()) {
 			String expression = entry.getKey();
 			expression = AbstractLogicMethodParser.getExpressionValue(expression);
-			if(AbstractLogicMethodParser.isValidExpression(expression)) {
+			if(AbstractLogicMethodParser.isValidJavaExpression(expression)) {
 				expression = AbstractLogicMethodParser.normalizeExpression(expression);
 				String methodName = entry.getValue();
 				generatedMethodsMap.put(methodName, expression);

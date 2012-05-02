@@ -51,6 +51,7 @@ public class LogicObjectInstrumentation {
 	}
 	
 	public static final String GENERATED_CLASS_SUFFIX = "_$LogicInstrumented";
+	public static final String GENERATED_PARAMETER_PREFIX = "$logicObjectsParam";
 	
 	public static String instrumentedClassName(Class aClass) {
 		return aClass.getName() + GENERATED_CLASS_SUFFIX;
@@ -137,7 +138,16 @@ public class LogicObjectInstrumentation {
 		}
 	}
 	
-	
+	private String getParamDeclarationString(Method method) {
+		StringBuilder paramDeclaration = new StringBuilder();
+		Class[] parameterTypes = method.getParameterTypes();
+		for(int i = 0; i<parameterTypes.length; i++) {
+			paramDeclaration.append(parameterTypes[i].getCanonicalName() + " " + GENERATED_PARAMETER_PREFIX + (i+1) );
+			if(i != parameterTypes.length-1)
+				paramDeclaration.append(", ");
+		}
+		return paramDeclaration.toString();
+	}
 	
 	private void createAuxiliaryMethods(CtClass ctClass, Method method) {
 		final String OBJECT_CONVERSION_METHOD_NAME = "toObject";
@@ -147,7 +157,7 @@ public class LogicObjectInstrumentation {
 			String methodExpression = methodEntry.getValue();
 			CtMethod ctMethod;
 			try {
-				String code = "public Object "+ methodName + "() { return " + ObjectConverter.class.getCanonicalName() + "." + OBJECT_CONVERSION_METHOD_NAME + "(" + methodExpression + "); }";
+				String code = "public Object "+ methodName + "(" + getParamDeclarationString(method) + ") { return " + ObjectConverter.class.getCanonicalName() + "." + OBJECT_CONVERSION_METHOD_NAME + "(" + methodExpression + "); }";
 				ctMethod = CtNewMethod.make(code, ctClass);
 				ctClass.addMethod(ctMethod);
 			} catch (CannotCompileException e) {
@@ -155,7 +165,6 @@ public class LogicObjectInstrumentation {
 			}
 		}
 	}
-	
 	
 	/*
 	 * @return an array of logic methods that should be overridden by the new generated class
