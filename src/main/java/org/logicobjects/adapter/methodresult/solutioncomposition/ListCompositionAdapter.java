@@ -1,5 +1,6 @@
 package org.logicobjects.adapter.methodresult.solutioncomposition;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -13,6 +14,10 @@ import org.reflectiveutils.GenericsUtil;
  */
 public class ListCompositionAdapter<LogicAnswerType> extends
 		WrapperAdapter<List<LogicAnswerType>, LogicAnswerType> {
+
+	public ListCompositionAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
+		super(method, targetObject, javaMethodParams);
+	}
 
 	@Override
 	public List<LogicAnswerType> adapt(Query query) {

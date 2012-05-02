@@ -20,19 +20,27 @@ public abstract class MethodResultAdapter<MethodResultType> extends LogicAdapter
 			return source;
 		}
 		
-		public DefaultMethodResultAdapter(Method method) {
-			super(method);
+		public DefaultMethodResultAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
+			super(method, targetObject, javaMethodParams);
 		}
 	}
 	
+	/*
 	public MethodResultAdapter() {
 	}
-	
-	public MethodResultAdapter(Method method) {
-		setMethod(method);
-	}
+	*/
 	
 	private Method method;
+	private Object targetObject;
+	private Object[] javaMethodParams;
+	
+	public MethodResultAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
+		setMethod(method);
+		setTargetObject(targetObject);
+		setJavaMethodParams(javaMethodParams);
+	}
+	
+	
 	/*
 	public MethodResultAdapter(Object ...parameters) {
 		super(parameters);
@@ -46,9 +54,25 @@ public abstract class MethodResultAdapter<MethodResultType> extends LogicAdapter
 	public void setMethod(Method method) {
 		this.method = method;
 	}
-	
-	
-	
+
+	public Object getTargetObject() {
+		return targetObject;
+	}
+
+	public void setTargetObject(Object targetObject) {
+		this.targetObject = targetObject;
+	}
+
+	public Object[] getJavaMethodParams() {
+		return javaMethodParams;
+	}
+
+	public void setJavaMethodParams(Object[] javaMethodParams) {
+		this.javaMethodParams = javaMethodParams;
+	}
+
+
+
 	/*
 	 * This method is a hack. 
 	 * Methods generated with Javassist ignore Generics information, that in this context is useful for introspection.

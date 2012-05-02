@@ -6,6 +6,7 @@ import jpl.Term;
 
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.core.LogicEngine;
+import org.logicobjects.instrumentation.AbstractLogicMethodParser;
 import org.logicobjects.termvisitor.ReplaceVariableVisitor;
 
 public class SolutionToLObjectAdapter extends
@@ -14,7 +15,9 @@ public class SolutionToLObjectAdapter extends
 	@Override
 	public Object adapt(Map bindings) {
 		LogicEngine engine = LogicEngine.getDefault();
-		String arg = (String)getParameters()[0];
+		//String arg = (String)getParameters()[0];
+		AbstractLogicMethodParser parser = AbstractLogicMethodParser.create(getMethod());
+		String arg = parser.resolveEachSolutionValue(getTargetObject(), getJavaMethodParams());
 		Term term = engine.textToTerm(arg);
 		ReplaceVariableVisitor replaceVariableVisitor = new ReplaceVariableVisitor(bindings);
 		

@@ -6,7 +6,8 @@ import java.util.regex.Pattern;
 import junit.framework.TestCase;
 
 import org.junit.Test;
-import static org.logicobjects.adapter.methodparameters.ParametersParser.*;
+
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.*;
 
 public class TestParametersParser extends AbstractLogicTest {
 

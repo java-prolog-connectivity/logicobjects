@@ -24,16 +24,16 @@ public abstract class MyTestList extends LList {
 	
 
 	@LSolution("L")
-	@LMethod(parameters={"$0", "/{java.util.Arrays.asList(new String[] {\"d\", \"e\"})/}", "L"})
+	@LMethod(params={"$0", "/{java.util.Arrays.asList(new String[] {\"d\", \"e\"})/}", "L"})
 	public abstract List<String> append();
 	
 	@LSolution("L")
-	@LMethod(name = "append", parameters={"$0", "$1", "L"})
+	@LMethod(name = "append", params={"$0", "$1", "L"})
 	public abstract List<String> append1(List<String> list);
 	
 	@LWrapper
 	@LSolution("[A, B]")
-	@LMethod(name = "append", parameters={"A", "B", "$1"})
+	@LMethod(name = "append", params={"A", "B", "$1"})
 	public abstract List<List<List<String>>> append2(List<String> list);
 	
 	
@@ -42,11 +42,11 @@ public abstract class MyTestList extends LList {
 	
 	
 	@LSolution("L")
-	@LMethod(parameters={"$0", "L"})
+	@LMethod(params={"$0", "L"})
 	public abstract int length();
 	
 
-	@LMethod(parameters={"$0", "_"})
+	@LMethod(params={"$0", "_"})
 	public abstract int member();
 	
 	

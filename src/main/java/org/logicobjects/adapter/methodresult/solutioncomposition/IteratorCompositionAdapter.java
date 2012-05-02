@@ -1,5 +1,6 @@
 package org.logicobjects.adapter.methodresult.solutioncomposition;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Iterator;
 
@@ -18,6 +19,11 @@ import org.reflectiveutils.GenericsUtil;
  */
 public class IteratorCompositionAdapter<LogicAnswerType> extends
 		WrapperAdapter<SolutionEnumeration<LogicAnswerType>, LogicAnswerType> {
+
+	public IteratorCompositionAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
+		super(method, targetObject, javaMethodParams);
+	}
+
 
 	@Override
 	public SolutionEnumeration<LogicAnswerType> adapt(Query query) {

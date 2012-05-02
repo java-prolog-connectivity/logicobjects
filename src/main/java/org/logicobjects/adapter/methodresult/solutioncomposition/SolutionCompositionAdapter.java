@@ -19,12 +19,14 @@ public abstract class SolutionCompositionAdapter<MethodResultType, EachSolutionT
 	
 	private EachSolutionAdapter<EachSolutionType> eachSolutionAdapter;
 	
+	/*
 	public SolutionCompositionAdapter() {
 		setEachSolutionAdapter((EachSolutionAdapter<EachSolutionType>) new EachSolutionAdapter.DefaultEachSolutionAdapter());
 	}
+	*/
 	
-	public SolutionCompositionAdapter(Method method) {
-		super(method);
+	public SolutionCompositionAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
+		super(method, targetObject, javaMethodParams);
 		setEachSolutionAdapter((EachSolutionAdapter<EachSolutionType>) new EachSolutionAdapter.DefaultEachSolutionAdapter());
 	}
 

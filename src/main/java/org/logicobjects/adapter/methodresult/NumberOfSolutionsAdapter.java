@@ -6,8 +6,8 @@ import jpl.Query;
 
 public class NumberOfSolutionsAdapter extends MethodResultAdapter<Integer> {
 
-	public NumberOfSolutionsAdapter(Method method) {
-		super(method);
+	public NumberOfSolutionsAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
+		super(method, targetObject, javaMethodParams);
 	}
 	
 	@Override

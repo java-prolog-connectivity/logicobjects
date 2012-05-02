@@ -1,10 +1,10 @@
 package org.logicobjects.adapter.methodresult.eachsolution;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
-import org.logicobjects.adapter.methodresult.solutioncomposition.SolutionCompositionAdapter;
-
 import org.logicobjects.adapter.LogicAdapter;
+import org.logicobjects.adapter.methodresult.solutioncomposition.SolutionCompositionAdapter;
 
 /*
  * Adapts a single logic answer. This adapter is used by the composition adapters, so many individual adapted solutions can be composed together in another object
@@ -36,6 +36,16 @@ public abstract class EachSolutionAdapter<EachSolutionType> extends LogicAdapter
 		this.compositionAdapter = compositionAdapter;
 	}
 	
+	public Method getMethod() {
+		return getCompositionAdapter().getMethod();
+	}
 	
+	public Object getTargetObject() {
+		return getCompositionAdapter().getTargetObject();
+	}
+	
+	public Object[] getJavaMethodParams() {
+		return getCompositionAdapter().getJavaMethodParams();
+	}
 	
 }

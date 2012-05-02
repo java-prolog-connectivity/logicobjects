@@ -141,7 +141,7 @@ public class LogicObjectInstrumentation {
 	
 	private void createAuxiliaryMethods(CtClass ctClass, Method method) {
 		final String OBJECT_CONVERSION_METHOD_NAME = "toObject";
-		Map<String, String> auxiliaryMethodsMap = TermParametersAdapter.generatedMethodsMap(method);
+		Map<String, String> auxiliaryMethodsMap = AbstractLogicMethodParser.create(method).generatedMethodsMap();
 		for(Entry<String, String> methodEntry : auxiliaryMethodsMap.entrySet()) {
 			String methodName = methodEntry.getKey();
 			String methodExpression = methodEntry.getValue();

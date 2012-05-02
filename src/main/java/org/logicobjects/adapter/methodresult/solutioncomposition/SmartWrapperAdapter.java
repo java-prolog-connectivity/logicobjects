@@ -1,6 +1,7 @@
 package org.logicobjects.adapter.methodresult.solutioncomposition;
 
 
+import java.lang.reflect.Method;
 import java.util.Set;
 
 import jpl.Query;
@@ -11,13 +12,18 @@ import org.reflectiveutils.GenericsUtil;
 
 public class SmartWrapperAdapter extends WrapperAdapter<Object, Object>  {
 
+	public SmartWrapperAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
+		super(method, targetObject, javaMethodParams);
+	}
+
 	@Override
 	public Object adapt(Query source) {
 		Class<? extends WrapperAdapter> wrapperAdapterClass = findWrapperAdapterClass();
 		if(wrapperAdapterClass!=null) {
 			try {
-				WrapperAdapter wrapperAdapter = wrapperAdapterClass.newInstance();
-				wrapperAdapter.setMethod(getMethod());
+				WrapperAdapter wrapperAdapter = wrapperAdapterClass.getConstructor(Method.class, Object.class, Object[].class).newInstance(getMethod(), getTargetObject(), getJavaMethodParams());
+				//WrapperAdapter wrapperAdapter = wrapperAdapterClass.newInstance();
+				//wrapperAdapter.setMethod(getMethod());
 				wrapperAdapter.setEachSolutionAdapter(getEachSolutionAdapter());
 				return wrapperAdapter.adapt(source);
 			} catch (Exception e) {

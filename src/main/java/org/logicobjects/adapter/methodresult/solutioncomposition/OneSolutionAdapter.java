@@ -8,8 +8,8 @@ import jpl.Query;
 
 public class OneSolutionAdapter<LogicSolutionType> extends SolutionCompositionAdapter<LogicSolutionType, LogicSolutionType> {
 
-	public OneSolutionAdapter(Method method) {
-		super(method);
+	public OneSolutionAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
+		super(method, targetObject, javaMethodParams);
 	}
 	
 	@Override

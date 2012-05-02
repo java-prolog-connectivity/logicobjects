@@ -69,10 +69,10 @@ public abstract class LogicEngine {
 	public synchronized static void initialize(LogicObjectsPreferences newPreferences) {
 		preferences = newPreferences;
 		configure(preferences);
-		//the following commented block of code attempts to change the existing Prolog engine configuration according to new preferences
+		
+		//the following block of code attempts to change the existing Prolog engine configuration according to new preferences
 		//this has not been possible to implement until now. Preferences are only applied if the logic engine has not yet been started.
-		//Left the code commented out instead of deleting it hoping to find something that works in the future.
-		/* 
+		//Left the code instead of deleting it hoping to find something that works in the future.
 		try {
 			//if JPL.init() is not explicitly called, it will be invoked by JPL at the first operation needing the engine
 			 //in theory this method answers true if the logic engine was not started before the call, and false otherwise.
@@ -85,10 +85,10 @@ public abstract class LogicEngine {
 				getDefault().resetPath();
 			}
 			
-		} catch(Exception ex) {
-			throw new RuntimeException(ex); //the exception originated when attempting to initialize the logic engine when it was already started, cannot be catched
+		} catch(Error e) {
+			throw new RuntimeException(e); //the exception originated when attempting to initialize the logic engine when it was already started cannot be caught (ClassNotFound exception)
 		}
-		*/
+		
 	}
 
 	/**
@@ -452,7 +452,7 @@ public abstract class LogicEngine {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@LSolution("FlagValue")
-	@LMethod(name="current_prolog_flag", parameters={"$1", "FlagValue"})
+	@LMethod(name="current_prolog_flag", params={"$1", "FlagValue"})
 	public abstract String currentPrologFlag(String flagName);
 
 }

@@ -3,10 +3,7 @@ package org.logicobjects.test;
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.junit.Test;
-import org.logicobjects.context.SystemLContext;
 import org.logicobjects.core.LogicObjectFactory;
 import org.logicobjects.lib.examples.MyTestList;
 
@@ -17,7 +14,7 @@ public class TestParametersAdapter extends AbstractLogicTest {
 	public void testExpressionsReplacement() {
 		MyTestList logicList = LogicObjectFactory.getDefault().create(MyTestList.class);
 	}
-	
+
 	@Test
 	public void testAppend() {
 		MyTestList logicList = LogicObjectFactory.getDefault().create(MyTestList.class);

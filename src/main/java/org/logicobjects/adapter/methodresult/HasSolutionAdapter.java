@@ -10,8 +10,8 @@ import jpl.Query;
  */
 public class HasSolutionAdapter extends MethodResultAdapter<Boolean> {
 
-	public HasSolutionAdapter(Method method) {
-		super(method);
+	public HasSolutionAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
+		super(method, targetObject, javaMethodParams);
 	}
 	
 	@Override
