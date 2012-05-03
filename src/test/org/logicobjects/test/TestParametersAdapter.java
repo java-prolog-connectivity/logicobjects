@@ -20,11 +20,13 @@ public class TestParametersAdapter extends AbstractLogicTest {
 
 	@Test
 	public void testAppend() {
-		
 		MyTestList logicList = LogicObjectFactory.getDefault().create(MyTestList.class);
+		
 		System.out.println("append result: " + logicList.append());
-		System.out.println("append result: " + logicList.append01(Arrays.<String>asList("d", "e"), "X"));
+		System.out.println("append result: " + logicList.append01("y"));
+		
 		System.out.println("append result: " + logicList.append02(Arrays.<String>asList("d", "e"), "X"));
+		System.out.println("append result: " + logicList.append03(Arrays.<String>asList("d", "e"), "X"));
 		
 		System.out.println("append result: " + logicList.append1(Arrays.<String>asList("d", "e")));
 		List<List<List<String>>> allResults = logicList.append2(Arrays.<String>asList("a", "b", "c", "d", "e"));
@@ -32,7 +34,6 @@ public class TestParametersAdapter extends AbstractLogicTest {
 		for(int i=0; i<allResults.size(); i++) {
 			System.out.println("Result  "+ (i+1) + ": " + allResults.get(i));
 		}
-		
 	}
 
 	/*

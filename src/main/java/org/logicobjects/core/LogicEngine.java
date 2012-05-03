@@ -34,6 +34,9 @@ public abstract class LogicEngine {
 	private static Logger logger = LoggerFactory.getLogger(LogicEngine.class);
 	
 	//CONSTANTS
+	public static Term TRUE_TERM = new Atom("true");
+	public static Term FALSE_TERM = new Atom("false");
+	
 	protected static final String VARIABLE_PREFIX = "LOGIC_OBJECTS_"; //prefix for generated framework variables 
 	protected static final Variable anonymousVar = new Variable("_");
 

@@ -16,11 +16,15 @@ public class LogicMethod extends AbstractLogicMethod {
 
 	private LMethod aLMethod;
 	
+	public static boolean isLogicMethod(Method method) {
+		return method.getAnnotation(LMethod.class) != null;
+	}
+	
 	public LogicMethod(Method method) {
 		super(method);
 		aLMethod = (LMethod) getWrappedMethod().getAnnotation(LMethod.class);
 		if(aLMethod == null)
-			throw new RuntimeException("No method "+getWrappedMethod().getName() + " is not a logic method");
+			throw new RuntimeException("The method "+getWrappedMethod().getName() + " is not a logic method");
 	}
 	
 	public String getLogicName() {

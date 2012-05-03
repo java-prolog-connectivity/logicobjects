@@ -14,7 +14,6 @@ import org.logicobjects.adapter.methodresult.solutioncomposition.OneSolutionAdap
 import org.logicobjects.adapter.methodresult.solutioncomposition.SolutionCompositionAdapter;
 import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.annotation.method.LParameter;
-import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.annotation.method.LSolution;
 import org.logicobjects.annotation.method.LWrapper;
 import org.logicobjects.util.AnnotationConstants.NO_ADAPTER;
@@ -31,16 +30,13 @@ public abstract class AbstractLogicMethod {
 	}
 	
 	public static AbstractLogicMethod create(Method method) {
-		if(isRawQuery(method))
-			return new RawLogicQuery(method);
-		else
+		if(LogicMethod.isLogicMethod(method))
 			return new LogicMethod(method);
-			
+		else
+			return new RawLogicQuery(method);
 	}
 	
-	public static boolean isRawQuery(Method method) {
-		return method.getAnnotation(LQuery.class) != null;
-	}
+	
 	
 	public Method getWrappedMethod() {
 		return method;

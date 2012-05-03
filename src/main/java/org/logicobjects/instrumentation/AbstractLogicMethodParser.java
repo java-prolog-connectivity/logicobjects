@@ -32,6 +32,8 @@ import org.logicobjects.adapter.LogicObjectAdapter;
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.core.AbstractLogicMethod;
 import org.logicobjects.core.LogicEngine;
+import org.logicobjects.core.LogicMethod;
+import org.logicobjects.core.RawLogicQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,10 +90,10 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	private String eachSolutionValue;
 
 	public static AbstractLogicMethodParser create(Method method) {
-		if(AbstractLogicMethod.isRawQuery(method))
-			return new RawQueryParser(method);
-		else
+		if(LogicMethod.isLogicMethod(method))
 			return new LogicMethodParser(method);
+		else
+			return new RawQueryParser(method);
 	}
 	
 	AbstractLogicMethodParser(Method method) {

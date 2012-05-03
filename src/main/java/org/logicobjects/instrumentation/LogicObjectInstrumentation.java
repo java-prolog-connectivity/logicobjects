@@ -2,7 +2,6 @@ package org.logicobjects.instrumentation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -17,9 +16,9 @@ import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.MethodInfo;
 
 import org.logicobjects.adapter.methodparameters.BadExpressionException;
-import org.logicobjects.adapter.methodparameters.TermParametersAdapter;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LQuery;
+import org.logicobjects.annotation.method.LSolution;
 import org.logicobjects.util.JavassistUtil;
 import org.logicobjects.util.JavassistUtil.ObjectConverter;
 
@@ -179,7 +178,7 @@ public class LogicObjectInstrumentation {
 		List<Method> methods = new ArrayList<Method>();
 		for(Method m : c.getMethods()) {
 			//System.out.println("Method candidate: "+m.getName()+". Generic string: "+m.toGenericString());
-			if (m.getAnnotation(LMethod.class) != null || m.getAnnotation(LQuery.class) != null) {
+			if (m.getAnnotation(LMethod.class) != null || m.getAnnotation(LQuery.class) != null || m.getAnnotation(LSolution.class) != null) {
 				methods.add(m);
 				//System.out.println("(Logic method)");
 				/*

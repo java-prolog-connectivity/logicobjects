@@ -26,14 +26,17 @@ public abstract class MyTestList extends LList {
 	@LMethod(params={"$0", "/{java.util.Arrays.asList(new String[] {\"d\", \"e\"})/}", "L"})
 	public abstract List<String> append();
 
+	@LSolution(".($1, $0)")
+	public abstract List<String> append01(String s);
+	
 	
 	@LSolution(".(/{$2/}, L)")
 	@LMethod(name = "append", params={"$0", "$1", "L"})
-	public abstract List<String> append01(List<String> list, Object o);
+	public abstract List<String> append02(List<String> list, Object o);
 	
 	@LSolution(".($2, L)")
 	@LMethod(name = "append", params={"$0", "$1", "L"})
-	public abstract List<String> append02(List<String> list, Object o);
+	public abstract List<String> append03(List<String> list, Object o);
 	
 	
 	@LSolution("L")

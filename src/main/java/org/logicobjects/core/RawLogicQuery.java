@@ -5,22 +5,35 @@ import java.lang.reflect.Method;
 import jpl.Query;
 
 import org.logicobjects.annotation.method.LQuery;
+import org.logicobjects.annotation.method.LSolution;
 import org.logicobjects.instrumentation.AbstractLogicMethodParser;
 import org.logicobjects.instrumentation.RawQueryParser;
 
 public class RawLogicQuery extends AbstractLogicMethod {
 
 	private LQuery aLQuery;
+	private String rawQuery;
+	
+	public static boolean isRawQuery(Method method) {
+		return !LogicMethod.isLogicMethod(method) && (method.getAnnotation(LQuery.class) != null || method.getAnnotation(LSolution.class) != null);
+	}
 	
 	public RawLogicQuery(Method method) {
 		super(method);
 		aLQuery = (LQuery) getWrappedMethod().getAnnotation(LQuery.class);
-		if(aLQuery == null)
-			throw new RuntimeException("No raw query has been defined for method "+getWrappedMethod().getName());
+		if(aLQuery == null) {
+			if (getWrappedMethod().getAnnotation(LSolution.class) != null)
+				rawQuery = "true";
+			else
+				throw new RuntimeException("No raw query has been defined for method "+getWrappedMethod().getName());
+		}
+			
 	}
 
 	public String getRawQuery() {
-		return aLQuery.value();
+		if(rawQuery == null)
+			rawQuery = aLQuery.value();
+		return rawQuery;
 	}
 
 	@Override
