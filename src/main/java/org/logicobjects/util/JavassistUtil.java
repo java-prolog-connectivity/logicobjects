@@ -14,11 +14,11 @@ import javassist.NotFoundException;
 import javassist.bytecode.ClassFile;
 
 public class JavassistUtil {
-
+/*
 	public static CtClass asCtClass(Class c) {
 		return asCtClass(c, ClassPool.getDefault());
 	}
-
+*/
 	public static CtClass asCtClass(Class c, ClassPool pool) {
 		try {
 			return pool.get(c.getName());	
@@ -32,6 +32,15 @@ public class JavassistUtil {
 			}
 		}
 	}
+	
+	private static CtClass[] asCtClasses(Class[] classes, ClassPool pool) {
+		CtClass[] ctClasses = new CtClass[classes.length];
+		for(int i=0; i<classes.length; i++) {
+			ctClasses[i] = asCtClass(classes[i], pool);
+		}
+		return ctClasses;
+	}
+	
 	/*
 	public static CtClass asCtClass(Class c, ClassLoader cl) {
 		ClassPool pool = ClassPool.getDefault();
@@ -43,15 +52,17 @@ public class JavassistUtil {
 		}
 	}
 	*/
-	public static CtMethod asCtMethod(Method m) {
-		CtClass rtClass = asCtClass(m.getDeclaringClass());
+
+	public static CtMethod asCtMethod(Method m, ClassPool pool) {
+		CtClass rtClass = asCtClass(m.getDeclaringClass(), pool);
 		try {
-			return rtClass.getDeclaredMethod(m.getName());
+			CtClass[] ctParamClasses = asCtClasses(m.getParameterTypes(), pool);
+			return rtClass.getDeclaredMethod(m.getName(), ctParamClasses);
 		} catch (NotFoundException e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	public static void createClassFile(String basePath, Class aClass) {
 		try {
 			createClassFile(basePath, ClassPool.getDefault().get(aClass.getCanonicalName()));

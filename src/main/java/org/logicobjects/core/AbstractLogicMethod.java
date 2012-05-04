@@ -20,6 +20,8 @@ import org.logicobjects.util.AnnotationConstants.NO_ADAPTER;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.primitives.Primitives;
+
 public abstract class AbstractLogicMethod {
 
 	private Method method;
@@ -58,7 +60,7 @@ public abstract class AbstractLogicMethod {
 					return new MethodResultAdapter.DefaultMethodResultAdapter(getWrappedMethod(), targetObject, javaMethodParams);
 				if(returnType.equals(Void.class) || returnType.equals(Boolean.class) || returnType.equals(boolean.class))
 					return new HasSolutionAdapter(getWrappedMethod(), targetObject, javaMethodParams);
-				if(Number.class.isAssignableFrom(returnType))
+				if(Number.class.isAssignableFrom(Primitives.wrap(returnType)))
 					return new NumberOfSolutionsAdapter(getWrappedMethod(), targetObject, javaMethodParams);
 			}
 		}

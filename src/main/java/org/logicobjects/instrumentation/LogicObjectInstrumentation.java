@@ -135,7 +135,7 @@ public class LogicObjectInstrumentation {
 	
 	private void createLogicMethods(CtClass ctClass) {
 		for(Method m : methodsToOverride()) {
-			CtMethod ctMethod = JavassistUtil.asCtMethod(m);
+			CtMethod ctMethod = JavassistUtil.asCtMethod(m, classPool);
 			createAuxiliaryMethods(ctClass, m);
 			overrideMethod(ctClass, ctMethod);
 		}
@@ -197,20 +197,7 @@ public class LogicObjectInstrumentation {
 		}
 		return methods.toArray(new Method[] {});
 	}
-	
-	public static class A {
-		public Object s() {return null;}
-	}
-	
-	public static class B extends A {
-		@Override
-		public String s() {return null;}
-		
-		public static void main(String[] args) {
-			B b = new B();
-			Object o = b.s();
-		}
-	}
+
 	
 	
 	//TODO
@@ -222,7 +209,7 @@ public class LogicObjectInstrumentation {
 			 * "By default, all the occurrences of the names of the class declaring m and the superclass are replaced with the name of the class and the superclass that the created method is added to. 
 			 * This is done whichever map is null or not. To prevent this replacement, call ClassMap.fix()."
 			 */
-			//classMap.fix(JavassistUtil.asCtClass(this.classToExtend, classPool));
+			classMap.fix(JavassistUtil.asCtClass(this.classToExtend, classPool));
 			/**
 			 * In the case that this class map is included it will provoke the following problem:
 			 * - Situation: The overridding method contains references (its return value for example) to the parent class where the extended method was originally located
