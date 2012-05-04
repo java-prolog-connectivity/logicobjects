@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 
 import org.junit.Test;
 import org.logicobjects.annotation.LObject;
+import org.logicobjects.core.LogicObjectFactory;
 import org.reflections.Reflections;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
@@ -50,7 +51,13 @@ public class TestReflections extends LocalLogicTest{
 	
 	
 	
-	
+	@Test
+	public void testFindLogicObject() {
+		Set<Class<?>> classes = LogicObjectFactory.getDefault().getContext().getLogicClasses();
+		for(Class clazz : classes) {
+			System.out.println(clazz);
+		}
+	}
 	
 	/*
 	@Test

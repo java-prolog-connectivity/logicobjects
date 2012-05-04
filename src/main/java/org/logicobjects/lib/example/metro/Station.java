@@ -52,6 +52,7 @@ public abstract class Station {
 	public abstract List<Station> nearby();
 	
 	
+	
 	@LMethod
 	public abstract boolean reachable(Station station);
 	
@@ -62,5 +63,6 @@ public abstract class Station {
 	@LMethod(name = "reachable", params = {"$1", "IntermediateStations"})
 	public abstract List<Station> intermediateStations(Station station);
 	
+
 
 }

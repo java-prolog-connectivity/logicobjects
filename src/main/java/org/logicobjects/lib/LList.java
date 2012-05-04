@@ -11,7 +11,6 @@ import org.logicobjects.annotation.method.LSolution;
  *
  */
 @LDelegationObject(name="list", imports="library(types_loader)")
-//LObject(name="list", imports="library(types_loader)")
 public abstract class LList<T> extends ArrayList<T> {
 	
 }

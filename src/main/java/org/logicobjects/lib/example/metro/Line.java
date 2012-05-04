@@ -23,5 +23,4 @@ public abstract class Line {
 	@LMethod(name = "connects", params = {"_", "_"})
 	public abstract int segments();
 	
-	
 }
