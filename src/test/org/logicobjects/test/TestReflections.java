@@ -12,7 +12,7 @@ import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 
 
-public class TestReflections extends AbstractLogicTest{
+public class TestReflections extends LocalLogicTest{
 
 	@Test
 	public void testFindingLogicObjects() {

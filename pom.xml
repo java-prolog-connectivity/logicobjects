@@ -26,7 +26,9 @@
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
 			<version>3.16.1-GA</version>
-			<!-- <version>3.15.0-GA</version> -->
+			<!-- 
+				<version>3.15.0-GA</version>
+			 -->
 		</dependency>
 
 
@@ -55,7 +57,12 @@
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
+			<version>0.9.7.RC1</version>
+			<!-- 
 			<version>0.9.5</version>
+			 -->
+			
+			
 			
 			<exclusions>
 				<exclusion>

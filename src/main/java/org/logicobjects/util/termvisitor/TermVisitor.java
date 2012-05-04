@@ -1,4 +1,4 @@
-package org.logicobjects.termvisitor;
+package org.logicobjects.util.termvisitor;
 
 import jpl.Term;
 

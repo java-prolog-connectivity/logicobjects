@@ -15,7 +15,7 @@ import org.logicobjects.core.LogicEngine;
  * @author sergioc78
  *
  */
-public class TestJpl extends AbstractLogicTest {
+public class TestJpl extends LocalLogicTest {
 	
 	@Test
 	public void testConnection() {

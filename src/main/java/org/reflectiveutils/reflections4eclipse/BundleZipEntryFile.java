@@ -30,7 +30,7 @@ public class BundleZipEntryFile implements File {
 		return relativePath;
 	}
 
-	@Override
+	//@Override
 	public String getFullPath() {
 		return dir.getFullPath()+this.getRelativePath();
 	}

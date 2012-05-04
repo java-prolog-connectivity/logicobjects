@@ -3,7 +3,7 @@ package org.logicobjects.test;
 import org.junit.Test;
 import org.logicobjects.util.LogicObjectsPreferences;
 
-public class TestEnvironment extends AbstractLogicTest {
+public class TestEnvironment extends LocalLogicTest {
 	
 	@Test
 	public void testLOGTALKHOME() {

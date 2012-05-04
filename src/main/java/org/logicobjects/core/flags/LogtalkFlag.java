@@ -1,4 +1,4 @@
-package org.logicobjects.flags;
+package org.logicobjects.core.flags;
 
 
 

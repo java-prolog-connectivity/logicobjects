@@ -14,7 +14,7 @@ import org.logicobjects.core.LogicEngine;
  * @author sergioc78
  *
  */
-public class TestLogtalk extends AbstractLogicTest {
+public class TestLogtalk extends LocalLogicTest {
 
 	@Test
 	public void testLoadingLogtalk() {

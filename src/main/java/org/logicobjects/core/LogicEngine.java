@@ -1,6 +1,6 @@
 package org.logicobjects.core;
 
-import static org.logicobjects.flags.PrologFlag.DIALECT;
+import static org.logicobjects.core.flags.PrologFlag.DIALECT;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +19,7 @@ import org.logicobjects.adapter.ObjectToTermException;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LSolution;
-import org.logicobjects.flags.LogtalkFlag;
+import org.logicobjects.core.flags.LogtalkFlag;
 import org.logicobjects.util.LogicObjectsPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

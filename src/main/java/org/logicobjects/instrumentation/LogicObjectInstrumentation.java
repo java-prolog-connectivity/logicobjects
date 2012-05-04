@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javassist.CannotCompileException;
+import javassist.ClassMap;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
@@ -38,19 +39,22 @@ public class LogicObjectInstrumentation {
 	}
 
 */
+
 	
 	private static final String TEST_DIRECTORY = "/test/";
 	
-	private Class targetClass;
+	private Class classToExtend;
 	private ClassPool classPool;
 	
-	public LogicObjectInstrumentation(Class targetClass, ClassPool classPool) {
-		this.targetClass = targetClass;
+	public LogicObjectInstrumentation(Class classToExtend, ClassPool classPool) {
+		this.classToExtend = classToExtend;
 		this.classPool = classPool;
 	}
 	
-	public static final String GENERATED_CLASS_SUFFIX = "_$LogicInstrumented";
-	public static final String GENERATED_PARAMETER_PREFIX = "$logicObjectsParam";
+	//public static final String GENERATED_CLASS_SUFFIX = "_$LogicInstrumented";
+	//public static final String GENERATED_PARAMETER_PREFIX = "$logicObjectsParam";
+	public static final String GENERATED_CLASS_SUFFIX = "___LogicObjectsInstrumented";  //avoid the character "$" this could create problems since it has an special meaning in javassist
+	public static final String GENERATED_PARAMETER_PREFIX = "logicObjectsParam";
 	
 	public static String instrumentedClassName(Class aClass) {
 		return aClass.getName() + GENERATED_CLASS_SUFFIX;
@@ -68,7 +72,7 @@ public class LogicObjectInstrumentation {
 	 * Answers the already loaded extending class. If the class is not loaded returns null
 	 */
 	public Class loadedExtendingClass() {
-		String extendingClassName = instrumentedClassName(targetClass);  //derive the name of the extending class using the name of the base class
+		String extendingClassName = instrumentedClassName(classToExtend);  //derive the name of the extending class using the name of the base class
 
 		try {
 			return classPool.getClassLoader().loadClass(extendingClassName);
@@ -92,8 +96,8 @@ public class LogicObjectInstrumentation {
 				return alreadyLoadedClass;
 			}
 			else {
-				String extendingClassName = instrumentedClassName(targetClass);  //derive the name of the extending class using the name of the base class
-				Class extendingClass = createExtendingClass(extendingClassName, JavassistUtil.asCtClass(targetClass, classPool));  //create it
+				String extendingClassName = instrumentedClassName(classToExtend);  //derive the name of the extending class using the name of the base class
+				Class extendingClass = createExtendingClass(extendingClassName, JavassistUtil.asCtClass(classToExtend, classPool));  //create it
 				return extendingClass;
 			}	
 		} catch(Exception e) {
@@ -169,7 +173,7 @@ public class LogicObjectInstrumentation {
 	 * @return an array of logic methods that should be overridden by the new generated class
 	 */
 	private Method[] methodsToOverride() {
-		return methodsToOverride(targetClass);
+		return methodsToOverride(classToExtend);
 	}
 	
 	
@@ -194,10 +198,39 @@ public class LogicObjectInstrumentation {
 		return methods.toArray(new Method[] {});
 	}
 	
+	public static class A {
+		public Object s() {return null;}
+	}
 	
+	public static class B extends A {
+		@Override
+		public String s() {return null;}
+		
+		public static void main(String[] args) {
+			B b = new B();
+			Object o = b.s();
+		}
+	}
+	
+	
+	//TODO
 	private void overrideMethod(CtClass targetClass, CtMethod ctMethod) {
 		try {
-			CtMethod ctCopiedMethod = CtNewMethod.copy(ctMethod, targetClass, null);
+			ClassMap classMap = new ClassMap();
+			/**
+			 * From the Javassist documentation:
+			 * "By default, all the occurrences of the names of the class declaring m and the superclass are replaced with the name of the class and the superclass that the created method is added to. 
+			 * This is done whichever map is null or not. To prevent this replacement, call ClassMap.fix()."
+			 */
+			//classMap.fix(JavassistUtil.asCtClass(this.classToExtend, classPool));
+			/**
+			 * In the case that this class map is included it will provoke the following problem:
+			 * - Situation: The overridding method contains references (its return value for example) to the parent class where the extended method was originally located
+			 * - Consequence: All these references to the parent class will be substituted by the instrumented class
+			 * - Problem: For some reason, call to this method will throw at runtime an AbstractMethodError.
+			 * (this sounds like a Bug in Javassist, since the method changing )
+			 */
+			CtMethod ctCopiedMethod = CtNewMethod.copy(ctMethod, targetClass, classMap);
 			try {
 				MethodInfo methodInfo = ctMethod.getMethodInfo();
 				AnnotationsAttribute attr = (AnnotationsAttribute)methodInfo.getAttribute(AnnotationsAttribute.visibleTag);
@@ -314,7 +347,8 @@ public class LogicObjectInstrumentation {
 	public void instrumentAsLogicMethod(CtMethod m) {
 		instrumentAsLogicMethod(m, LogicMethodInvoker.class, "invoke");
 	}
-		
+	
+	
 	public void instrumentAsLogicMethod(CtMethod m, Class invokerClass, String invokerMethodName) {
 		String methodCode = null;
 		try {
@@ -342,10 +376,12 @@ public class LogicObjectInstrumentation {
 				methodCodeBuilder.append("return ");				
 				if(m.getReturnType().isPrimitive()) {
 					//model: return ((WrapperType)result).primitiveValue()
-					methodCodeBuilder.append("(("+((CtPrimitiveType)m.getReturnType()).getWrapperName()+")result)."+m.getReturnType().getName()+"Value(); ");
+					String castingResultType = ((CtPrimitiveType)m.getReturnType()).getWrapperName();
+					methodCodeBuilder.append("(("+ castingResultType +")result)."+m.getReturnType().getName()+"Value(); ");
 				} else {
 					//model: return (Type)result;
-					methodCodeBuilder.append("("+m.getReturnType().getName()+")result; ");
+					String castingResultType = m.getReturnType().getName();
+					methodCodeBuilder.append("("+ castingResultType +")result; ");
 				}
 					
 				

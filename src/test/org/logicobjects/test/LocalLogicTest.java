@@ -12,7 +12,7 @@ import org.logicobjects.core.LogicObjectFactory;
  * @author sergioc78
  *
  */
-public class AbstractLogicTest extends TestCase {
+public class LocalLogicTest extends TestCase {
 
 	@Override
 	public void setUp() {

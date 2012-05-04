@@ -30,7 +30,7 @@ public class BundleUrlFile implements File {
         return getFullPath().substring(dir.getPath().length());
     }
 
-    @Override
+    //@Override
     public String getFullPath() {
         return url.getFile();
     }

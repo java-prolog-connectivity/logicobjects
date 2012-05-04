@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.*;
 import org.junit.Test;
 
-public class TestParametersParser extends AbstractLogicTest {
+public class TestParametersParser extends LocalLogicTest {
 	
 	@Test
 	public void testParseJavaExpressions() {

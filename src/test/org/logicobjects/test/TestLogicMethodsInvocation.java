@@ -2,9 +2,9 @@ package org.logicobjects.test;
 
 import org.junit.Test;
 import org.logicobjects.core.LogicObjectFactory;
-import org.logicobjects.lib.examples.MyTestList;
+import org.logicobjects.lib.example.MyTestList;
 
-public class TestLogicMethodsInvocation extends AbstractLogicTest {
+public class TestLogicMethodsInvocation extends LocalLogicTest {
 
 	
 

@@ -157,7 +157,11 @@ public class LogicClass {
 		if(fileName == null || fileName.equals(""))
 			return false;
 		String packageName = clazz.getPackage().getName();
-		if(clazz.getResource(fileName+".lgt") != null) { //the getResource method will append before the path of the class
+		/**
+		 * the getResource method will append before the path of the class
+		 * note that for some reason this method is not case sensitive: fileName will match any file with the same name without taking into consideration its case
+		 */
+		if(clazz.getResource(fileName+".lgt") != null) { 
 			destiny.add(packageName+"."+fileName);
 			return true;
 		}
@@ -166,7 +170,13 @@ public class LogicClass {
 	
 	public static String[] getDefaultImports(Class clazz) {
 		List<String> defaultImports = new ArrayList<String>();
+		/**
+		 * It is not a good idea to look for a .lgt class with exactly the same name than the class
+		 * 1) If it starts with a capital letter then it does not respect the Prolog conventions
+		 * 2) If the only variation in the java name and the prolog name (obtained with 'javaClassNameToProlog') the resource will be loaded twice
+		 */
 		addIfLgtFileExists(clazz.getSimpleName(), clazz, defaultImports);
+		addIfLgtFileExists(LogicUtil.javaClassNameToProlog(clazz.getSimpleName()), clazz, defaultImports);
 		
 		LObject logicObject = getLogicObjectAnnotation(clazz);
 		if(logicObject != null)

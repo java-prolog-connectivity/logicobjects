@@ -4,9 +4,9 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.logicobjects.core.LogicObjectFactory;
-import org.logicobjects.lib.examples.MyTestList;
+import org.logicobjects.lib.example.MyTestList;
 
-public class TestLogicObjectsCreation extends AbstractLogicTest {
+public class TestLogicObjectsCreation extends LocalLogicTest {
 	@Test
 	public void testCreateLogicObject() {
 		MyTestList tuple = LogicObjectFactory.getDefault().create(MyTestList.class);

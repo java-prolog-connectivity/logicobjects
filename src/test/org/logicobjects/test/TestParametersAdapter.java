@@ -1,17 +1,14 @@
 package org.logicobjects.test;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
-import org.logicobjects.adapter.methodparameters.TermParametersAdapter;
 import org.logicobjects.core.LogicObjectFactory;
-import org.logicobjects.lib.LList;
-import org.logicobjects.lib.examples.MyTestList;
+import org.logicobjects.lib.example.MyTestList;
 
 
-public class TestParametersAdapter extends AbstractLogicTest {
+public class TestParametersAdapter extends LocalLogicTest {
 
 	@Test
 	public void testExpressionsReplacement() {
