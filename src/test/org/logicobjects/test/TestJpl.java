@@ -6,9 +6,9 @@ import jpl.Query;
 import jpl.Term;
 import jpl.Util;
 import jpl.Variable;
-
 import org.junit.Test;
 import org.logicobjects.core.LogicEngine;
+import static junit.framework.TestCase.*;
 
 /**
  * This class test some Prolog functionality (to be completed)

@@ -1,5 +1,6 @@
 package org.logicobjects.test;
 
+import static junit.framework.TestCase.*;
 import org.junit.Test;
 import org.logicobjects.util.LogicObjectsPreferences;
 

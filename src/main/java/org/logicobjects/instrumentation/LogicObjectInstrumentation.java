@@ -20,6 +20,7 @@ import org.logicobjects.adapter.methodparameters.BadExpressionException;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.annotation.method.LSolution;
+import org.logicobjects.core.NoLogicResultException;
 import org.logicobjects.util.JavassistUtil;
 import org.logicobjects.util.JavassistUtil.ObjectConverter;
 
@@ -359,16 +360,17 @@ public class LogicObjectInstrumentation {
 			
 			
 			
-			if(!JavassistUtil.isVoid(m)) {
-				methodCodeBuilder.append("return ");				
+			if(!JavassistUtil.isVoid(m)) {			
 				if(m.getReturnType().isPrimitive()) {
+					methodCodeBuilder.append("if (result == null) {throw new " + NoLogicResultException.class.getCanonicalName() +"(); } ");
+					
 					//model: return ((WrapperType)result).primitiveValue()
 					String castingResultType = ((CtPrimitiveType)m.getReturnType()).getWrapperName();
-					methodCodeBuilder.append("(("+ castingResultType +")result)."+m.getReturnType().getName()+"Value(); ");
+					methodCodeBuilder.append("return (("+ castingResultType +")result)."+m.getReturnType().getName()+"Value(); ");
 				} else {
 					//model: return (Type)result;
 					String castingResultType = m.getReturnType().getName();
-					methodCodeBuilder.append("("+ castingResultType +")result; ");
+					methodCodeBuilder.append("return ("+ castingResultType +")result; ");
 				}
 					
 				

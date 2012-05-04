@@ -5,9 +5,9 @@ import jpl.Compound;
 import jpl.Term;
 import jpl.Util;
 import jpl.Variable;
-
 import org.junit.Test;
 import org.logicobjects.core.LogicEngine;
+import static junit.framework.TestCase.*;
 
 /**
  * This class test some Logtalk functionality (to be completed)

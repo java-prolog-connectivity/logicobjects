@@ -5,6 +5,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.*;
 import org.junit.Test;
+import static junit.framework.TestCase.*;
+
 
 public class TestParametersParser extends LocalLogicTest {
 	
