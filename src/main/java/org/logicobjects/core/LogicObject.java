@@ -10,10 +10,8 @@ import jpl.Term;
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.FieldAdaptingContext;
 import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
+import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.ReflectionUtil;
-
-import com.google.code.guava.beans.Properties;
-import com.google.code.guava.beans.Property;
 
 
 public class LogicObject implements ITermObject {
@@ -21,8 +19,7 @@ public class LogicObject implements ITermObject {
 	public static final String LOGTALK_OPERATOR = "::";
 	
 	public static Compound logtalkMessage(Term object, String messageName, Term[] messageArguments) {
-		Term rightTerm = messageArguments.length > 0 ? new Compound(messageName, messageArguments) : new Atom(messageName);
-		return new Compound(LOGTALK_OPERATOR, new Term[] {object, rightTerm});
+		return new Compound(LOGTALK_OPERATOR, new Term[] {object, LogicUtil.asTerm(messageName, messageArguments)});
 	}
 	
 	

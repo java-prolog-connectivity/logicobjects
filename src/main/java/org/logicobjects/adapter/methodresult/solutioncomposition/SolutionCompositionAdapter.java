@@ -7,6 +7,7 @@ import jpl.Query;
 
 import org.logicobjects.adapter.methodresult.MethodResultAdapter;
 import org.logicobjects.adapter.methodresult.eachsolution.EachSolutionAdapter;
+import org.logicobjects.instrumentation.ParsedLogicMethod;
 
 import org.reflectiveutils.AbstractTypeWrapper;
 import org.reflectiveutils.AbstractTypeWrapper.SingleTypeWrapper;
@@ -25,9 +26,8 @@ public abstract class SolutionCompositionAdapter<MethodResultType, EachSolutionT
 	}
 	*/
 	
-	public SolutionCompositionAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
-		super(method, targetObject, javaMethodParams);
-		setEachSolutionAdapter((EachSolutionAdapter<EachSolutionType>) new EachSolutionAdapter.DefaultEachSolutionAdapter());
+	public SolutionCompositionAdapter() {
+		setEachSolutionAdapter((EachSolutionAdapter<EachSolutionType>) new EachSolutionAdapter.EachSolutionMapAdapter());
 	}
 
 

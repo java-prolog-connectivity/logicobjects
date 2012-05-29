@@ -7,15 +7,13 @@ import java.util.List;
 
 import jpl.Query;
 
+import org.logicobjects.instrumentation.ParsedLogicMethod;
 import org.reflectiveutils.AbstractTypeWrapper;
 import org.reflectiveutils.AbstractTypeWrapper.ArrayTypeWrapper;
 import org.reflectiveutils.GenericsUtil;
 
 public class ArrayCompositionAdapter<LogicAnswerType> extends WrapperAdapter<LogicAnswerType[], LogicAnswerType>  {
 
-	public ArrayCompositionAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
-		super(method, targetObject, javaMethodParams);
-	}
 
 	@Override
 	public LogicAnswerType[] adapt(Query query) {

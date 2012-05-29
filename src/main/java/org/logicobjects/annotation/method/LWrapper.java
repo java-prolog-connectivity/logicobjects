@@ -15,5 +15,4 @@ import org.logicobjects.adapter.methodresult.solutioncomposition.SmartWrapperAda
  */
 public @interface LWrapper {
 	Class adapter() default SmartWrapperAdapter.class;
-	String value() default "";
 }

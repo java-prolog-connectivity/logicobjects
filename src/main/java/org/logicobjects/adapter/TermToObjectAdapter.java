@@ -18,6 +18,7 @@ import org.logicobjects.adapter.objectadapters.TermToCollectionAdapter;
 import org.logicobjects.adapter.objectadapters.TermToMapAdapter;
 import org.logicobjects.adapter.objectadapters.TermToMapAdapter.TermToEntryAdapter;
 import org.logicobjects.annotation.LObjectAdapter;
+import org.logicobjects.annotation.LObjectAdapter.LObjectAdapterUtil;
 import org.logicobjects.core.LogicClass;
 import org.logicobjects.core.LogicEngine;
 import org.logicobjects.core.LogicObjectFactory;
@@ -32,10 +33,10 @@ import com.google.common.primitives.Primitives;
 
 public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 	
-	public static TermToObjectAdapter create(LObjectAdapter objectAdapterAnnotation) {
+	public static TermToObjectAdapter create(LObjectAdapter aLObjectAdapter) {
 		try {
-			TermToObjectAdapter objectAdapter = (TermToObjectAdapter)objectAdapterAnnotation.adapter().newInstance();
-			objectAdapter.setParameters(objectAdapterAnnotation.args());
+			TermToObjectAdapter objectAdapter = (TermToObjectAdapter)LObjectAdapterUtil.getAdapter(aLObjectAdapter).newInstance();
+			objectAdapter.setParameters(aLObjectAdapter.args());
 			return objectAdapter;
 		} catch (Exception e) {
 			throw new RuntimeException(e);

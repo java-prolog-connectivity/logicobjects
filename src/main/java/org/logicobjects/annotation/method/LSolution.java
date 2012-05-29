@@ -10,6 +10,6 @@ import org.logicobjects.adapter.methodresult.eachsolution.SolutionToLObjectAdapt
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LSolution {
-	Class adapter() default SolutionToLObjectAdapter.class;
-	String value() default "";
+	String value() default ""; //a string representation of a solution
+	Class adapter() default SolutionToLObjectAdapter.class; //the adapter interpreting the solution
 }

@@ -6,6 +6,7 @@ import java.util.List;
 
 import jpl.Query;
 
+import org.logicobjects.instrumentation.ParsedLogicMethod;
 import org.reflectiveutils.AbstractTypeWrapper;
 import org.reflectiveutils.GenericsUtil;
 
@@ -15,9 +16,6 @@ import org.reflectiveutils.GenericsUtil;
 public class ListCompositionAdapter<LogicAnswerType> extends
 		WrapperAdapter<List<LogicAnswerType>, LogicAnswerType> {
 
-	public ListCompositionAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
-		super(method, targetObject, javaMethodParams);
-	}
 
 	@Override
 	public List<LogicAnswerType> adapt(Query query) {

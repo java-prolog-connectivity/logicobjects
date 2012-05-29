@@ -11,6 +11,7 @@ import org.logicobjects.adapter.objectadapters.ImplementationMap;
 import org.logicobjects.adapter.objectadapters.MapToTermAdapter.EntryToTermAdapter;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LTermAdapter;
+import org.logicobjects.annotation.LTermAdapter.LTermAdapterUtil;
 import org.logicobjects.core.ITermObject;
 import org.logicobjects.core.LogicClass;
 
@@ -92,10 +93,10 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 	}
 	
 
-	public static ObjectToTermAdapter create (LTermAdapter termAdapterAnnotation) {
+	public static ObjectToTermAdapter create(LTermAdapter aLTermAdapter) {
 		try {
-			ObjectToTermAdapter termAdapter = (ObjectToTermAdapter)termAdapterAnnotation.adapter().newInstance();
-			termAdapter.setParameters(termAdapterAnnotation.args());
+			ObjectToTermAdapter termAdapter = (ObjectToTermAdapter)LTermAdapterUtil.getAdapter(aLTermAdapter).newInstance();
+			termAdapter.setParameters(aLTermAdapter.args());
 			return termAdapter;
 		} catch (Exception e) {
 			throw new RuntimeException(e);

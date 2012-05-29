@@ -5,16 +5,12 @@ import java.lang.reflect.Type;
 
 import jpl.Query;
 
+import org.logicobjects.instrumentation.ParsedLogicMethod;
 import org.reflectiveutils.AbstractTypeWrapper;
 import org.reflectiveutils.AbstractTypeWrapper.SingleTypeWrapper;
 
 public abstract class WrapperAdapter<MethodResultType, EachSolutionType> extends
 		SolutionCompositionAdapter<MethodResultType, EachSolutionType> {
-
-
-	public WrapperAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
-		super(method, targetObject, javaMethodParams);
-	}
 
 	protected Type getFirstParameterizedType() {
 		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(getMethodResultType());

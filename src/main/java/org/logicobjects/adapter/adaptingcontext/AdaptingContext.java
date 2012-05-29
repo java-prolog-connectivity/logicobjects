@@ -36,9 +36,9 @@ public abstract class AdaptingContext {
 	}
 	
 	public boolean canAdaptToTerm() {
-		if (hasObjectToTermAdapter())
+		if (hasObjectToTermAdapter()) //first check if there is an explicit adapter
 			return true;
-		return hasMethodInvokerDescription();
+		return hasMethodInvokerDescription(); //if no adapter is found, try to use a method invoker description
 	}
 	
 	protected Term adaptToTermWithAdapter(Object object) {
@@ -55,7 +55,7 @@ public abstract class AdaptingContext {
 	}
 	
 	public Term adaptToTerm(Object object) {
-		if(hasObjectToTermAdapter()) {
+		if(hasObjectToTermAdapter()) { //first check if there is an explicit adapter
 			return adaptToTermWithAdapter(object);
 		}
 		else { //in the current implementation, an Adapter annotation overrides any method invoker description
@@ -95,7 +95,5 @@ public abstract class AdaptingContext {
 			return adaptToObjectFromDescription(term, type, getMethodInvokerDescription());
 		}
 	}
-	
-	
 
 }

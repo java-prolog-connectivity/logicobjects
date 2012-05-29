@@ -1,6 +1,8 @@
 package org.logicobjects.test.fixture;
 
+import org.logicobjects.adapter.TextToTermAdapter;
 import org.logicobjects.annotation.LObject;
+import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.annotation.method.LSolution;
 
@@ -30,5 +32,21 @@ public abstract class MyRawQueries {
 	@LSolution("L")
 	@LQuery("false=L")
 	public abstract boolean falseMethod2();
+	
+	@LQuery("/{1==1/}")
+	public abstract boolean shouldSucceed();
+	
+	@LQuery("/{1==2/}")
+	public abstract boolean shouldFail();
+	
+	@LSolution("FlagValue")
+	@LQuery(args={"$1", "FlagValue"})
+	public abstract String currentPrologFlag(String flagName);
+	
+	@LQuery
+	public abstract boolean currentPrologFlag(String flagName, String flagValue);
+	
+	@LQuery("$$")
+	public abstract boolean scripting(@LTermAdapter(TextToTermAdapter.class) String query);
 	
 }

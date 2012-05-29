@@ -1,4 +1,4 @@
-package org.logicobjects.adapter.methodparameters;
+package org.logicobjects.adapter;
 
 public class BadExpressionException extends RuntimeException {
 	private String methodName;

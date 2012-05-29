@@ -5,6 +5,8 @@ import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import jpl.Atom;
+import jpl.Compound;
 import jpl.Term;
 import jpl.Util;
 import jpl.Variable;
@@ -17,6 +19,11 @@ import jpl.Variable;
  */
 public class LogicUtil {
 
+	public static Term asTerm(String predicate, Term[] parameters) {
+		Term term = parameters.length > 0 ? new Compound(predicate, parameters) : new Atom(predicate);
+		return term;
+	}
+	
 	public static String javaClassNameToProlog(String javaClassName) {
 		String prologName = javaNameToProlog(javaClassName);
 		String start = prologName.substring(0, 1);

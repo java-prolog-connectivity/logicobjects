@@ -2,6 +2,8 @@ package org.logicobjects.adapter.methodresult;
 
 import java.lang.reflect.Method;
 
+import org.logicobjects.instrumentation.ParsedLogicMethod;
+
 import jpl.Query;
 
 
@@ -10,9 +12,6 @@ import jpl.Query;
  */
 public class HasSolutionAdapter extends MethodResultAdapter<Boolean> {
 
-	public HasSolutionAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
-		super(method, targetObject, javaMethodParams);
-	}
 	
 	@Override
 	public Boolean adapt(Query source) {

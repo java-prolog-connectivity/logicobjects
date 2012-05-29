@@ -25,7 +25,7 @@ public class SolutionEnumeration<EachSolutionType> implements Enumeration<EachSo
 	private Query query;
 	
 	public SolutionEnumeration(Query query) {
-		this(query, (EachSolutionAdapter<EachSolutionType>) new EachSolutionAdapter.DefaultEachSolutionAdapter());
+		this(query, (EachSolutionAdapter<EachSolutionType>) new EachSolutionAdapter.EachSolutionMapAdapter());
 	}
 	
 	public SolutionEnumeration(Query query, EachSolutionAdapter<EachSolutionType> adapter) {

@@ -17,5 +17,11 @@ public class TestRawQueries extends LocalLogicTest {
 		assertTrue(rawQueries.trueMethod2());
 		assertFalse(rawQueries.falseMethod1());
 		assertFalse(rawQueries.falseMethod2());
+		assertTrue(rawQueries.shouldSucceed());
+		assertFalse(rawQueries.shouldFail());
+		assertNotNull(rawQueries.currentPrologFlag("dialect"));
+		assertNotNull(rawQueries.currentPrologFlag("dialect", "yap"));
+		assertNotNull(rawQueries.scripting("current_prolog_flag(dialect, yap)"));
+
 	}
 }

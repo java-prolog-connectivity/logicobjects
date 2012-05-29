@@ -6,6 +6,7 @@ import java.util.Iterator;
 
 import jpl.Query;
 
+import org.logicobjects.instrumentation.ParsedLogicMethod;
 import org.reflectiveutils.AbstractTypeWrapper;
 import org.reflectiveutils.GenericsUtil;
 
@@ -19,10 +20,6 @@ import org.reflectiveutils.GenericsUtil;
  */
 public class IteratorCompositionAdapter<LogicAnswerType> extends
 		WrapperAdapter<SolutionEnumeration<LogicAnswerType>, LogicAnswerType> {
-
-	public IteratorCompositionAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
-		super(method, targetObject, javaMethodParams);
-	}
 
 
 	@Override

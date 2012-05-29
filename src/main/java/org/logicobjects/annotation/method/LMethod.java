@@ -13,6 +13,6 @@ import org.logicobjects.util.AnnotationConstants;
 public @interface LMethod {
 	
 	String name() default "";
-	String[] params() default {AnnotationConstants.NULL};  //if no parameters are explicitly added, the logic method will have the same parameters than the Java method
+	String[] args() default {AnnotationConstants.NULL};  //if no parameters are explicitly added, the logic method will have the same parameters than the Java method
 
 }

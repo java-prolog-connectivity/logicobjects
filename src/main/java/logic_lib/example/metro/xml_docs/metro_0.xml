@@ -28,6 +28,11 @@
 <scope>public</scope>
 <compilation>static</compilation>
 </predicate>
+<predicate>
+<name><![CDATA[line/1]]></name>
+<scope>public</scope>
+<compilation>static</compilation>
+</predicate>
 </public>
 <protected>
 </protected>

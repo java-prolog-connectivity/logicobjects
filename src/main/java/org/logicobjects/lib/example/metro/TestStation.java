@@ -8,6 +8,8 @@ import static junit.framework.TestCase.*;
 
 public class TestStation extends LocalLogicTest {
 
+	
+	
 	@Test
 	public void testAllConnections() {
 		Station station1 = LogicObjectFactory.getDefault().create(Station.class);

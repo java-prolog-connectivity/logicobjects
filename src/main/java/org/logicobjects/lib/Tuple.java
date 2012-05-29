@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.logicobjects.annotation.LObject;
 
-@LObject(name="tuple", params = {"items"})
+@LObject(name="tuple", args = {"items"})
 //@XmlRootElement(namespace = "iv4e.xml.jaxb.model")
 //@XmlType(name = "tuple")
 //@XmlTransient

@@ -77,10 +77,15 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	
 	public static final String PARAMETERS_SEPARATOR = "~~~";
 	
-	public static final String RETURN_SEPARATOR = "~RET~";
+	public static final String PARAMETERS_TAG = "~PARAMETERS~";
+	
+	public static final String QUERY_TAG = "~QUERY~";
+	
+	public static final String RETURN_TAG = "~RET~";
 
 	
 
+	
 	
 	private LM logicMethod;
 	private String allLogicStrings;
@@ -89,41 +94,89 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	private Map<String, String> expressionsReplacementMap;
 	private String eachSolutionValue;
 
+	private ParsingData unparsedData;
+	
 	public static AbstractLogicMethodParser create(Method method) {
+		return new AbstractLogicMethodParser(method) {};
+		/*
 		if(LogicMethod.isLogicMethod(method))
 			return new LogicMethodParser(method);
 		else
 			return new RawQueryParser(method);
+		*/
 	}
 	
 	AbstractLogicMethodParser(Method method) {
 		logicMethod = (LM) AbstractLogicMethod.create(method);
-		parse();
+		unparsedData = logicMethod.getDataToParse();
+		preParsing();
 	}
 
-	public AbstractLogicMethodParser parse() {
-		String paramsLogicString = concatenateTokens(getInputTokens());
-		allLogicStrings = paramsLogicString + RETURN_SEPARATOR;
-		eachSolutionValue = logicMethod.getEachSolutionValue();
-		if(eachSolutionValue != null) {
-			allLogicStrings += eachSolutionValue;
-		}
+	public AbstractLogicMethodParser preParsing() {
+		String paramsLogicString = concatenateTokens(getParametersToParse());
+		allLogicStrings = QUERY_TAG + getQueryToParse() + PARAMETERS_TAG + paramsLogicString + RETURN_TAG + getSolutionToParse();
 		foundSymbols = getAllSymbols(allLogicStrings);
 		expressions = getJavaExpressions(allLogicStrings);
 		expressionsReplacementMap = expressionsReplacementMap(expressions);
 		return this;
 	}
+
+
+	public String getQueryToParse() {
+		if(unparsedData.getQueryString() == null)
+			return "";
+		else
+			return unparsedData.getQueryString();
+	}
+	
+	public String[] getParametersToParse() {
+		if(unparsedData.getParameters() == null)
+			return new String[]{};
+		else
+			return unparsedData.getParameters();
+	}
+	
+	public String getSolutionToParse() {
+		if(unparsedData.getSolutionString() == null)
+			return "";
+		else
+			return unparsedData.getSolutionString();
+	}
 	
 	public LM getLogicMethod() {
 		return logicMethod;
 	}
-	
+
 	public Method getMethod() {
 		return logicMethod.getWrappedMethod();
 	}
-	
-	protected abstract String[] getInputTokens();
 
+
+
+	public ParsingData parsedData(Object targetObject, Object[] oldParams) {
+		String allLogicStringsProcessed = replaceSymbolsAndExpressions(allLogicStrings, foundSymbols, expressionsReplacementMap, targetObject, oldParams);
+		ParsingData parsedData = decomposeLogicString(allLogicStringsProcessed);
+		return parsedData;
+	}
+
+	public static ParsingData decomposeLogicString(String allLogicStringsProcessed) {
+		ParsingData parsedData = new ParsingData();
+		Pattern pattern = Pattern.compile(Pattern.quote(QUERY_TAG)+"(.*)"+Pattern.quote(PARAMETERS_TAG)+"(.*)"+Pattern.quote(RETURN_TAG)+"(.*)");
+		Matcher matcher = pattern.matcher(allLogicStringsProcessed);
+		matcher.find();
+		String queryString = matcher.group(1);
+		if(!queryString.isEmpty())
+			parsedData.setQueryString(queryString);
+		String params = matcher.group(2);
+		if(!params.isEmpty())
+			parsedData.setParameters(splitConcatenatedTokens(params));
+		String result = matcher.group(3);
+		if(!result.isEmpty())
+			parsedData.setSolutionString(result);
+		return parsedData;
+	}
+	
+	/*
 	public String[] resolveInputTokens(Object targetObject, Object[] oldParams) {
 		String inputString = allLogicStrings.split(RETURN_SEPARATOR)[0];
 		inputString = replaceSymbolsAndExpressions(inputString, foundSymbols, expressionsReplacementMap, targetObject, oldParams);
@@ -136,7 +189,7 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 		String solvedEachSolutionValue = replaceSymbolsAndExpressions(eachSolutionValue, foundSymbols, expressionsReplacementMap, targetObject, oldParams);
 		return solvedEachSolutionValue;
 	}
-	
+*/
 	private static String concatenateTokens(Object[] tokens) {
 		String concatenatedParams = "";
 		for(int i=0; i<tokens.length; i++) {
@@ -201,7 +254,7 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 		}
 		return new ArrayList<String>(symbolsSet);
 	}
-	
+
 
 	/**
 	 * Extract the expression value from a delimited expression

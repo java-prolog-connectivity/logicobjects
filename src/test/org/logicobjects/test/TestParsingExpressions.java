@@ -1,12 +1,32 @@
 package org.logicobjects.test;
 
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.*;
-import org.junit.Test;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.ALL_PARAMS_SUFFIX;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.BEGIN_JAVA_EXPRESSION;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.END_JAVA_EXPRESSION;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.INSTANCE_PROPERTY_PREFIX;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.JAVA_NAME_REX;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.PARAMETERS_PREFIX;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.PARAMETERS_TAG;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.QUERY_TAG;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.RETURN_TAG;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.getAllSymbols;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.getExpressionValue;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.getJavaExpressions;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.isInstancePropertySymbol;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.isValidJavaExpression;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.normalizeExpression;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.parameterSymbol;
 
-import static junit.framework.TestCase.*;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import org.junit.Test;
+import org.logicobjects.instrumentation.AbstractLogicMethodParser;
+import org.logicobjects.instrumentation.ParsingData;
 
 
 public class TestParsingExpressions extends LocalLogicTest {
@@ -105,8 +125,6 @@ public class TestParsingExpressions extends LocalLogicTest {
 		assertTrue(pattern.matcher("_$aName").matches());
 	}
 	
-	
-	
 	@Test
 	public void testValidJavaExpressions() {
 		assertFalse(isValidJavaExpression(null));
@@ -114,6 +132,27 @@ public class TestParsingExpressions extends LocalLogicTest {
 		assertFalse(isValidJavaExpression(";"));
 		assertFalse(isValidJavaExpression("   "));
 		assertTrue(isValidJavaExpression(" x "));
+	}
+
+	@Test
+	public void testDecomposeLogicString() {
+		String query = "myQuery";
+		String params = "myParams";
+		String returnValue = "returnValue";
+		String testString = QUERY_TAG+query+PARAMETERS_TAG+params+RETURN_TAG+returnValue;
+		ParsingData parsedData = AbstractLogicMethodParser.decomposeLogicString(testString);
+		
+		assertEquals(parsedData.getQueryString(), query);
+		assertEquals(parsedData.getParameters()[0], params);
+		assertEquals(parsedData.getSolutionString(), returnValue);
+		
+		query = "";
+		params = "";
+		testString = QUERY_TAG+query+PARAMETERS_TAG+params+RETURN_TAG+returnValue;
+		parsedData = AbstractLogicMethodParser.decomposeLogicString(testString);
+		assertEquals(parsedData.getQueryString(), null);
+		assertEquals(parsedData.getParameters(), null);
+		assertEquals(parsedData.getSolutionString(), returnValue);
 	}
 
 }

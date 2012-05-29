@@ -6,6 +6,7 @@ import java.util.Enumeration;
 
 import jpl.Query;
 
+import org.logicobjects.instrumentation.ParsedLogicMethod;
 import org.reflectiveutils.AbstractTypeWrapper;
 import org.reflectiveutils.GenericsUtil;
 
@@ -19,11 +20,6 @@ import org.reflectiveutils.GenericsUtil;
  */
 public class EnumerationCompositionAdapter<LogicAnswerType> extends
 		WrapperAdapter<SolutionEnumeration<LogicAnswerType>, LogicAnswerType> {
-
-
-	public EnumerationCompositionAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
-		super(method, targetObject, javaMethodParams);
-	}
 
 
 	@Override

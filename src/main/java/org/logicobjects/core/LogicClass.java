@@ -42,7 +42,7 @@ public class LogicClass {
 	
 	public String[] getParameters() {
 		LObject lObjectAnnotation = (LObject) clazz.getAnnotation(LObject.class);
-		return lObjectAnnotation.params();
+		return lObjectAnnotation.args();
 	}
 	
 	public String[] getImports() {
@@ -113,7 +113,7 @@ public class LogicClass {
 		return LogicEngine.getDefault().logtalkLoad(importTerms) && result; //loading Logtalk objects
 	}
 	
-	private static final String IMPORTS = "objects"; //"objects" in logicobjects files will be loaded with logtalk_load
+	private static final String IMPORTS = "imports"; //"objects" in logicobjects files will be loaded with logtalk_load
 	private static final String MODULES = "modules"; //"modules" in logicobjects files will be loaded with ensure_loaded
 	public static final String BUNDLE_NAME = "logicobjects";
 	
@@ -255,11 +255,29 @@ public class LogicClass {
 		};
 		finderVisitor.visit(candidateClass);
 		return finderVisitor.getFoundType();
-		
+	}
+	
+	//TODO
+	/**
+	 * Answers the first class/interface in the class hierarchy specifying the logic object method invoker
+	 * @param candidateClass
+	 * @return
+	 */
+	public static Class findMethodInvokerClass(Class candidateClass) {
+		FindFirstTypeVisitor finderVisitor = new FindFirstTypeVisitor(InterfaceMode.EXCLUDE_INTERFACES) {
+			
+			@Override
+			public boolean match(Class clazz) {
+				return clazz.getAnnotation(LDelegationObject.class) != null || isGuidingClass(clazz);
+			}
+		};
+		finderVisitor.visit(candidateClass);
+		return finderVisitor.getFoundType();
 	}
 	
 	/**
-	 * Answers the first class/interface in the class hierarchy specifying the logic object method invoker
+	 * Answers the delegation class in the hierarchy
+	 * If before arriving to the class, it is found a "guiding" class (a class with LObject annotation or other information for converting an object to a LObject) the method will return null
 	 * @param candidateClass
 	 * @return
 	 */
@@ -282,6 +300,12 @@ public class LogicClass {
 		return finderVisitor.getFoundType();
 	}
 	
+	
+	/**
+	 * Answers the first class in the hierarchy providing information to import the dependencies of the logic object
+	 * @param candidateClass
+	 * @return
+	 */
 	public static Class findDependencyInfoClass(Class candidateClass) {
 		FindFirstTypeVisitor finderVisitor = new FindFirstTypeVisitor(InterfaceMode.EXCLUDE_INTERFACES) {
 			@Override

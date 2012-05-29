@@ -6,7 +6,7 @@ import org.logicobjects.annotation.LDelegationObject;
 
 /**
  * This class is a workaround to the problem than in Java annotations cannot extend other annotations or implement an interface
- * Since @LObject and @LPsueodObject are quite similar, this class and its subclasses define methods to access common functionality from these two annotations
+ * Since @LObject and @LDelegationObject are quite similar, this class and its subclasses define methods to access common functionality from these two annotations
  * (without having to be aware which of the two ones are the used ones behind the curtains)
  * @author sergioc78
  *
@@ -49,7 +49,7 @@ public abstract class LMethodInvokerDescription {
 		}
 
 		public String[] params() {
-			return aLObject.params();
+			return aLObject.args();
 		}
 
 		public String[] imports() {

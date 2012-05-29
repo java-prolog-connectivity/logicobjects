@@ -7,21 +7,20 @@ import java.util.Set;
 import jpl.Query;
 
 import org.logicobjects.core.LogicObjectFactory;
+import org.logicobjects.instrumentation.ParsedLogicMethod;
 import org.reflectiveutils.AbstractTypeWrapper;
 import org.reflectiveutils.GenericsUtil;
 
 public class SmartWrapperAdapter extends WrapperAdapter<Object, Object>  {
 
-	public SmartWrapperAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
-		super(method, targetObject, javaMethodParams);
-	}
 
 	@Override
 	public Object adapt(Query source) {
 		Class<? extends WrapperAdapter> wrapperAdapterClass = findWrapperAdapterClass();
 		if(wrapperAdapterClass!=null) {
 			try {
-				WrapperAdapter wrapperAdapter = wrapperAdapterClass.getConstructor(Method.class, Object.class, Object[].class).newInstance(getMethod(), getTargetObject(), getJavaMethodParams());
+				WrapperAdapter wrapperAdapter = wrapperAdapterClass.getConstructor().newInstance();
+				wrapperAdapter.setParsedLogicMethod(getParsedLogicMethod());
 				//WrapperAdapter wrapperAdapter = wrapperAdapterClass.newInstance();
 				//wrapperAdapter.setMethod(getMethod());
 				wrapperAdapter.setEachSolutionAdapter(getEachSolutionAdapter());

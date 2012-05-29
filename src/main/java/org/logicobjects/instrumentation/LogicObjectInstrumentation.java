@@ -15,8 +15,9 @@ import javassist.CtNewMethod;
 import javassist.CtPrimitiveType;
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.MethodInfo;
+import javassist.bytecode.ParameterAnnotationsAttribute;
 
-import org.logicobjects.adapter.methodparameters.BadExpressionException;
+import org.logicobjects.adapter.BadExpressionException;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.annotation.method.LSolution;
@@ -121,7 +122,7 @@ public class LogicObjectInstrumentation {
 			createLogicMethods(newCtClass);
 			
 			JavassistUtil.makeNonAbstract(newCtClass); //Javassist makes a class abstract if an abstract method is added to the class. Then it has to be explicitly changed back to non-abstract
-			JavassistUtil.createClassFile(TEST_DIRECTORY, newCtClass);  //just to show how the new class looks like
+			JavassistUtil.createClassFile(TEST_DIRECTORY, newCtClass);  //just to show how the new class looks like (TODO DO NOT FORGET TO DELETE THIS LINE IN THE RELEASED IMPLEMENTATION !!!)
 			
 			
 			//Class newClass = newCtClass.toClass();
@@ -213,17 +214,26 @@ public class LogicObjectInstrumentation {
 			classMap.fix(JavassistUtil.asCtClass(this.classToExtend, classPool));
 			/**
 			 * In the case that this class map is included it will provoke the following problem:
-			 * - Situation: The overridding method contains references (its return value for example) to the parent class where the extended method was originally located
+			 * - Situation: The overriding method contains references (its return value for example) to the parent class where the extended method was originally located
 			 * - Consequence: All these references to the parent class will be substituted by the instrumented class
 			 * - Problem: For some reason, call to this method will throw at runtime an AbstractMethodError.
-			 * (this sounds like a Bug in Javassist, since the method changing )
+			 * (this looks like a Bug in Javassist)
 			 */
 			CtMethod ctCopiedMethod = CtNewMethod.copy(ctMethod, targetClass, classMap);
 			try {
 				MethodInfo methodInfo = ctMethod.getMethodInfo();
-				AnnotationsAttribute attr = (AnnotationsAttribute)methodInfo.getAttribute(AnnotationsAttribute.visibleTag);
-				attr = (AnnotationsAttribute)attr.copy(targetClass.getClassFile().getConstPool(), null);
-				ctCopiedMethod.getMethodInfo().addAttribute(attr);
+				
+				AnnotationsAttribute methodAnnotationsAttribute = (AnnotationsAttribute)methodInfo.getAttribute(AnnotationsAttribute.visibleTag);
+				if(methodAnnotationsAttribute != null) {
+					methodAnnotationsAttribute = (AnnotationsAttribute)methodAnnotationsAttribute.copy(targetClass.getClassFile().getConstPool(), classMap);
+					ctCopiedMethod.getMethodInfo().addAttribute(methodAnnotationsAttribute);
+				}
+				
+				ParameterAnnotationsAttribute parameterAnnotationsAttribute = (ParameterAnnotationsAttribute)methodInfo.getAttribute(ParameterAnnotationsAttribute.visibleTag);
+				if(parameterAnnotationsAttribute != null) {
+					parameterAnnotationsAttribute = (ParameterAnnotationsAttribute)parameterAnnotationsAttribute.copy(targetClass.getClassFile().getConstPool(), classMap);
+					ctCopiedMethod.getMethodInfo().addAttribute(parameterAnnotationsAttribute);
+				}
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

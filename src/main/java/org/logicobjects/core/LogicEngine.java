@@ -455,7 +455,7 @@ public abstract class LogicEngine {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@LSolution("FlagValue")
-	@LMethod(name="current_prolog_flag", params={"$1", "FlagValue"})
+	@LMethod(args={"$1", "FlagValue"})
 	public abstract String currentPrologFlag(String flagName);
 
 }

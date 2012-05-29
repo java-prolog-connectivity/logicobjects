@@ -4,7 +4,7 @@
 		author is 'Sergio Castro',
 		comment is 'The Londom metro. Taken from the "Simply logic" book (Peter Flach).'
 	]).
-	:- public([connected/3, nearby/2, reachable/3]).
+	:- public([connected/3, nearby/2, reachable/3, line/1]).
 
 	connected(station(bond_street),station(oxford_circus),line(central)).
 	connected(station(oxford_circus),station(tottenham_court_road),line(central)).
@@ -24,4 +24,6 @@
 	reachable(X,Y,[]):-connected(X,Y,L).
 	reachable(X,Y,[Z|R]):-connected(X,Z,L),reachable(Z,Y,R).
 
+	line(Name) :- setof(L, connected(_,_,L), AllLines), list::member(line(Name), AllLines).
+    	
 :- end_object.

@@ -2,12 +2,11 @@ package org.logicobjects.adapter.methodresult;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Map;
 
 import jpl.Query;
 
 import org.logicobjects.adapter.LogicAdapter;
-import org.logicobjects.adapter.methodresult.eachsolution.EachSolutionAdapter;
+import org.logicobjects.instrumentation.ParsedLogicMethod;
 
 /*
  * Abstract base class for all the adapters that adapt a logic query as an object of type MethodResultType
@@ -19,10 +18,7 @@ public abstract class MethodResultAdapter<MethodResultType> extends LogicAdapter
 		public Query adapt(Query source) {
 			return source;
 		}
-		
-		public DefaultMethodResultAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
-			super(method, targetObject, javaMethodParams);
-		}
+
 	}
 	
 	/*
@@ -30,16 +26,20 @@ public abstract class MethodResultAdapter<MethodResultType> extends LogicAdapter
 	}
 	*/
 	
+	/*
 	private Method method;
 	private Object targetObject;
 	private Object[] javaMethodParams;
+	*/
 	
-	public MethodResultAdapter(Method method, Object targetObject, Object[] javaMethodParams) {
-		setMethod(method);
-		setTargetObject(targetObject);
-		setJavaMethodParams(javaMethodParams);
+	private ParsedLogicMethod parsedLogicMethod;
+	
+	public MethodResultAdapter(ParsedLogicMethod parsedMethodData) {
+		this.parsedLogicMethod = parsedMethodData;
 	}
 	
+	public MethodResultAdapter() {
+	}
 	
 	/*
 	public MethodResultAdapter(Object ...parameters) {
@@ -48,9 +48,18 @@ public abstract class MethodResultAdapter<MethodResultType> extends LogicAdapter
 	*/
 
 	public Method getMethod() {
-		return method;
+		return parsedLogicMethod.getLogicMethod().getWrappedMethod();
 	}
 
+	public ParsedLogicMethod getParsedLogicMethod() {
+		return parsedLogicMethod;
+	}
+	
+	public void setParsedLogicMethod(ParsedLogicMethod parsedLogicMethod) {
+		this.parsedLogicMethod = parsedLogicMethod;
+	}
+	
+/*
 	public void setMethod(Method method) {
 		this.method = method;
 	}
@@ -70,6 +79,9 @@ public abstract class MethodResultAdapter<MethodResultType> extends LogicAdapter
 	public void setJavaMethodParams(Object[] javaMethodParams) {
 		this.javaMethodParams = javaMethodParams;
 	}
+*/
+
+
 
 
 
@@ -82,16 +94,15 @@ public abstract class MethodResultAdapter<MethodResultType> extends LogicAdapter
 	 */
 	public Type getMethodResultType() {
 		try {
-			Class superClass = method.getDeclaringClass().getSuperclass();
-			Method superMethod = superClass.getMethod(method.getName(), method.getParameterTypes());
+			Class superClass = getMethod().getDeclaringClass().getSuperclass();
+			Method superMethod = superClass.getMethod(getMethod().getName(), getMethod().getParameterTypes());
 			return superMethod.getGenericReturnType();
 		} catch (NoSuchMethodException e) {
-			return method.getGenericReturnType();
+			return getMethod().getGenericReturnType();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 //		return method.getGenericReturnType();
 	}
-	
 
 }

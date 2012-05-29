@@ -2,9 +2,8 @@ package org.logicobjects.lib.example.metro;
 
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.method.LMethod;
-import org.logicobjects.annotation.method.LSolution;
 
-@LObject(params = {"name"})
+@LObject(args = {"name"})
 public abstract class Line {
 
 	private String name;
@@ -20,7 +19,14 @@ public abstract class Line {
 	@Override
 	public String toString() {return name;}
 	
-	@LMethod(name = "connects", params = {"_", "_"})
+	@LMethod
+	public abstract boolean connects(Station s1, Station s2);
+	
+	@LMethod(name = "connects", args = {"_", "_"})
 	public abstract int segments();
+	
+	
+	
+
 	
 }

@@ -1,9 +1,17 @@
 package org.logicobjects.lib.example.metro;
 
+import java.util.List;
+
 import org.logicobjects.annotation.LObject;
+import org.logicobjects.annotation.method.LMethod;
+import org.logicobjects.annotation.method.LWrapper;
 
 @LObject
 public abstract class Metro {
 	
+	@LWrapper @LMethod(name="line", args={"_"})
+	public abstract List<Line> lines();
 	
+	@LMethod
+	public abstract Line line(String s);
 }
