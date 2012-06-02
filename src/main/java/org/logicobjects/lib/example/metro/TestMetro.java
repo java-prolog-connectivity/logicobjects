@@ -15,6 +15,11 @@ public class TestMetro extends LocalLogicTest {
 		List<Line> lines = metro.lines();
 		assertNotNull(lines);
 		System.out.println("Number of lines: " + lines.size());
+		System.out.print("Lines: ");
+		for(Line line : lines) {
+			System.out.print(line + " ");
+		}
+		System.out.println();
 	}
 	
 	@Test

@@ -6,7 +6,7 @@ import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.annotation.method.LSolution;
 
-@LObject(name = "user")
+@LObject
 public abstract class MyRawQueries {
 
 	@LSolution("L")
@@ -38,6 +38,10 @@ public abstract class MyRawQueries {
 	
 	@LQuery("/{1==2/}")
 	public abstract boolean shouldFail();
+	
+	@LSolution("FlagValue")
+	@LQuery(predicate = "current_prolog_flag", args={"dialect", "FlagValue"})
+	public abstract String prologDialect();
 	
 	@LSolution("FlagValue")
 	@LQuery(args={"$1", "FlagValue"})

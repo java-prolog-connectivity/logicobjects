@@ -1,5 +1,6 @@
 package org.logicobjects.test.fixture;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -10,10 +11,11 @@ import org.logicobjects.annotation.method.LSolution;
 import org.logicobjects.annotation.method.LWrapper;
 import org.logicobjects.lib.LList;
 
-public abstract class MyList extends LList {
+
+public abstract class MyList extends LList<String> {
 	
 	public MyList() {
-		addAll(Arrays.<String>asList("a", "b", "c"));
+		//addAll(Arrays.<String>asList("a", "b", "c"));
 	}
 
 	@LSolution("L")
@@ -21,10 +23,14 @@ public abstract class MyList extends LList {
 	public abstract int length();
 
 	@LMethod(name = "member", args={"_", "$0"})
-	public abstract int length2();
+	public abstract int membersLength();
 	
-	@LSolution(".($1, $0)")
-	public abstract List<String> appendFirst(String s);
+	//@LSolution(".($1, $0)") //this will produce the same effect
+	@LSolution("[$1|$0]")
+	public abstract List<String> addFirst(String s);
+	
+	
+	
 	
 	@LSolution("L")
 	@LMethod(name = "append", args={"$0", "$1", "L"})
@@ -32,8 +38,8 @@ public abstract class MyList extends LList {
 	
 	@LWrapper
 	@LSolution("[A, B]")
-	@LMethod(name = "append", args={"A", "B", "$1"})
-	public abstract List<List<List<String>>> appendCombinations(List<String> list);
+	@LMethod(name = "append", args={"A", "B", "$0"})
+	public abstract List<List<List<String>>> appendCombinations();
 	
 	
 	

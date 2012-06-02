@@ -24,6 +24,6 @@
 	reachable(X,Y,[]):-connected(X,Y,L).
 	reachable(X,Y,[Z|R]):-connected(X,Z,L),reachable(Z,Y,R).
 
-	line(Name) :- setof(L, connected(_,_,L), AllLines), list::member(line(Name), AllLines).
+	line(Name) :- setof(L, S1^S2^connected(S1,S2,L), AllLines), list::member(line(Name), AllLines).
     	
 :- end_object.

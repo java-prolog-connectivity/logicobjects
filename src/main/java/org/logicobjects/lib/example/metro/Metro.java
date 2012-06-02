@@ -9,7 +9,7 @@ import org.logicobjects.annotation.method.LWrapper;
 @LObject
 public abstract class Metro {
 	
-	@LWrapper @LMethod(name="line", args={"_"})
+	@LWrapper @LMethod(name="line", args={"L"})
 	public abstract List<Line> lines();
 	
 	@LMethod

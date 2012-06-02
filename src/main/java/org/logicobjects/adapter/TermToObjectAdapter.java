@@ -28,10 +28,14 @@ import org.reflectiveutils.AbstractTypeWrapper.ArrayTypeWrapper;
 import org.reflectiveutils.AbstractTypeWrapper.SingleTypeWrapper;
 import org.reflectiveutils.AbstractTypeWrapper.VariableTypeWrapper;
 import org.reflectiveutils.GenericsUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.primitives.Primitives;
 
 public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
+	
+	private static Logger logger = LoggerFactory.getLogger(TermToObjectAdapter.class);
 	
 	public static TermToObjectAdapter create(LObjectAdapter aLObjectAdapter) {
 		try {
@@ -93,6 +97,11 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 				//System.out.println(typeWrapper.getClass());
 				if( typeWrapper instanceof SingleTypeWrapper ) { //the type is not an array and not an erased type (but it can be a collection)
 					SingleTypeWrapper singleTypeWrapper = SingleTypeWrapper.class.cast(typeWrapper);
+					
+					if(term instanceof Variable && !Term.class.isAssignableFrom(singleTypeWrapper.asClass())) {//found a variable, and the method is not explicitly returning terms
+						logger.warn("Attempting to transform the variable term " + term + " to an object of class " + singleTypeWrapper.asClass() + ". Transformed as null.");
+						return null;
+					}
 					logicObjectClass = LogicClass.findLogicClass(singleTypeWrapper.asClass());  //find out if the expected type is a logic object
 					if( logicObjectClass != null ) 
 						return (To) new ClassAdaptingContext(logicObjectClass).adaptToLObject(term, type);
@@ -121,8 +130,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 						if(singleTypeWrapper.asClass().isAssignableFrom(term.getClass() ))
 							return (To) term;
 					}*/
-					if(term instanceof Variable && !Term.class.isAssignableFrom(singleTypeWrapper.asClass())) //found a variable, and the method is not explicitly returning terms
-						return null;
+					
 					if(singleTypeWrapper.isAssignableFrom(Term.class))
 						return (To) term;
 				}
