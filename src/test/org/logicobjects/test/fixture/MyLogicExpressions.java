@@ -7,19 +7,19 @@ public abstract class MyLogicExpressions {
 	@LSolution("text")
 	public abstract String methodExpression1();
 	
-	@LSolution("/{\"text\"/}")
+	@LSolution("${\"text\"}")
 	public abstract String methodExpression2();
 
 	@LSolution("true")
 	public abstract boolean methodTrue1();
 	
-	@LSolution("/{true/}")
+	@LSolution("${true}")
 	public abstract boolean methodTrue2();	
 	
 	@LSolution("false")
 	public abstract boolean methodFalse1();
 	
-	@LSolution("/{false/}")
+	@LSolution("${false}")
 	public abstract boolean methodFalse2();	
 	
 }

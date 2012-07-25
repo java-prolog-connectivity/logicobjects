@@ -44,10 +44,10 @@ public abstract class MyList extends LList<String> {
 	
 	
 	@LSolution("L")
-	@LMethod(name = "append", args={"$0", "/{java.util.Arrays.asList(new String[] {\"d\", \"e\"})/}", "L"})
+	@LMethod(name = "append", args={"$0", "${java.util.Arrays.asList(new String[] {\"d\", \"e\"})}", "L"})
 	public abstract List<String> appendCustom();
 	
-	@LSolution(".(/{$2/}, L)")
+	@LSolution(".(${$2}, L)")
 	@LMethod(name = "append", args={"$0", "$1", "L"})
 	public abstract List<String> appendCustom2(List<String> list, Object o);
 	

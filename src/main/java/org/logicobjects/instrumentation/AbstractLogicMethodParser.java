@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,8 +33,6 @@ import org.logicobjects.adapter.LogicObjectAdapter;
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.core.AbstractLogicMethod;
 import org.logicobjects.core.LogicEngine;
-import org.logicobjects.core.LogicMethod;
-import org.logicobjects.core.RawLogicQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,10 +44,21 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> {
 	private static Logger logger = LoggerFactory.getLogger(AbstractLogicMethodParser.class);
 
-	public static final String generatedMethodsPrefix = "$logicobjects_";
+	public static final String GENERATED_METHOD_PREFIX = "$logicobjects_";
 	
-	public static final String BEGIN_JAVA_EXPRESSION = "/{";
-	public static final String END_JAVA_EXPRESSION = "/}";
+	public static final String IMMEDIATE_EXP_EVALUATION_SYMBOL = "$";
+	public static final String DEFERRED_EXP_EVALUATION_SYMBOL = "#";
+	
+	public static final String BEGIN_JAVA_EXPRESSION_BLOCK = "{";
+	public static final String END_JAVA_EXPRESSION_BLOCK = "}";
+	
+	public static final String BEGIN_IMMEDIATE_JAVA_EXPRESSION = IMMEDIATE_EXP_EVALUATION_SYMBOL + BEGIN_JAVA_EXPRESSION_BLOCK;
+	public static final String BEGIN_DEFERRED_JAVA_EXPRESSION = DEFERRED_EXP_EVALUATION_SYMBOL + BEGIN_JAVA_EXPRESSION_BLOCK;
+	
+	
+	//public static final String BEGIN_JAVA_EXPRESSION = "/{";
+	//public static final String END_JAVA_EXPRESSION = "/}";
+	
 	
 	
 	public static final String INSTANCE_PROPERTY_PREFIX = "@";
@@ -73,7 +83,7 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	/*
 	 * the question mark is to specify a reluctant quantifier, so 'any' characters (the '.') will occur the minimum possible amount of times
 	 */
-	public static final String DELIMITED_JAVA_REX = Pattern.quote(BEGIN_JAVA_EXPRESSION) + "(.*?)" + Pattern.quote(END_JAVA_EXPRESSION);
+	//public static final String DELIMITED_JAVA_REX = Pattern.quote(BEGIN_JAVA_EXPRESSION) + "(.*?)" + Pattern.quote(END_JAVA_EXPRESSION);
 	
 	public static final String PARAMETERS_SEPARATOR = "~~~";
 	
@@ -86,7 +96,7 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	
 
 	
-	
+	private Method method;
 	private LM logicMethod;
 	private String allLogicStrings;
 	private List<String> foundSymbols;
@@ -107,17 +117,19 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	}
 	
 	AbstractLogicMethodParser(Method method) {
-		logicMethod = (LM) AbstractLogicMethod.create(method);
-		unparsedData = logicMethod.getDataToParse();
-		preParsing();
+		this.method = method;
+		//parse();
 	}
 
-	public AbstractLogicMethodParser preParsing() {
+	public AbstractLogicMethodParser parse() {
+		logicMethod = (LM) AbstractLogicMethod.create(method);
+		unparsedData = logicMethod.getDataToParse();
+		
 		String paramsLogicString = concatenateTokens(getParametersToParse());
 		allLogicStrings = QUERY_TAG + getQueryToParse() + PARAMETERS_TAG + paramsLogicString + RETURN_TAG + getSolutionToParse();
-		foundSymbols = getAllSymbols(allLogicStrings);
 		expressions = getJavaExpressions(allLogicStrings);
 		expressionsReplacementMap = expressionsReplacementMap(expressions);
+		foundSymbols = getAllSymbols(allLogicStrings);
 		return this;
 	}
 
@@ -234,20 +246,37 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	}
 	
 	
+	public String suppressJavaExpressions(String s) {
+		/**
+		 * A Set is used to avoid duplicates
+		 * LinkedHashSet preserves the insertion order
+		 */
+		for(String expression : expressions) {
+			s.replaceAll(Pattern.quote(expression), ""); //ignore symbols in java Expressions
+		}
+		//s = concatenatedParams.replaceAll(DELIMITED_JAVA_REX, ""); //ignore symbols in java Expressions
+		return s;
+	}
+	
 	/**
 	 * 
 	 * @param concatenatedParams
 	 * @return A list of symbol params referenced in the string sent as a parameter
 	 */
-	public static List<String> getAllSymbols(String concatenatedParams) {
-		/**
-		 * A Set is used to avoid duplicates
-		 * LinkedHashSet preserves the insertion order
-		 */
-		concatenatedParams = concatenatedParams.replaceAll(DELIMITED_JAVA_REX, ""); //ignore symbols in java Expressions
+	public List<String> getAllSymbols(String concatenatedParams) {
+		concatenatedParams = suppressJavaExpressions(concatenatedParams);
+		return scanSymbols(concatenatedParams);
+	}
+
+	/**
+	 * Created a separated method just to facilitate a bit testing
+	 * @param s
+	 * @return
+	 */
+	public static List<String> scanSymbols(String s) {
 		Set<String> symbolsSet = new LinkedHashSet<String>();
 		Pattern pattern = Pattern.compile("("+Pattern.quote(PARAMETERS_PREFIX)+"(\\d+|"+Pattern.quote(ALL_PARAMS_SUFFIX)+"))|"+Pattern.quote(INSTANCE_PROPERTY_PREFIX)+JAVA_NAME_REX);
-		Matcher findingMatcher = pattern.matcher(concatenatedParams);
+		Matcher findingMatcher = pattern.matcher(s);
 		while(findingMatcher.find()) {
 			String match = findingMatcher.group();
 			symbolsSet.add(match);
@@ -255,17 +284,18 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 		return new ArrayList<String>(symbolsSet);
 	}
 
-
 	/**
 	 * Extract the expression value from a delimited expression
 	 * @param delimitedExpression
 	 * @return
 	 */
 	public static String getExpressionValue(String delimitedExpression) {
-		Pattern pattern = Pattern.compile(DELIMITED_JAVA_REX);
+		Pattern pattern = Pattern.compile("^(" + Pattern.quote(BEGIN_IMMEDIATE_JAVA_EXPRESSION) + "|" + Pattern.quote(BEGIN_DEFERRED_JAVA_EXPRESSION) + ")(.*)" + END_JAVA_EXPRESSION_BLOCK + "$");
+		
+		//Pattern pattern = Pattern.compile(DELIMITED_JAVA_REX);
 		Matcher findingMatcher = pattern.matcher(delimitedExpression);
 		findingMatcher.find();
-		return findingMatcher.group(1);
+		return findingMatcher.group(2);
 	}
 	
 	/**
@@ -314,15 +344,66 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 		 */
 		Set<String> javaExpressionsSet = new LinkedHashSet<String>(); 
 
+		
+		/*
 		Pattern pattern = Pattern.compile(DELIMITED_JAVA_REX);
 		Matcher findingMatcher = pattern.matcher(expression);
 		while(findingMatcher.find()) {
 			String match = findingMatcher.group();
 			javaExpressionsSet.add(match);
 		}
+		*/
+		
+		List<MatchResult> matchResults = getJavaExpressionMatches(expression);
+		for(MatchResult matchResult : matchResults) {
+			javaExpressionsSet.add(matchResult.group());
+		}
+		
+		
 		return new ArrayList<String>(javaExpressionsSet);
 	}
 
+	private static List<MatchResult> getJavaExpressionMatches(String expression) {
+		List<MatchResult> expressionMatches = new ArrayList<MatchResult>();
+		Pattern pattern = Pattern.compile( Pattern.quote(BEGIN_IMMEDIATE_JAVA_EXPRESSION) + "|" + Pattern.quote(BEGIN_DEFERRED_JAVA_EXPRESSION) );
+		Matcher matcher = pattern.matcher(expression);
+		while(matcher.find()) {
+			int start = matcher.start();
+			int end = findClosingBrace(expression, start + 2); //the starting delimiter (two characters long) is not included in the expression to search
+			if(end == -1)
+				throw new RuntimeException("Impossible to find balanced closing brace in expression");
+			expressionMatches.add(new SimpleMatchResult(expression, start, end));
+		}
+		return expressionMatches;
+	}
+	
+	/**
+	 * 
+	 * @param expression is a String containing the Java expression to search for a closing brace
+	 * @param start is the start of the expression (immediately after the starting delimiter)
+	 * @return the index of the (balanced) closing brace
+	 */
+	private static int findClosingBrace(String expression, int start) {
+		if(start >= expression.length())
+			return -1;
+		int openingBraceCounters = 0;
+		for(int i = start; i < expression.length(); i++) {
+			String s = expression.substring(i, i + 1);
+			if(s.equalsIgnoreCase(END_JAVA_EXPRESSION_BLOCK)) {
+				if(openingBraceCounters == 0)
+					return i;
+				else
+					openingBraceCounters--;
+			} else {
+				if(s.equalsIgnoreCase(BEGIN_JAVA_EXPRESSION_BLOCK))
+					openingBraceCounters++;
+			}		
+		}
+		return -1;
+	}
+	
+	
+	
 	/**
 	 * This method answers the method name returning a Java expression declared in position @position at the original logic method
 	 * The name of the method returning the expression is based on the original method name (obtained with: method.toGenericString())
@@ -343,7 +424,7 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 		normalizedMethodName = normalizedMethodName.replaceAll(" abstract ", "_");
 		normalizedMethodName = normalizedMethodName.replaceAll("\\(|\\)", "_");
 		normalizedMethodName = normalizedMethodName.replaceAll(" |\\.|,", "_");
-		return generatedMethodsPrefix + normalizedMethodName + "_exp" + position;
+		return GENERATED_METHOD_PREFIX + normalizedMethodName + "_exp" + position;
 	}
 	
 	

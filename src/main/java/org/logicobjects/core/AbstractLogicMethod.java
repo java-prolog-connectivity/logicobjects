@@ -217,7 +217,7 @@ public abstract class AbstractLogicMethod {
 
 	public ParsedLogicMethod parse(Object targetObject, Object[] originalParameters) {
 		Object[] adaptedParams = adaptOriginalParameters(originalParameters);
-		ParsingData parsedData = getMethodParser().parsedData(targetObject, adaptedParams);
+		ParsingData parsedData = getMethodParser().parse().parsedData(targetObject, adaptedParams);
 		ParsedLogicMethod parsedLogicMethod = new ParsedLogicMethod(this, targetObject, adaptedParams, parsedData);
 		computeParameters(parsedLogicMethod);
 		computeMethodName(parsedLogicMethod);

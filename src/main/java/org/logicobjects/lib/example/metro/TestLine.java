@@ -28,7 +28,7 @@ public class TestLine extends LocalLogicTest  {
 		System.out.println("Number of segments of line " + line1 + ": " + line1.segments());
 		
 		Line line2 = LogicObjectFactory.getDefault().create(Line.class);
-		line2.setName("inexisting_line");
+		line2.setName("unexisting_line");
 		assertEquals(line2.segments(), 0);
 	}
 	

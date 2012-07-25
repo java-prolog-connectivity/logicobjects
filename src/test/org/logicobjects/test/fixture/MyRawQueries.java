@@ -10,7 +10,7 @@ import org.logicobjects.annotation.method.LSolution;
 public abstract class MyRawQueries {
 
 	@LSolution("L")
-	@LQuery("/{1/}=L")
+	@LQuery("${1}=L")
 	public abstract int intMethod1();
 	
 	@LSolution("L")
@@ -18,7 +18,7 @@ public abstract class MyRawQueries {
 	public abstract int intMethod2();
 	
 	@LSolution("L")
-	@LQuery("/{true/}=L")
+	@LQuery("${true}=L")
 	public abstract boolean trueMethod1();
 	
 	@LSolution("L")
@@ -26,17 +26,17 @@ public abstract class MyRawQueries {
 	public abstract boolean trueMethod2();
 	
 	@LSolution("L")
-	@LQuery("/{false/}=L")
+	@LQuery("${false}=L")
 	public abstract boolean falseMethod1();
 	
 	@LSolution("L")
 	@LQuery("false=L")
 	public abstract boolean falseMethod2();
 	
-	@LQuery("/{1==1/}")
+	@LQuery("${1==1}")
 	public abstract boolean shouldSucceed();
 	
-	@LQuery("/{1==2/}")
+	@LQuery("${1==2}")
 	public abstract boolean shouldFail();
 	
 	@LSolution("FlagValue")

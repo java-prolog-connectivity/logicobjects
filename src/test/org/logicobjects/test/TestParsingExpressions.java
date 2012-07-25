@@ -5,15 +5,15 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.ALL_PARAMS_SUFFIX;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.BEGIN_JAVA_EXPRESSION;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.END_JAVA_EXPRESSION;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.BEGIN_IMMEDIATE_JAVA_EXPRESSION;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.END_JAVA_EXPRESSION_BLOCK;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.INSTANCE_PROPERTY_PREFIX;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.JAVA_NAME_REX;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.PARAMETERS_PREFIX;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.PARAMETERS_TAG;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.QUERY_TAG;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.RETURN_TAG;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.getAllSymbols;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.scanSymbols;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.getExpressionValue;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.getJavaExpressions;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.isInstancePropertySymbol;
@@ -33,8 +33,8 @@ public class TestParsingExpressions extends LocalLogicTest {
 	
 	@Test
 	public void testParseJavaExpressions() {
-		String beginExp = BEGIN_JAVA_EXPRESSION;
-		String endExp = END_JAVA_EXPRESSION;
+		String beginExp = BEGIN_IMMEDIATE_JAVA_EXPRESSION;
+		String endExp = END_JAVA_EXPRESSION_BLOCK;
 		
 		String test = "xxx"+beginExp + "match1" + endExp + "xxx"+beginExp + "match1" + endExp + "xxx" + beginExp + "match2" + endExp +"xxx";
 		List<String> javaExpressions = getJavaExpressions(test);
@@ -51,7 +51,6 @@ public class TestParsingExpressions extends LocalLogicTest {
 	}
 
 
-	
 	@Test
 	public void testInstancePropertySymbols() {
 		//There are instance property symbols
@@ -72,10 +71,10 @@ public class TestParsingExpressions extends LocalLogicTest {
 	
 	@Test
 	public void testGetAllSymbols() {
-		String beginExp = BEGIN_JAVA_EXPRESSION;
-		String endExp = END_JAVA_EXPRESSION;
+		//String beginExp = BEGIN_IMMEDIATE_JAVA_EXPRESSION;
+		//String endExp = END_JAVA_EXPRESSION_BLOCK;
 		
-		List<String> symbols = getAllSymbols(
+		List<String> symbols = scanSymbols(
 			INSTANCE_PROPERTY_PREFIX+"this"
 			+" xxx " 
 			+ PARAMETERS_PREFIX + "1" 
@@ -83,7 +82,7 @@ public class TestParsingExpressions extends LocalLogicTest {
 			+ INSTANCE_PROPERTY_PREFIX+"this" + //this should be ignored, since the symbol already exists
 			" xxx " 
 			+ PARAMETERS_PREFIX + ALL_PARAMS_SUFFIX
-			+ beginExp + PARAMETERS_PREFIX + "2" + endExp //this should be ignored since it is inside a Java block
+			//+ beginExp + PARAMETERS_PREFIX + "2" + endExp //this should be ignored since it is inside a Java block
 		);
 		assertEquals(symbols.get(0), INSTANCE_PROPERTY_PREFIX+"this");
 		assertEquals(symbols.get(1), PARAMETERS_PREFIX + "1");
