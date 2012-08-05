@@ -137,7 +137,14 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 								return (To) LogicUtil.asNumber(term);
 						}
 					} else if (Primitives.isWrapperType( Primitives.wrap(singleTypeWrapper.asClass()))) { //checks if the class corresponds to a primitive or its wrapper. e.g., boolean, Boolean (at this point it is not a number)
-						return (To) valueOf(singleTypeWrapper.asClass(), LogicUtil.toString(term));
+						if(Primitives.wrap(singleTypeWrapper.asClass()).equals(Character.class)) {
+							String termString = LogicUtil.toString(term);
+							if(termString.length() == 1)
+								return (To) Character.valueOf(termString.charAt(0));
+							else
+								throw new RuntimeException("Impossible to transform the string " + termString + "to a single character");
+						} else
+							return (To) valueOf(singleTypeWrapper.asClass(), LogicUtil.toString(term));
 					} else if(singleTypeWrapper.asClass().equals(String.class)) {
 						if(term.isAtom())
 							return (To) ((Atom)term).name();
