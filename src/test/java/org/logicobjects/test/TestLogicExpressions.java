@@ -6,7 +6,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.GregorianCalendar;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.Test;
 import org.logicobjects.core.LogicObjectFactory;
@@ -55,6 +60,19 @@ public class TestLogicExpressions extends LocalLogicTest {
 		assertEquals(logicExpressions.testBigDecimal1(1.0).doubleValue(), 1.0);
 		assertEquals(logicExpressions.testBigDecimal2("1.0").doubleValue(), 1.0);
 		assertEquals(logicExpressions.testBigDecimal3(bigDecimal).doubleValue(), 1.0);
+		
+		long timeInMilliSeconds = 1000;
+		GregorianCalendar gregorianCalendar = new GregorianCalendar();
+		gregorianCalendar.setTimeInMillis(timeInMilliSeconds);
+		assertEquals(logicExpressions.testCalendar(gregorianCalendar), gregorianCalendar);
+		
+		XMLGregorianCalendar xmlGregorianCalendar;
+		try {
+			xmlGregorianCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);
+		} catch (DatatypeConfigurationException e) {
+			throw new RuntimeException(e);
+		}
+		assertEquals(logicExpressions.testXMLGregorianCalendar(xmlGregorianCalendar), xmlGregorianCalendar);
 	}
 
 }

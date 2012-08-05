@@ -1,9 +1,15 @@
 package org.logicobjects.util;
 
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import jpl.Atom;
 import jpl.Compound;
@@ -179,32 +185,36 @@ public class LogicUtil {
 	}
 	
 	public static int asInt(Term term) {
-		if(term instanceof jpl.Integer)
-			return term.intValue();
-		else if(term instanceof jpl.Atom)
-			return Integer.valueOf(term.name());
-		else
-			throw new RuntimeException("Impossible to convert the term " + term + "to an int");
+		return (int) asLong(term);
 	}
 	
-	public static float asFloat(Term term) {
-		if(term instanceof jpl.Float)
-			return term.floatValue();
+	public static long asLong(Term term) {
+		if(term instanceof jpl.Integer)
+			return term.longValue();
 		else if(term instanceof jpl.Atom)
-			return Float.valueOf(term.name());
+			return Long.valueOf(term.name());
 		else
-			throw new RuntimeException("Impossible to convert the term " + term + "to a float");
+			throw new RuntimeException("Impossible to convert the term " + term + " to a long");
+	}
+	
+	public static double asDouble(Term term) {
+		if(term instanceof jpl.Float)
+			return term.doubleValue();
+		else if(term instanceof jpl.Atom)
+			return Double.valueOf(term.name());
+		else
+			throw new RuntimeException("Impossible to convert the term " + term + " to a double");
 	}
 	
 	public static Number asNumber(Term term) {
 		if(term instanceof jpl.Integer)
-			return term.intValue();
+			return term.longValue();
 		if(term instanceof jpl.Float)
-			return term.floatValue();
+			return term.doubleValue();
 		else if(term instanceof jpl.Atom)
-			return Float.valueOf(term.name());
+			return Double.valueOf(term.name());
 		else
-			throw new RuntimeException("Impossible to convert the term " + term + "to a number");
+			throw new RuntimeException("Impossible to convert the term " + term + " to a number");
 	}
 	
 	public static boolean isNumber(Term term) {

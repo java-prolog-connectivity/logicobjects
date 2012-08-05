@@ -2,17 +2,22 @@ package org.logicobjects.adapter;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Calendar;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import jpl.Atom;
 import jpl.Term;
 
 import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
 import org.logicobjects.adapter.objectadapters.AnyCollectionToTermAdapter;
+import org.logicobjects.adapter.objectadapters.CalendarToTermAdapter;
 import org.logicobjects.adapter.objectadapters.ImplementationMap;
 import org.logicobjects.adapter.objectadapters.MapToTermAdapter.EntryToTermAdapter;
+import org.logicobjects.adapter.objectadapters.XMLGregorianCalendarToTermAdapter;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.annotation.LTermAdapter.LTermAdapterUtil;
@@ -69,6 +74,10 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 				return new jpl.Float(BigDecimal.class.cast(object).doubleValue());
 			} else if(Primitives.isWrapperType(object.getClass())) {  //any other primitive
 				return new Atom(object.toString());
+			} else if(Calendar.class.isAssignableFrom(object.getClass())) {
+				return new CalendarToTermAdapter().adapt((Calendar) object);
+			} else if(XMLGregorianCalendar.class.isAssignableFrom(object.getClass())) {
+				return new XMLGregorianCalendarToTermAdapter().adapt((XMLGregorianCalendar) object);
 			}
 			Class guidingClass = LogicClass.findGuidingClass(object.getClass());
 			if(guidingClass != null) {

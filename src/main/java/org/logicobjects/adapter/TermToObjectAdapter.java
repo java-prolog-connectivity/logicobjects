@@ -4,11 +4,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import jpl.Atom;
 import jpl.Compound;
@@ -18,9 +21,11 @@ import jpl.Variable;
 import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
 import org.logicobjects.adapter.adaptingcontext.ClassAdaptingContext;
 import org.logicobjects.adapter.objectadapters.TermToArrayAdapter;
+import org.logicobjects.adapter.objectadapters.TermToCalendarAdapter;
 import org.logicobjects.adapter.objectadapters.TermToCollectionAdapter;
 import org.logicobjects.adapter.objectadapters.TermToMapAdapter;
 import org.logicobjects.adapter.objectadapters.TermToMapAdapter.TermToEntryAdapter;
+import org.logicobjects.adapter.objectadapters.TermToXMLGregorianCalendarAdapter;
 import org.logicobjects.annotation.LObjectAdapter;
 import org.logicobjects.annotation.LObjectAdapter.LObjectAdapterUtil;
 import org.logicobjects.core.LogicClass;
@@ -114,20 +119,26 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 						Type entryParameters[] = new GenericsUtil().findAncestorTypeParameters(Entry.class, singleTypeWrapper.getWrappedType());
 						return (To) new TermToEntryAdapter().adapt((Compound)term, entryParameters[0], entryParameters[1], adaptingContext);
 					}
-					if( Number.class.isAssignableFrom(Primitives.wrap(singleTypeWrapper.asClass()))  ||  LogicUtil.isNumber(term)) { //either the required type is a number or the term is a number
+					if(Calendar.class.isAssignableFrom(singleTypeWrapper.asClass())) {
+						return (To)new TermToCalendarAdapter().adapt(term);
+					}
+					if(XMLGregorianCalendar.class.isAssignableFrom(singleTypeWrapper.asClass())) {
+						return (To)new TermToXMLGregorianCalendarAdapter().adapt(term);
+					}
+					if(Number.class.isAssignableFrom(Primitives.wrap(singleTypeWrapper.asClass()))  ||  LogicUtil.isNumber(term)) { //either the required type is a number or the term is a number
 						if( Number.class.isAssignableFrom(Primitives.wrap(singleTypeWrapper.asClass())) ) { //the required type is a number
 							if(term.isAtom() || LogicUtil.isNumber(term)) { //check if indeed the term can be converted to a number
 								if(singleTypeWrapper.asClass().isPrimitive() || Primitives.isWrapperType(singleTypeWrapper.asClass())) {
 									return (To) valueOf(singleTypeWrapper.asClass(), LogicUtil.toString(term));
 								} else { //try to convert to a numeric type that is not a primitive nor a wrapper type
 									if(singleTypeWrapper.asClass().equals(BigInteger.class))
-										return (To) BigInteger.valueOf(LogicUtil.asInt(term));
+										return (To) BigInteger.valueOf(LogicUtil.asLong(term));
 									else if(singleTypeWrapper.asClass().equals(AtomicInteger.class))
 										return (To) new AtomicInteger(LogicUtil.asInt(term));
 									else if(singleTypeWrapper.asClass().equals(AtomicLong.class))
-										return (To) new AtomicLong((long)LogicUtil.asInt(term));
+										return (To) new AtomicLong((long)LogicUtil.asLong(term));
 									else if(singleTypeWrapper.asClass().equals(BigDecimal.class))
-										return (To) BigDecimal.valueOf(LogicUtil.asFloat(term));
+										return (To) BigDecimal.valueOf(LogicUtil.asDouble(term));
 									else
 										throw new RuntimeException(); //it should never arrive here !
 								}

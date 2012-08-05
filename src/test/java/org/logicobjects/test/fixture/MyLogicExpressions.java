@@ -2,8 +2,11 @@ package org.logicobjects.test.fixture;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.logicobjects.annotation.method.LSolution;
 
@@ -111,5 +114,11 @@ public abstract class MyLogicExpressions {
 	@LSolution("$1")
 	public abstract BigDecimal testBigDecimal3(BigDecimal b);
 	
+	@LSolution("$1")
+	public abstract Calendar testCalendar(Calendar cal);
+	
+	@LSolution("$1")
+	public abstract XMLGregorianCalendar testXMLGregorianCalendar(XMLGregorianCalendar cal);
+
 }
 
