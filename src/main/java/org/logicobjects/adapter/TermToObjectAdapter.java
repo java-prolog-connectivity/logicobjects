@@ -2,9 +2,13 @@ package org.logicobjects.adapter;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import jpl.Atom;
 import jpl.Compound;
@@ -95,7 +99,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 				} //else
 					//System.out.println("************* Logic class NOT found !!!");
 				//System.out.println(typeWrapper.getClass());
-				if( typeWrapper instanceof SingleTypeWrapper ) { //the type is not an array and not an erased type (but it can be a collection)
+				if( typeWrapper instanceof SingleTypeWrapper ) { //the type is not an array and not an erased type (but still it can be a collection)
 					SingleTypeWrapper singleTypeWrapper = SingleTypeWrapper.class.cast(typeWrapper);
 					
 					if(term instanceof Variable && !Term.class.isAssignableFrom(singleTypeWrapper.asClass())) {//found a variable, and the method is not explicitly returning terms
@@ -110,13 +114,30 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 						Type entryParameters[] = new GenericsUtil().findAncestorTypeParameters(Entry.class, singleTypeWrapper.getWrappedType());
 						return (To) new TermToEntryAdapter().adapt((Compound)term, entryParameters[0], entryParameters[1], adaptingContext);
 					}
-					if(singleTypeWrapper.asClass().isPrimitive() || Primitives.isWrapperType(singleTypeWrapper.asClass())) {
-						if(term.isAtom() || term.isInteger() || term.isFloat() ) {
-							Class wrapper = singleTypeWrapper.asClass().isPrimitive()?Primitives.wrap(singleTypeWrapper.asClass()):singleTypeWrapper.asClass();
-							Method m = wrapper.getDeclaredMethod("valueOf", String.class);
-							//converting the name of the atom term to a native value
-							return (To) m.invoke(null, LogicUtil.toString(term)); //'m' is a static method, so no object needs to be provided
+					if( Number.class.isAssignableFrom(Primitives.wrap(singleTypeWrapper.asClass()))  ||  LogicUtil.isNumber(term)) { //either the required type is a number or the term is a number
+						if( Number.class.isAssignableFrom(Primitives.wrap(singleTypeWrapper.asClass())) ) { //the required type is a number
+							if(term.isAtom() || LogicUtil.isNumber(term)) { //check if indeed the term can be converted to a number
+								if(singleTypeWrapper.asClass().isPrimitive() || Primitives.isWrapperType(singleTypeWrapper.asClass())) {
+									return (To) valueOf(singleTypeWrapper.asClass(), LogicUtil.toString(term));
+								} else { //try to convert to a numeric type that is not a primitive nor a wrapper type
+									if(singleTypeWrapper.asClass().equals(BigInteger.class))
+										return (To) BigInteger.valueOf(LogicUtil.asInt(term));
+									else if(singleTypeWrapper.asClass().equals(AtomicInteger.class))
+										return (To) new AtomicInteger(LogicUtil.asInt(term));
+									else if(singleTypeWrapper.asClass().equals(AtomicLong.class))
+										return (To) new AtomicLong((long)LogicUtil.asInt(term));
+									else if(singleTypeWrapper.asClass().equals(BigDecimal.class))
+										return (To) BigDecimal.valueOf(LogicUtil.asFloat(term));
+									else
+										throw new RuntimeException(); //it should never arrive here !
+								}
+							}
+						} else {
+							if(singleTypeWrapper.asClass().equals(Object.class)) //if we arrive here the term should be a number (jpl.Integer or jpl.Float)
+								return (To) LogicUtil.asNumber(term);
 						}
+					} else if (Primitives.isWrapperType( Primitives.wrap(singleTypeWrapper.asClass()))) { //checks if the class corresponds to a primitive or its wrapper. e.g., boolean, Boolean (at this point it is not a number)
+						return (To) valueOf(singleTypeWrapper.asClass(), LogicUtil.toString(term));
 					} else if(singleTypeWrapper.asClass().equals(String.class)) {
 						if(term.isAtom())
 							return (To) ((Atom)term).name();
@@ -145,6 +166,24 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 		throw new TermToObjectException(term, type);  //no idea how to adapt the term
 	}
 
+	/**
+	 * 
+	 * @param clazz
+	 * @param s
+	 * @return the result of calling the static method "valueOf(String)" on the class sent as parameter
+	 */
+	private Object valueOf(Class clazz, String s) {
+		Class wrapper = Primitives.wrap(clazz); //if the class is already a wrapper, the 'wrap' method will just return that class
+		Method m;
+		try {
+			m = wrapper.getDeclaredMethod("valueOf", String.class);
+			return (To) m.invoke(null, s); //'m' is a static method, so no object needs to be provided
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		
+	}
+	
 	
 	private To adaptListTerm(Term term, Type type, AdaptingContext adaptingContext) {
 		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);

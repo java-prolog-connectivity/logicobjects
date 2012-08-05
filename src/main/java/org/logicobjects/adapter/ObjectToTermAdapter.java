@@ -1,6 +1,10 @@
 package org.logicobjects.adapter;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import jpl.Atom;
 import jpl.Term;
@@ -43,14 +47,26 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 					return new Variable(text.substring(1, text.length()));
 				*/
 				return new Atom(text);
-			} else if(object.getClass().equals(java.lang.Integer.class)) { //better full class name to avoid confusions here ;)
+			} else if(object.getClass().equals(java.lang.Byte.class)) {
+				return new jpl.Integer(java.lang.Byte.class.cast(object).byteValue());
+			} else if(object.getClass().equals(java.lang.Short.class)) {
+				return new jpl.Integer(java.lang.Short.class.cast(object).shortValue());
+			} else if(object.getClass().equals(java.lang.Integer.class)) { //better full class name to avoid confusions here
 				return new jpl.Integer(java.lang.Integer.class.cast(object).intValue());
-			}  else if(object.getClass().equals(java.lang.Long.class)) { //better full class name to avoid confusions here ;)
+			}  else if(object.getClass().equals(AtomicInteger.class)) { 
+				return new jpl.Integer(AtomicInteger.class.cast(object).intValue());
+			}  else if(object.getClass().equals(java.lang.Long.class)) { //better full class name to avoid confusions here 
 				return new jpl.Integer(java.lang.Long.class.cast(object).longValue());
-			}  else if(object.getClass().equals(java.lang.Float.class)) { 
+			} else if(object.getClass().equals(AtomicLong.class)) { 
+				return new jpl.Integer(AtomicLong.class.cast(object).longValue());
+			} else if(object.getClass().equals(BigInteger.class)) {
+				return new jpl.Integer(BigInteger.class.cast(object).longValue());
+			} else if(object.getClass().equals(java.lang.Float.class)) { 
 				return new jpl.Float(java.lang.Float.class.cast(object).floatValue());
 			} else if(object.getClass().equals(java.lang.Double.class)) { 
 				return new jpl.Float(java.lang.Double.class.cast(object).doubleValue());
+			} else if(object.getClass().equals(BigDecimal.class)) { 
+				return new jpl.Float(BigDecimal.class.cast(object).doubleValue());
 			} else if(Primitives.isWrapperType(object.getClass())) {  //any other primitive
 				return new Atom(object.toString());
 			}

@@ -178,8 +178,38 @@ public class LogicUtil {
 			return term.toString();
 	}
 	
+	public static int asInt(Term term) {
+		if(term instanceof jpl.Integer)
+			return term.intValue();
+		else if(term instanceof jpl.Atom)
+			return Integer.valueOf(term.name());
+		else
+			throw new RuntimeException("Impossible to convert the term " + term + "to an int");
+	}
 	
+	public static float asFloat(Term term) {
+		if(term instanceof jpl.Float)
+			return term.floatValue();
+		else if(term instanceof jpl.Atom)
+			return Float.valueOf(term.name());
+		else
+			throw new RuntimeException("Impossible to convert the term " + term + "to a float");
+	}
 	
+	public static Number asNumber(Term term) {
+		if(term instanceof jpl.Integer)
+			return term.intValue();
+		if(term instanceof jpl.Float)
+			return term.floatValue();
+		else if(term instanceof jpl.Atom)
+			return Float.valueOf(term.name());
+		else
+			throw new RuntimeException("Impossible to convert the term " + term + "to a number");
+	}
+	
+	public static boolean isNumber(Term term) {
+		return (term instanceof jpl.Integer || term instanceof jpl.Float);
+	}
 	
 	public static Term termArrayToList(Term[] terms) {
 		return Util.termArrayToList(terms);
