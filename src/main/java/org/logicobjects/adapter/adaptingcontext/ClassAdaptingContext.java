@@ -40,15 +40,15 @@ public class ClassAdaptingContext extends AnnotatedAdaptingContext {
 	}
 
 	@Override
-	public LMethodInvokerDescription getMethodInvokerDescription() {
+	public LObjectGenericDescription getLogicObjectDescription() {
 		LObject aLObject = (LObject) getContext().getAnnotation(LObject.class);
 		if(aLObject != null)
-			return LMethodInvokerDescription.create(aLObject);
+			return LObjectGenericDescription.create(aLObject);
 		return null;
 	}
 	
 	@Override
-	protected Object adaptToObjectFromDescription(Term term, Type type, LMethodInvokerDescription lMethodInvokerDescription) {
+	protected Object adaptToObjectFromDescription(Term term, Type type, LObjectGenericDescription lMethodInvokerDescription) {
 		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
 		try {
 			Object lObject = null;
@@ -57,7 +57,7 @@ public class ClassAdaptingContext extends AnnotatedAdaptingContext {
             } else {
             	lObject = LogicObjectFactory.getDefault().create(typeWrapper.asClass());
             }
-			LogicObject.setParams(lObject, term, lMethodInvokerDescription.params());
+			LogicObject.setProperties(lObject, lMethodInvokerDescription.args(), term);
 			return lObject;
 		} catch (Exception e) {
 			throw new RuntimeException(e);

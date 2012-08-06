@@ -123,8 +123,5 @@ public class SimpleLContext extends AbstractLContext {
 		compositionAdapters = new HashSet<Class<? extends WrapperAdapter>>();
 		filterAdapters(unfilteredAdapters, compositionAdapters);
 	}
-	
-	
-	
-	
+
 }

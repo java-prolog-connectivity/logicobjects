@@ -4,8 +4,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.code.guava.beans.Properties;
-import com.google.code.guava.beans.Property;
+import org.apache.commons.beanutils.PropertyUtils;
 
 public class ReflectionUtil {
 
@@ -58,51 +57,66 @@ public class ReflectionUtil {
 	}
 	
 	public static Field getField(Object target, String propertyName) {
-		return getField(target.getClass(), propertyName);
+		return getFieldInHierarchy(target.getClass(), propertyName);
 	}
 	
-	public static Field getField(Class clazz, String propertyName) {
+	public static Field getFieldInHierarchy(Class clazz, String propertyName) {
 		Field field = null;
 		try {
-			field = clazz.getField(propertyName); //this fails if the field is not public
-		} catch (NoSuchFieldException e) {
+			field = clazz.getField(propertyName); //does not work for private fields
+		} catch(NoSuchFieldException e1) { //Unknown property
 			try {
-				Property property = Properties.getPropertyByName(clazz, propertyName); //this fails if there is not a getter
-				field = property.getField();
-			} catch(IllegalStateException e2) { //Unknown property
-				throw new RuntimeException(e2); 
+				field = getFieldInHierarchyAux(clazz, propertyName);
+			} catch(Exception e2) {
+				throw new RuntimeException(e1);
 			}
 		}
 		return field;
 	}
 	
+	private static Field getFieldInHierarchyAux(Class clazz, String propertyName) {
+		Field field = null;
+		try {
+			field = clazz.getDeclaredField(propertyName); //all the fields declared by the current class
+		} catch(NoSuchFieldException e2) { //Unknown property
+			if(clazz.equals(Object.class))
+				throw new RuntimeException(e2);
+			else
+				field = getFieldInHierarchyAux(clazz.getSuperclass(), propertyName);
+		}
+		return field;
+	}
+
+	
+	
+	
 	public static Object getFieldValue(Object target, String propertyName) {
 		Object value = null;
-		Field field = getField(target, propertyName);
-		if(field != null) {
-			field.setAccessible(true); //otherwise we will get an illegal access exception
+		try {
+			value = PropertyUtils.getProperty(target, propertyName); //try with an accessor if possible
+		} catch(Exception e) { //no accessor
 			try {
+				Field field = getField(target, propertyName); //try obtaining directly the field
+				field.setAccessible(true); //otherwise we will get an illegal access exception
 				value = field.get(target);
-			} catch (Exception e) {
-				throw new RuntimeException(e);
+			} catch(Exception e2) {
+				throw new RuntimeException(e2);
 			}
 		}
 		return value;
 	}
 	
+	
 	public static void setFieldValue(Object target, String propertyName, Object value) {
-		Field field = getField(target, propertyName);
 		try {
-			if(field != null) {
+			PropertyUtils.setProperty(target, propertyName, value);
+		} catch (Exception e) { //setter no defined
+			try {
+				Field field = getField(target, propertyName);
 				field.setAccessible(true); //otherwise we will get an illegal access exception
 				field.set(target, value);
-			}
-		} catch (Exception e) {
-			Property property = Properties.getPropertyByName(target, propertyName);
-			try {
-				property.setValueWithSetter(target, value); //try to use the setter if any
-			} catch(NullPointerException e2) { //setter no defined
-				property.setFieldValue(target, value);
+			} catch(Exception e2) { 
+				throw new RuntimeException(e2);
 			}
 		} 
 		

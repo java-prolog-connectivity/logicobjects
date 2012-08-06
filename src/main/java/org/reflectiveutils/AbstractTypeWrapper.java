@@ -14,9 +14,6 @@ import java.util.Map;
 
 import org.logicobjects.annotation.LObject;
 
-import com.google.code.guava.beans.Properties;
-import com.google.code.guava.beans.Property;
-
 /*
  * The objective of this class is to reduce the amount of castings and instanceof operations that otherwise certain adapters will have to do
  * 

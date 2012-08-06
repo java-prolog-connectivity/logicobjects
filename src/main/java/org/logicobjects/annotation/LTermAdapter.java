@@ -5,6 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.util.AnnotationConstants.NO_ADAPTER;
 
 /*
@@ -18,7 +19,8 @@ public @interface LTermAdapter {
 	String[] args() default {};
 	
 	public static class LTermAdapterUtil {
-		public static Class getAdapter(LTermAdapter aLTermAdapter) {
+		
+		public static Class getAdapterClass(LTermAdapter aLTermAdapter) {
 			Class adapterClass = aLTermAdapter.adapter();
 			if(adapterClass == null || adapterClass.equals(NO_ADAPTER.class))
 				adapterClass = aLTermAdapter.value();
@@ -26,5 +28,16 @@ public @interface LTermAdapter {
 				adapterClass = null;
 			return adapterClass;
 		}
+		
+		public static ObjectToTermAdapter newAdapter(LTermAdapter aLTermAdapter) {
+			try {
+				ObjectToTermAdapter termAdapter = (ObjectToTermAdapter)LTermAdapterUtil.getAdapterClass(aLTermAdapter).newInstance();
+				termAdapter.setParameters(aLTermAdapter.args());
+				return termAdapter;
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
 	}
 }

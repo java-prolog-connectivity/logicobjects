@@ -11,21 +11,22 @@ import org.logicobjects.core.LogicObject;
 import org.logicobjects.core.LogicObjectFactory;
 import org.reflectiveutils.AbstractTypeWrapper;
 
+/**
+ * This class help to guide the transformation to or from a term, given the context of this transformation
+ * For example, it this necessary because the term is going to be assigned to a field ? or the term is the result of a method invocation ?
+ * @author sergioc78
+ *
+ */
 public abstract class AdaptingContext {
-
-	protected abstract LMethodInvokerDescription getMethodInvokerDescription();
 
 	protected abstract TermToObjectAdapter getTermToObjectAdapter();
 
 	public abstract ObjectToTermAdapter getObjectToTermAdapter();
 
-	public abstract String infereLogicObjectName();
+	protected abstract LObjectGenericDescription getLogicObjectDescription();
 	
+	public abstract String infereLogicObjectName();
 
-
-	public boolean hasMethodInvokerDescription() {
-		return getMethodInvokerDescription() != null;
-	}
 	
 	public boolean hasObjectToTermAdapter() {
 		return getObjectToTermAdapter() != null;
@@ -34,11 +35,15 @@ public abstract class AdaptingContext {
 	public boolean hasTermToObjectAdapter() {
 		return getTermToObjectAdapter() != null;
 	}
+
+	public boolean hasLogicObjectDescription() {
+		return getLogicObjectDescription() != null;
+	}
 	
 	public boolean canAdaptToTerm() {
 		if (hasObjectToTermAdapter()) //first check if there is an explicit adapter
 			return true;
-		return hasMethodInvokerDescription(); //if no adapter is found, try to use a method invoker description
+		return hasLogicObjectDescription(); //if no adapter is found, try to use a method invoker description
 	}
 	
 	protected Term adaptToTermWithAdapter(Object object) {
@@ -47,11 +52,11 @@ public abstract class AdaptingContext {
 	}
 	
 	protected Term adaptToTermWithDescription(Object object) {
-		LMethodInvokerDescription methodInvokerDescription = getMethodInvokerDescription();
-		String logicObjectName = methodInvokerDescription.name();
+		LObjectGenericDescription logicObjectDescription = getLogicObjectDescription();
+		String logicObjectName = logicObjectDescription.name();
 		if(logicObjectName.isEmpty())
 			logicObjectName = infereLogicObjectName();
-		return new LogicObjectAdapter().asLogicObject(object, logicObjectName, methodInvokerDescription.params()).asTerm();
+		return new LogicObjectAdapter().asLogicObject(object, logicObjectName, logicObjectDescription.args()).asTerm();
 	}
 	
 	public Term adaptToTerm(Object object) {
@@ -66,7 +71,7 @@ public abstract class AdaptingContext {
 	public boolean canAdaptToLObject() {
 		if(hasTermToObjectAdapter())
 			return true;
-		return hasMethodInvokerDescription();
+		return hasLogicObjectDescription();
 	}
 	
 	protected Object adaptToObjectFromAdapter(Term term, Type type) {
@@ -74,14 +79,15 @@ public abstract class AdaptingContext {
 		TermToObjectAdapter objectAdapter = getTermToObjectAdapter();
 		return typeWrapper.asClass().cast(objectAdapter.adapt(term));
 	}
+	
 	/*
-	 * This method transform a term in a logic object of a specified class using the information present in a LMethodInvokerDescription object.
+	 * This method transform a term in a logic object of a specified class using the information present in a LObjectGenericDescription object.
 	 */
-	protected Object adaptToObjectFromDescription(Term term, Type type, LMethodInvokerDescription lMethodInvokerDescription) {
+	protected Object adaptToObjectFromDescription(Term term, Type type, LObjectGenericDescription lObjectDescription) {
 		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
 		try {
 			Object lObject = LogicObjectFactory.getDefault().create(typeWrapper.asClass());
-			LogicObject.setParams(lObject, term, lMethodInvokerDescription.params());
+			LogicObject.setProperties(lObject, lObjectDescription.args(), term);
 			return lObject;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -92,7 +98,7 @@ public abstract class AdaptingContext {
 		if(hasTermToObjectAdapter()) {
 			return adaptToObjectFromAdapter(term, type);
 		} else {
-			return adaptToObjectFromDescription(term, type, getMethodInvokerDescription());
+			return adaptToObjectFromDescription(term, type, getLogicObjectDescription());
 		}
 	}
 

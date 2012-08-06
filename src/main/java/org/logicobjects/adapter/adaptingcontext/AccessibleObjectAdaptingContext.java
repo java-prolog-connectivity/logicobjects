@@ -22,7 +22,7 @@ public abstract class AccessibleObjectAdaptingContext extends AnnotatedAdaptingC
 	}
 	*/
 	
-	public abstract AccessibleObject getContext();
+	public abstract AccessibleObject getContext(); //an accessible object can be a method or field
 	
 	@Override
 	public LObjectAdapter getTermToObjectAdapterAnnotation() {
@@ -35,10 +35,10 @@ public abstract class AccessibleObjectAdaptingContext extends AnnotatedAdaptingC
 	}
 
 	@Override
-	public LMethodInvokerDescription getMethodInvokerDescription() {
+	public LObjectGenericDescription getLogicObjectDescription() {
 		LObject aLObject = (LObject) getContext().getAnnotation(LObject.class);
 		if(aLObject != null)
-			return LMethodInvokerDescription.create(aLObject);
+			return LObjectGenericDescription.create(aLObject);
 		return null;
 	}
 

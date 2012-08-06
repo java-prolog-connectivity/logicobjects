@@ -46,15 +46,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 	
 	private static Logger logger = LoggerFactory.getLogger(TermToObjectAdapter.class);
 	
-	public static TermToObjectAdapter create(LObjectAdapter aLObjectAdapter) {
-		try {
-			TermToObjectAdapter objectAdapter = (TermToObjectAdapter)LObjectAdapterUtil.getAdapter(aLObjectAdapter).newInstance();
-			objectAdapter.setParameters(aLObjectAdapter.args());
-			return objectAdapter;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+
 	
 	
 	private LogicEngine engine;

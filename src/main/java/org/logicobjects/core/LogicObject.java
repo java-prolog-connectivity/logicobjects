@@ -88,25 +88,20 @@ public class LogicObject implements ITermObject {
 		return query;
 	}
 
-	
-	
-
 	@Override
 	public String toString() {
 		return asTerm().toString();
 	}
 	
 	
-	public static void setParams(Object lObject, Term term , String[] params) {
-		for(int i=0; i<params.length; i++) {
-			String propertyName = params[i];
+	public static void setProperties(Object lObject, String[] properties, Term term) {
+		for(int i=0; i<properties.length; i++) {
+			String propertyName = properties[i];
 			Field field = ReflectionUtil.getField(lObject, propertyName);
 			Object fieldValue = new TermToObjectAdapter().adapt(term.arg(i+1), field.getGenericType(), new FieldAdaptingContext(field));
 			ReflectionUtil.setFieldValue(lObject, propertyName, fieldValue);
 		}
 	}
-	
-	
 
 }
 

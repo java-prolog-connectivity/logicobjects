@@ -11,7 +11,7 @@ import java.util.Set;
 import jpl.Term;
 
 import org.logicobjects.adapter.LogicResourcePathAdapter;
-import org.logicobjects.adapter.adaptingcontext.LMethodInvokerDescription;
+import org.logicobjects.adapter.adaptingcontext.LObjectGenericDescription;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LDelegationObject;
 import org.logicobjects.annotation.LTermAdapter;
@@ -31,7 +31,7 @@ public class LogicClass {
 		return clazz;
 	}
 	
-	public String getLogicName() {
+	public String getLObjectName() {
 		LObject lObjectAnnotation = (LObject) clazz.getAnnotation(LObject.class);
 		String name = lObjectAnnotation.name();
 		if(!name.isEmpty())
@@ -40,7 +40,7 @@ public class LogicClass {
 			return LogicUtil.javaClassNameToProlog(clazz.getSimpleName());
 	}
 	
-	public String[] getParameters() {
+	public String[] getLObjectArgs() {
 		LObject lObjectAnnotation = (LObject) clazz.getAnnotation(LObject.class);
 		return lObjectAnnotation.args();
 	}
@@ -70,7 +70,7 @@ public class LogicClass {
 		if(clazz == null)
 			return false;
 		
-		LMethodInvokerDescription lMethodInvokerDescription = LMethodInvokerDescription.create(clazz);  //look at the annotations of the class and return an object having information about how to load dependencies
+		LObjectGenericDescription lMethodInvokerDescription = LObjectGenericDescription.create(clazz);  //look at the annotations of the class and return an object having information about how to load dependencies
 		
 		//LObject aLObject = getLogicObjectAnnotation(clazz);
 		

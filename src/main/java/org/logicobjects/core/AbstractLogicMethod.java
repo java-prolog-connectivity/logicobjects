@@ -150,7 +150,7 @@ public abstract class AbstractLogicMethod {
 		if(aLParamsAdapter == null)
 			return null;
 		try {
-			ParametersAdapter parametersAdapter = (ParametersAdapter)LArgsAdapterUtil.getAdapter(aLParamsAdapter).newInstance();
+			ParametersAdapter parametersAdapter = (ParametersAdapter)LArgsAdapterUtil.getAdapterClass(aLParamsAdapter).newInstance();
 			return parametersAdapter;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -168,7 +168,7 @@ public abstract class AbstractLogicMethod {
 					aLTermAdapter = LTermAdapter.class.cast(parameterAnnotation);
 				} catch (ClassCastException e) {} //annotations others than LParameter will be ignored here
 				if(aLTermAdapter != null) {
-					Class parameterAdapterClass = LTermAdapterUtil.getAdapter(aLTermAdapter);
+					Class parameterAdapterClass = LTermAdapterUtil.getAdapterClass(aLTermAdapter);
 					if(parameterAdapterClass != null) {
 						ObjectToTermAdapter parameterAdapter = null;
 						try {

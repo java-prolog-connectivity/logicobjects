@@ -87,7 +87,7 @@ public abstract class AbstractLContext {
 		Set<Class<?>> set = getLogicClasses();
 		for(Class clazz : set) {
 			LogicClass logicClass = new LogicClass(clazz);
-			if(logicClass.getLogicName().equals(logicName) && logicClass.getParameters().length == args)
+			if(logicClass.getLObjectName().equals(logicName) && logicClass.getLObjectArgs().length == args)
 				return clazz;
 		}
 		return null;

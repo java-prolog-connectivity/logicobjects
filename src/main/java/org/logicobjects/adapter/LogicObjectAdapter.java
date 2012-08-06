@@ -4,15 +4,11 @@ package org.logicobjects.adapter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-
 import jpl.Term;
-
 import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
 import org.logicobjects.adapter.adaptingcontext.FieldAdaptingContext;
 import org.logicobjects.core.LogicObject;
 import org.reflectiveutils.ReflectionUtil;
-
-import com.google.code.guava.beans.Properties;
 
 public class LogicObjectAdapter extends Adapter<Object, LogicObject> {
 

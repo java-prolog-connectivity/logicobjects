@@ -17,7 +17,8 @@ public @interface LArgsAdapter {
 	Class adapter() default NO_ADAPTER.class;
 	
 	public static class LArgsAdapterUtil {
-		public static Class getAdapter(LArgsAdapter aLArgsAdapter) {
+		
+		public static Class getAdapterClass(LArgsAdapter aLArgsAdapter) {
 			Class adapterClass = aLArgsAdapter.adapter();
 			if(adapterClass == null || adapterClass.equals(NO_ADAPTER.class))
 				adapterClass = aLArgsAdapter.value();
@@ -25,5 +26,6 @@ public @interface LArgsAdapter {
 				adapterClass = null;
 			return adapterClass;
 		}
+		
 	}
 }

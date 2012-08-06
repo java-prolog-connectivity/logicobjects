@@ -86,12 +86,12 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 				
 				LTermAdapter termAdapterAnnotation = (LTermAdapter)guidingClass.getAnnotation(LTermAdapter.class);
 				if(termAdapterAnnotation!=null) 
-					return create(termAdapterAnnotation).adapt(object);
+					return LTermAdapterUtil.newAdapter(termAdapterAnnotation).adapt(object);
 				
 				LObject logicObjectAnnotation = (LObject)guidingClass.getAnnotation(LObject.class);
 				if(logicObjectAnnotation!=null) {
 					LogicClass logicClass = new LogicClass(guidingClass);
-					return new LogicObjectAdapter().asLogicObject(object, logicClass.getLogicName(), logicClass.getParameters()).asTerm();
+					return new LogicObjectAdapter().asLogicObject(object, logicClass.getLObjectName(), logicClass.getLObjectArgs()).asTerm();
 				}
 					
 				throw new ObjectToTermException(object);  //if we arrive here something went wrong
@@ -115,17 +115,6 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 	
 	public static Term asTerm(Object object) {
 		return new ObjectToTermAdapter().adapt(object);
-	}
-	
-
-	public static ObjectToTermAdapter create(LTermAdapter aLTermAdapter) {
-		try {
-			ObjectToTermAdapter termAdapter = (ObjectToTermAdapter)LTermAdapterUtil.getAdapter(aLTermAdapter).newInstance();
-			termAdapter.setParameters(aLTermAdapter.args());
-			return termAdapter;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 	
 	

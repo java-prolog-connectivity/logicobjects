@@ -5,21 +5,22 @@ import org.logicobjects.annotation.LDelegationObject;
 
 
 /**
- * This class is a workaround to the problem than in Java annotations cannot extend other annotations or implement an interface
- * Since @LObject and @LDelegationObject are quite similar, this class and its subclasses define methods to access common functionality from these two annotations
- * (without having to be aware which of the two ones are the used ones behind the curtains)
+ * This class describes a logic object: Currently these are objects annotated with @LObject and @LDelegationObject
+ * NOTE: The class is a workaround to the problem than in Java annotations cannot extend other annotations or implement an interface,
+ *   since @LObject and @LDelegationObject are quite similar, this class and its subclasses define methods to access common functionality from these two annotations
+ *   (without having to be aware which of the two ones are the used ones behind the curtains).
  * @author sergioc78
  *
  */
-public abstract class LMethodInvokerDescription {
+public abstract class LObjectGenericDescription {
 
 	public abstract String name(); 
-	public abstract String[] params(); 
+	public abstract String[] args(); 
 	public abstract String[] imports();
 	public abstract String[] modules();
 	public abstract boolean automaticImport();
 
-	public static LMethodInvokerDescription create(Class clazz) {
+	public static LObjectGenericDescription create(Class clazz) {
 		LObject aLObject = (LObject) clazz.getAnnotation(LObject.class);
 		if(aLObject != null)
 			return create(aLObject);
@@ -29,15 +30,15 @@ public abstract class LMethodInvokerDescription {
 		throw new RuntimeException("Impossible to create Method invoker description from class: " + clazz.getSimpleName());
 	}
 	
-	public static LMethodInvokerDescription create(LObject aLObject) {
+	public static LObjectGenericDescription create(LObject aLObject) {
 		return new LObjectDescription(aLObject);
 	}
 	
-	public static LMethodInvokerDescription create(LDelegationObject aLDelegationObject) {
+	public static LObjectGenericDescription create(LDelegationObject aLDelegationObject) {
 		return new LDelegationObjectDescription(aLDelegationObject);
 	}
 	
-	public static class LObjectDescription extends LMethodInvokerDescription {
+	public static class LObjectDescription extends LObjectGenericDescription {
 		LObject aLObject;
 
 		public LObjectDescription(LObject aLObject) {
@@ -48,7 +49,7 @@ public abstract class LMethodInvokerDescription {
 			return aLObject.name();
 		}
 
-		public String[] params() {
+		public String[] args() {
 			return aLObject.args();
 		}
 
@@ -69,7 +70,7 @@ public abstract class LMethodInvokerDescription {
 	
 	
 	
-	public static class LDelegationObjectDescription extends LMethodInvokerDescription {
+	public static class LDelegationObjectDescription extends LObjectGenericDescription {
 		LDelegationObject aLDelegationObject;
 
 		public LDelegationObjectDescription(LDelegationObject aLDelegationObject) {
@@ -80,7 +81,7 @@ public abstract class LMethodInvokerDescription {
 			return aLDelegationObject.name();
 		}
 
-		public String[] params() {
+		public String[] args() {
 			return aLDelegationObject.params();
 		}
 

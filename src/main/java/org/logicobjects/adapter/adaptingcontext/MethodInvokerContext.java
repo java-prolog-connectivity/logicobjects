@@ -7,7 +7,9 @@ import org.logicobjects.annotation.LObject;
 import org.logicobjects.core.LogicClass;
 
 /**
- * This class represents the context of a method invocation
+ * This class represents the context of a logic method invocation
+ * The Java object needs to be transformed to a Term first in order to execute a logic method
+ * 
  * @author sergioc78
  *
  */
@@ -21,7 +23,7 @@ public class MethodInvokerContext extends ClassAdaptingContext {
 	
 	@Override
 	public boolean canAdaptToTerm() {
-		return hasMethodInvokerDescription();
+		return hasLogicObjectDescription();
 	}
 	
 	@Override
@@ -30,12 +32,12 @@ public class MethodInvokerContext extends ClassAdaptingContext {
 	}
 	
 	@Override
-	public LMethodInvokerDescription getMethodInvokerDescription() {
+	public LObjectGenericDescription getLogicObjectDescription() {
 		Class invokerClass = LogicClass.findDelegationObjectClass(getContext());
 		if(invokerClass == null)
 			return null;
 		LDelegationObject aLDelegationObject = (LDelegationObject) invokerClass.getAnnotation(LDelegationObject.class);
-		return LMethodInvokerDescription.create(aLDelegationObject);
+		return LObjectGenericDescription.create(aLDelegationObject);
 	}
 
 }
