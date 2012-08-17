@@ -32,18 +32,22 @@ public class GlobalLContext extends AbstractLContext {
 		return userContext;
 	}
 
+	@Override
 	public void addSearchFilter(String packageName) {
 		userContext.addSearchFilter(packageName);
 	}
 	
+	@Override
 	public void addSearchUrlFromClass(Class clazz) {
 		userContext.addSearchUrlFromClass(clazz);
 	}
 	
+	@Override
 	public void addSearchUrls(URL ...urls) {
 		userContext.addSearchUrls(urls);
 	}
 	
+	@Override
 	public Set<Class<?>> getLogicClasses() {
 		Set<Class<?>> setCombination = new HashSet<Class<?>>(); //a new set needs to be defined since the system and user sets are Immutable collections
 		setCombination.addAll(systemContext.getLogicClasses());
@@ -53,6 +57,7 @@ public class GlobalLContext extends AbstractLContext {
 		return setCombination;
 	}
 	
+	@Override
 	public Set<Class<? extends WrapperAdapter>> getWrapperAdapters() {
 		Set<Class<? extends WrapperAdapter>> setCombination = new HashSet<Class<? extends WrapperAdapter>>(); //a new set needs to be defined since the system and user sets are Immutable collections
 		setCombination.addAll(systemContext.getWrapperAdapters());

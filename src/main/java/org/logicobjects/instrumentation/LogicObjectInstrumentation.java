@@ -14,8 +14,16 @@ import javassist.CtMethod;
 import javassist.CtNewMethod;
 import javassist.CtPrimitiveType;
 import javassist.bytecode.AnnotationsAttribute;
+import javassist.bytecode.BadBytecode;
 import javassist.bytecode.MethodInfo;
 import javassist.bytecode.ParameterAnnotationsAttribute;
+import javassist.bytecode.SignatureAttribute;
+import javassist.bytecode.SignatureAttribute.ClassSignature;
+import javassist.bytecode.SignatureAttribute.ClassType;
+import javassist.bytecode.SignatureAttribute.ObjectType;
+import javassist.bytecode.SignatureAttribute.TypeArgument;
+import javassist.bytecode.SignatureAttribute.TypeParameter;
+import javassist.bytecode.SignatureAttribute.TypeVariable;
 
 import org.logicobjects.adapter.BadExpressionException;
 import org.logicobjects.annotation.method.LMethod;
@@ -112,10 +120,7 @@ public class LogicObjectInstrumentation {
 	 * @param parent the base class of the new class
 	 */
 	private Class createExtendingClass(String extendingClassName, CtClass parent) {
-		//ClassPool pool = ClassPool.getDefault();
-
 		CtClass newCtClass = classPool.makeClass(extendingClassName);//creating the new class with the given name
-		
 		
 		try {
 			newCtClass.setSuperclass(parent);
@@ -124,10 +129,38 @@ public class LogicObjectInstrumentation {
 			JavassistUtil.makeNonAbstract(newCtClass); //Javassist makes a class abstract if an abstract method is added to the class. Then it has to be explicitly changed back to non-abstract
 			JavassistUtil.createClassFile(TEST_DIRECTORY, newCtClass);  //just to show how the new class looks like (TODO DO NOT FORGET TO DELETE THIS LINE IN THE RELEASED IMPLEMENTATION !!!)
 			
-			
-			//Class newClass = newCtClass.toClass();
-			//Class newClass = classPool.toClass(newCtClass, IntensionalViewsPlugin.getDefault().getClass().getClassLoader(), null);
-			//Class newClass = classPool.toClass(newCtClass, classPool.getClassLoader(), null);
+			String genericSignature = parent.getGenericSignature(); //the generic signature contains information about the type parameters and the generic superclass and interfaces
+			/**
+			 * In case that the parent class has generic signature data, part of this data should be present in the generated class
+			 * For example, if the generated class is:
+			 * public class A<X,Y> {...}
+			 * 
+			 * Then the generated class should be:
+			 * public class B<X,Y> extends A<X,Y> {...}
+			 */
+			if(genericSignature != null) {  //there is generic signature data in the parent class, then we should copy this on the generated class
+				try {
+					ClassSignature extendedClassSignature = SignatureAttribute.toClassSignature(genericSignature); //reifies the string representation of the generic class signature to a more convenient object representation
+					
+					List<TypeArgument> typeArgumentsList = new ArrayList<TypeArgument>();
+					for(TypeParameter typeParameter : extendedClassSignature.getParameters()) {
+						ObjectType objectType = new TypeVariable(typeParameter.getName());
+						typeArgumentsList.add(new TypeArgument(objectType));
+					}
+					
+					ClassType extendingGenericSuperClassType = new ClassType(parent.getName(), typeArgumentsList.toArray(new TypeArgument[]{}));
+					
+					ClassSignature extendingClassSignature = new ClassSignature(
+							extendedClassSignature.getParameters(), //same type parameters than the extending class
+							extendingGenericSuperClassType, //setting the generic super class to be the parent class with arguments with same names than the parameter types in the parent class declaration
+							new ClassType[]{} //no additional interfaces
+					);
+
+					newCtClass.setGenericSignature(extendingClassSignature.encode());
+				} catch (BadBytecode e) {
+					throw new RuntimeException(e);
+				}
+			}
 			Class newClass = classPool.toClass(newCtClass, classPool.getClass().getClassLoader(), null);
 			return newClass;
 		} catch (CannotCompileException e) {
@@ -220,6 +253,17 @@ public class LogicObjectInstrumentation {
 			 * (this looks like a Bug in Javassist)
 			 */
 			CtMethod ctCopiedMethod = CtNewMethod.copy(ctMethod, targetClass, classMap);
+			
+			/*
+			 * generics data is not strictly part of the method byte code, but rather "extra-data"
+			 * this data concerning generic is copied from the original method to the new one
+			 */
+			String methodGenericSignature = ctMethod.getGenericSignature(); 
+			if(methodGenericSignature != null) {
+				ctCopiedMethod.setGenericSignature(methodGenericSignature);
+			}
+			
+			
 			try {
 				MethodInfo methodInfo = ctMethod.getMethodInfo();
 				

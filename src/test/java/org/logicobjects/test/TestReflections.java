@@ -1,27 +1,71 @@
 package org.logicobjects.test;
 
-import java.util.Set;
+import static org.junit.Assert.assertTrue;
 
-import junit.framework.TestCase;
+import java.io.File;
+import java.util.Set;
 
 import org.junit.Test;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.core.LogicObjectFactory;
+import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 
+import com.google.common.base.Predicate;
+
 
 public class TestReflections extends LocalLogicTest{
-
+/*
+	public static interface I{}
+	
 	@Test
-	public void testFindingLogicObjects() {
+	public void testI() {
+		I i = new I(){};
+		System.out.println(i.getClass());
+		System.out.println(i.getClass().getSuperclass());
+	}
+*/	
+	
+	@Test
+	public void testFindingLogicObjectsWithCustomizedReflections() {
 		ConfigurationBuilder config = new ConfigurationBuilder();
-		
-		
-		
 		FilterBuilder fb = new FilterBuilder();
+		fb.include(FilterBuilder.prefix("org.logicobjects"));
+		config.filterInputsBy(fb);
+		config.setUrls(ClasspathHelper.forPackage("org.logicobjects"));
+		config.setScanners(new SubTypesScanner(false));
+		Reflections reflections = new Reflections(config);
+		//Set<Class<? extends Adapter>> classes = reflections.getSubTypesOf(Adapter.class);//getSubTypesOf(Object.class);
+		Set<Class<? extends Object>> classes = reflections.getSubTypesOf(Object.class);
+		//Set<Class<? extends LogicEngine>> classes = reflections.getSubTypesOf(LogicEngine.class);
+		
+		Predicate predicate = new Predicate<Class>() {
+			  public boolean apply(Class clazz) {
+			    return clazz.getAnnotation(LObject.class) != null;
+			  }
+		};
+
+		classes = ReflectionUtils.getAll(classes, predicate);
+		
+		System.out.println("Number of classes: " + classes.size());
+		for(Class clazz : classes) {
+			System.out.println(clazz);
+		}
+		System.out.println("done ...");
+	}
+	
+	
+	
+	@Test
+	public void testFindLogicObjectsWithReflections() {
+		ConfigurationBuilder config = new ConfigurationBuilder();
+		FilterBuilder fb = new FilterBuilder();
+		
 		fb.include(FilterBuilder.prefix("org.logicobjects"));
 		//fb.include(FilterBuilder.prefix("iv4e"));
 		//fb.include(FilterBuilder.prefix("bin"));
@@ -43,6 +87,7 @@ public class TestReflections extends LocalLogicTest{
 		Set<Class<?>> classes = system_reflections.getTypesAnnotatedWith(LObject.class);
 		
 		System.out.println("printing logic classes: ");
+		System.out.println("Number of classes: " + classes.size());
 		for(Class clazz : classes) {
 			System.out.println("Logic class: "+clazz.getName());
 		}
@@ -52,12 +97,15 @@ public class TestReflections extends LocalLogicTest{
 	
 	
 	@Test
-	public void testFindLogicObject() {
-		Set<Class<?>> classes = LogicObjectFactory.getDefault().getContext().getLogicClasses();
+	public void testFindLogicObjectsWithFramework() {
+		Set<Class<?>> classes = LogicObjectFactory.getDefault().getContext().getLogicClasses(); //this does not include logic classes in the test packages
+		System.out.println("printing logic classes: ");
+		System.out.println("Number of classes: " + classes.size());
 		for(Class clazz : classes) {
 			System.out.println(clazz);
 		}
 	}
+	
 	
 	/*
 	@Test
@@ -70,4 +118,30 @@ public class TestReflections extends LocalLogicTest{
 		System.out.println(clazz.getName());
 	}
 */
+	
+	@Test
+	public void testFindResources() {
+		Reflections reflections = new Reflections(new ConfigurationBuilder()
+        .setUrls(ClasspathHelper.forPackage("org.logicobjects"))
+        .setScanners(new ResourcesScanner()));
+		
+		
+		Predicate predicate = new Predicate<String>() {
+			  public boolean apply(String string) {
+			    return string.matches(".*\\.properties");
+			  }
+		};
+		
+		Set<String> propertiesFiles = reflections.getResources(predicate);  //in case a complex predicate is needed
+		//Set<String> propertiesFiles = reflections.getResources(Pattern.compile(".*\\.properties")); //in case the condition is just based on the name of the file
+		
+		System.out.println("Number of property files: " + propertiesFiles.size());
+		for(String propertyFile : propertiesFiles) {
+			System.out.println(propertyFile);
+			File file = new File(propertyFile);
+			assertTrue(file.exists());
+		}
+		
+		
+	}
 }

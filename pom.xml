@@ -25,8 +25,9 @@
  		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
-			<version>3.16.1-GA</version>
+			<version>3.17.0-GA</version> <!-- this version currently does not exist in the central Maven repository. It is provided as part of the included local repository. It includes an important improvement from Chiba -->
 			<!-- 
+			    <version>3.16.1-GA</version>
 				<version>3.15.0-GA</version>
 			 -->
 		</dependency>
@@ -62,7 +63,7 @@
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
-			<version>0.9.7.RC1</version>
+			<version>0.9.8</version>
 			<!-- 
 			<version>0.9.5</version>
 			 -->

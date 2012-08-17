@@ -31,6 +31,7 @@ public class TestLine extends LocalLogicTest  {
 		line2.setName("unexisting_line");
 		assertEquals(line2.segments(), 0);
 	}
+
 	
 
 }

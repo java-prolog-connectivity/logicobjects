@@ -5,15 +5,19 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import jpl.Term;
 import jpl.Variable;
 
 import org.logicobjects.adapter.Adapter;
-import org.logicobjects.adapter.methodresult.solutioncomposition.SolutionCompositionAdapter;
 import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.annotation.IgnoreAdapter;
 import org.logicobjects.core.LogicClass;
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
 
 public abstract class AbstractLContext {
 
@@ -22,7 +26,6 @@ public abstract class AbstractLContext {
 	public abstract void addSearchUrls(URL... urls);
 	
 	public abstract Set<Class<?>> getLogicClasses();
-	
 	public abstract Set<Class<? extends WrapperAdapter>> getWrapperAdapters();
 	
 	
@@ -53,7 +56,7 @@ public abstract class AbstractLContext {
 	
 
 	/**
-	 * This method is a workaround to the problem that the current version of reflections (0.9.5) does not recognize JBoss URLs.
+	 * This method is a workaround to the problem that the current version of reflections (at the moment of testing: 0.9.5 ) does not recognize JBoss URLs.
 	 * TODO check if next versions of Reflections still have this problem, otherwise this method can be removed.
 	 * @param urls
 	 * @return
@@ -98,4 +101,6 @@ public abstract class AbstractLContext {
 			return null;
 		return findLogicClass(term.name(), term.args().length);
 	}
+	
+
 }

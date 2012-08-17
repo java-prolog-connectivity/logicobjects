@@ -3,9 +3,12 @@ package org.logicobjects.lib.example.metro;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.method.LMethod;
 
-@LObject(args = {"name"})
-public abstract class Line {
 
+
+
+@LObject(args = {"name"})
+public abstract class Line { 
+	
 	private String name;
 
 	public String getName() {

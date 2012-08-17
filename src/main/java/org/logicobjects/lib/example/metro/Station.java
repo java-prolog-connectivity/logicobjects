@@ -10,6 +10,7 @@ import org.logicobjects.annotation.method.LWrapper;
 @LObject(args = {"name"})
 public abstract class Station {
 
+
 	private String name;
 
 	public String getName() {

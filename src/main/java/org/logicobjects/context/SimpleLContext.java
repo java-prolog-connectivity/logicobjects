@@ -34,23 +34,25 @@ public class SimpleLContext extends AbstractLContext {
 		refresh();
 	}
 	
-	private void loadDefaultSearchUrl(String reason) {
+	private void loadDefaultSearchUrlWithWarning(String reason) {
 		LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for "+reason+" without having provided a filter.");
 		URL url = findCallerClasspath();
 		LoggerFactory.getLogger(SimpleLContext.class).warn("Looking for classes in the same classpath than the user of the library: "+url);
 		addSearchUrls(url);
 	}
 	
+	@Override
 	public Set<Class<?>> getLogicClasses() {
 		if(reflections == null) {
-			loadDefaultSearchUrl("user logic classes");
+			loadDefaultSearchUrlWithWarning("user logic classes");
 		} 
 		return logicClasses;
 	}
 	
+	@Override
 	public Set<Class<? extends WrapperAdapter>> getWrapperAdapters() {
 		if(reflections == null) {
-			loadDefaultSearchUrl("user wrapper adapters");
+			loadDefaultSearchUrlWithWarning("user wrapper adapters");
 		} 
 		return compositionAdapters;
 	}
@@ -74,7 +76,7 @@ public class SimpleLContext extends AbstractLContext {
 		return null;
 	}
 	
-	
+	@Override
 	public void addSearchFilter(String packageName) {
 		if(reflections == null) {
 			//reflections = new Reflections(packageName);
@@ -93,10 +95,12 @@ public class SimpleLContext extends AbstractLContext {
 		refresh();
 	} 
 	
+	@Override
 	public void addSearchUrlFromClass(Class clazz) {
 		addSearchUrls(ClasspathHelper.forClass(clazz));
 	} 
 	
+	@Override
 	public void addSearchUrls(URL... urls) {
 		Reflections reflections_url;
 		ConfigurationBuilder config = new ConfigurationBuilder();
