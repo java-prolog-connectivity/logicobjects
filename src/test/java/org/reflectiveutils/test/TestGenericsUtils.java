@@ -12,20 +12,21 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.reflectiveutils.GenericsUtil;
-import org.reflectiveutils.test.FixtureGenerics.Class6;
-import org.reflectiveutils.test.FixtureGenerics.Class7;
-import org.reflectiveutils.test.FixtureGenerics.MyMap;
-import org.reflectiveutils.test.FixtureGenerics.MyMap3;
-import org.reflectiveutils.test.FixtureGenerics.MyMap4;
+import org.reflectiveutils.test.FixtureGenericsUtil.Class6;
+import org.reflectiveutils.test.FixtureGenericsUtil.Class7;
+import org.reflectiveutils.test.FixtureGenericsUtil.MyMap;
+import org.reflectiveutils.test.FixtureGenericsUtil.MyMap3;
+import org.reflectiveutils.test.FixtureGenericsUtil.MyMap4;
+import org.reflectiveutils.test.FixtureGenericsUtil.MyMap5;
+import org.reflectiveutils.test.FixtureGenericsUtil.MyMap6;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
-
 
 /**
  * 
  * @author sergioc78
  *
  */
-public class TestReflectiveUtils {
+public class TestGenericsUtils {
 
 	@Test
 	public void testUnifying() {
@@ -33,7 +34,7 @@ public class TestReflectiveUtils {
 		Type descendantType = MyMap4.class; //MyMap4
 		
 		GenericsUtil util = new GenericsUtil();
-		Map<TypeVariable, Type> typeVars = util.unify(ancestorType, descendantType);
+		Map<TypeVariable, Type> typeVars = util.unifyWithDescendant(ancestorType, descendantType);
 		
 		TypeVariable typeVar = (TypeVariable) typeVars.keySet().toArray()[0];
 		assertEquals(typeVar.getName(), "X");
@@ -44,6 +45,25 @@ public class TestReflectiveUtils {
 		System.out.println("Descendant type: " + descendantType);
 		System.out.println("Unified type variables" + typeVars);
 		*/
+	}
+	
+	@Test
+	public void testUnifyingArrayType() {
+		Type ancestorType = MyMap5.class.getGenericSuperclass(); //MyMap2<java.util.List<X>, X>
+		Type descendantType = MyMap6.class; //MyMap4
+		
+		GenericsUtil util = new GenericsUtil();
+		Map<TypeVariable, Type> typeVars = util.unifyWithDescendant(ancestorType, descendantType);
+		
+		TypeVariable typeVar = (TypeVariable) typeVars.keySet().toArray()[0];
+		assertEquals(typeVar.getName(), "X");
+		Type t = typeVars.get(typeVar);
+		assertEquals(t, String.class);
+		
+		System.out.println("Ancestor type: " + ancestorType);
+		System.out.println("Descendant type: " + descendantType);
+		System.out.println("Unified type variables" + typeVars);
+		
 	}
 	
 	@Test
@@ -72,7 +92,7 @@ public class TestReflectiveUtils {
 
 		Field f;
 		try {
-			f = FixtureGenerics.class.getField("myField");
+			f = FixtureGenericsUtil.class.getField("myField");
 		} catch (SecurityException e) {
 			// TODO Auto-generated catch block
 			throw new RuntimeException(e);

@@ -24,7 +24,7 @@ public class OneSolutionAdapter<LogicSolutionType> extends SolutionCompositionAd
 
 	@Override
 	public Type getEachSolutionType() {
-		return getMethodResultType();
+		return getConcreteMethodResultType();
 	}
 
 }

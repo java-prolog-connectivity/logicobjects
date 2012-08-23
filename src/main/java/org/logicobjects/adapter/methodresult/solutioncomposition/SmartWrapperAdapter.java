@@ -1,18 +1,13 @@
 package org.logicobjects.adapter.methodresult.solutioncomposition;
 
 
-import java.lang.reflect.Method;
 import java.util.Set;
-
 import jpl.Query;
-
 import org.logicobjects.core.LogicObjectFactory;
-import org.logicobjects.instrumentation.ParsedLogicMethod;
 import org.reflectiveutils.GenericsUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
 public class SmartWrapperAdapter extends WrapperAdapter<Object, Object>  {
-
 
 	@Override
 	public Object adapt(Query source) {
@@ -35,14 +30,12 @@ public class SmartWrapperAdapter extends WrapperAdapter<Object, Object>  {
 	
 	public Class findWrapperAdapterClass() {
 		Set<Class<? extends WrapperAdapter>> wrapperAdaptersClasses = LogicObjectFactory.getDefault().getContext().getWrapperAdapters();
-		//AbstractTypeWrapper methodType = AbstractTypeWrapper.wrap(getMethod().getGenericReturnType());
-		AbstractTypeWrapper methodTypeWrapper = AbstractTypeWrapper.wrap(getMethodResultType());
+		AbstractTypeWrapper methodTypeWrapper = AbstractTypeWrapper.wrap(getConcreteMethodResultType());
 		
 		for(Class wrapperAdaptersClass : wrapperAdaptersClasses) {
 			AbstractTypeWrapper wrapperAdapterReturnType = AbstractTypeWrapper.wrap(new GenericsUtil().findAncestorTypeParameters(WrapperAdapter.class, wrapperAdaptersClass)[0]);
 			if(methodTypeWrapper.isAssignableFrom(wrapperAdapterReturnType.getWrappedType()))
 				return wrapperAdaptersClass;
-				
 		}
 		return null;
 	}

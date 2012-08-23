@@ -7,11 +7,14 @@ import jpl.Query;
 
 import org.logicobjects.adapter.LogicAdapter;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
+import org.reflectiveutils.GenericsUtil;
 
 /*
  * Abstract base class for all the adapters that adapt a logic query as an object of type MethodResultType
  */
 public abstract class MethodResultAdapter<MethodResultType> extends LogicAdapter<Query, MethodResultType> {
+	
+	
 	
 	public static class DefaultMethodResultAdapter extends MethodResultAdapter<Query> {
 		@Override
@@ -92,7 +95,7 @@ public abstract class MethodResultAdapter<MethodResultType> extends LogicAdapter
 	 * where the method type has the Generics information.
 	 * This could be changed if used another byte code instrumentation library that does not ignore generics (maybe ASM, but not tried it yet)
 	 */
-	public Type getMethodResultType() {
+	public Type getConcreteMethodResultType() {
 		/*
 		try {
 			Class superClass = getMethod().getDeclaringClass().getSuperclass();

@@ -36,9 +36,14 @@ public abstract class AbstractTypeWrapper {
 	}
 	
 	public abstract Class asClass();
+	public abstract boolean hasTypeParameters();
+	public abstract TypeVariable[] getTypeParameters();
 	public abstract Type[] getActualTypeArguments();
 	public abstract boolean hasActualTypeArguments();
 	public abstract boolean isAssignableFrom(AbstractTypeWrapper type);
+	//public abstract boolean canBindTypeVariables(Map<TypeVariable, Type> typeVariableMap);
+	
+	
 	/**
 	 * Collects all the type variables nested in the type. Type Variables are inserted in the order they are found from left to right. No duplicates are collected. Wildcard Types are also included.
 	 * @param types is the list collection the found type variable.

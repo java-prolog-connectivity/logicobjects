@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class FixtureGenerics {
+public class FixtureGenericsUtil {
 
 	public static interface MyMap<X,Y> extends Map<Y,X> {} 
 	
@@ -36,5 +36,9 @@ public class FixtureGenerics {
 	public static abstract class MyMap3<X> extends MyMap2<List<X>, X> {}
 	
 	public static abstract class MyMap4 extends MyMap3<String> {}
+	
+	public static abstract class MyMap5<X> extends MyMap2<X[], X> {}
+	
+	public static abstract class MyMap6 extends MyMap5<String> {}
 }
 

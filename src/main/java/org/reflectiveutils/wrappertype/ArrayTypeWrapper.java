@@ -22,19 +22,23 @@ public class ArrayTypeWrapper extends AbstractTypeWrapper {
 	}
 	
 	@Override
+	public boolean hasTypeParameters() {
+		return AbstractTypeWrapper.wrap(getBaseType()).hasTypeParameters();
+	}
+
+	@Override
+	public TypeVariable[] getTypeParameters() {
+		return AbstractTypeWrapper.wrap(getBaseType()).getTypeParameters();
+	}
+	
+	@Override
 	public Type[] getActualTypeArguments() {
-		if(hasActualTypeArguments()) {
-			return AbstractTypeWrapper.wrap(((ArrayTypeWrapper)wrappedType).getBaseType()).getActualTypeArguments();
-					
-		} else
-			return new Type[] {};
+		return AbstractTypeWrapper.wrap(getBaseType()).getActualTypeArguments();
 	}
 	
 	@Override
 	public boolean hasActualTypeArguments() {
-		Type baseType = getBaseType();
-		//return baseType instanceof ParameterizedType || wrappedType instanceof TypeVariable;
-		return GenericArrayType.class.isAssignableFrom(wrappedType.getClass());
+		return AbstractTypeWrapper.wrap(getBaseType()).hasActualTypeArguments();
 	}
 /*
 	@Override
@@ -123,6 +127,15 @@ public class ArrayTypeWrapper extends AbstractTypeWrapper {
 	@Override
 	public Type bindVariables(Map<TypeVariable, Type> typeVariableMap) {
 		Type boundType;
+		Type unboundComponentType = getComponentType();
+		AbstractTypeWrapper wrappedComponentType = AbstractTypeWrapper.wrap(unboundComponentType);
+		Type boundComponentType = wrappedComponentType.bindVariables(typeVariableMap);
+		if(unboundComponentType.equals(boundComponentType))
+			boundType = wrappedType;
+		else
+			boundType = new GenericArrayTypeImpl(boundComponentType);
+		
+		/*
 		if(hasActualTypeArguments()) {
 			AbstractTypeWrapper wrappedComponentType = AbstractTypeWrapper.wrap(getComponentType());
 			Type componentType = wrappedComponentType.bindVariables(typeVariableMap);
@@ -130,7 +143,10 @@ public class ArrayTypeWrapper extends AbstractTypeWrapper {
 		} else {
 			boundType = wrappedType;
 		}
+		*/
 		return boundType;
 	}
+
+
 
 }

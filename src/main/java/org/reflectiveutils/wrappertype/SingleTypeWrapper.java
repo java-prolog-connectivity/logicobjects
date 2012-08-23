@@ -37,10 +37,12 @@ public class SingleTypeWrapper extends AbstractTypeWrapper {
 			return new Type[] {};
 	}
 
+	@Override
 	public boolean hasTypeParameters() {
 		return getTypeParameters().length>0;
 	}
 	
+	@Override
 	public TypeVariable[] getTypeParameters() {
 		return asClass().getTypeParameters();
 	}
@@ -85,15 +87,6 @@ public class SingleTypeWrapper extends AbstractTypeWrapper {
 			System.out.println("Parameter: "+i+": "+getActualTypeArguments()[i].toString());
 		}
 	}
-
-
-	private boolean bindsAtLeastOneTypeVariable(TypeVariable[] typeVariables, Map<TypeVariable, Type> typeVariableMap) {
-		for(TypeVariable typeVariable: typeVariables) {
-			if(typeVariableMap.containsKey(typeVariable))
-				return true;
-		}
-		return false;
-	}
 	
 	public Type getOwnerType() {
 		if(wrappedType instanceof ParameterizedType)
@@ -101,6 +94,27 @@ public class SingleTypeWrapper extends AbstractTypeWrapper {
 		else
 			return ((Class)wrappedType).getEnclosingClass();
 	}
+	
+	
+	private boolean bindAtLeastOneTypeVariable(TypeVariable[] typeVariables, Map<TypeVariable, Type> typeVariableMap) {
+		for(TypeVariable typeVariable: typeVariables) {
+			if(typeVariableMap.containsKey(typeVariable))
+				return true;
+		}
+		return false;
+	}
+	
+	public boolean canBindTypeParameters(Map<TypeVariable, Type> typeVariableMap) {
+		if(hasTypeParameters())
+			return bindAtLeastOneTypeVariable(getTypeParameters(), typeVariableMap);
+		return false;
+	}
+	/*
+	@Override
+	public boolean canBindTypeVariables(Map<TypeVariable, Type> typeVariableMap) {
+		return hasActualTypeArguments() || canBindTypeParameters(typeVariableMap);
+	}
+	*/
 	
 	/**
 	 * Bind the type variables sent in the map to any free type variables in the actual arguments list
@@ -113,7 +127,7 @@ public class SingleTypeWrapper extends AbstractTypeWrapper {
 			Type[] actualTypeArguments = null;
 			if(hasActualTypeArguments())
 				actualTypeArguments = bindVariables(getActualTypeArguments(), typeVariableMap);
-			else if(hasTypeParameters() && bindsAtLeastOneTypeVariable(getTypeParameters(), typeVariableMap)) {
+			else if(canBindTypeParameters(typeVariableMap)) {
 				actualTypeArguments = bindVariables(getTypeParameters(), typeVariableMap);
 			}
 			if(actualTypeArguments != null)

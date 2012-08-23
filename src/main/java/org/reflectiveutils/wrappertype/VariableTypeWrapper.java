@@ -13,6 +13,17 @@ public class VariableTypeWrapper extends AbstractTypeWrapper {
 		super(wrappedType);
 	}
 
+	@Override
+	public boolean hasTypeParameters() {
+		//if(true) throw new UnsupportedOperationException();
+		return false;
+	}
+	
+	@Override
+	public TypeVariable[] getTypeParameters() {
+		//if(true) throw new UnsupportedOperationException();
+		return new TypeVariable[] {};
+	}
 
 	@Override
 	public Type[] getActualTypeArguments() {
@@ -85,9 +96,13 @@ public class VariableTypeWrapper extends AbstractTypeWrapper {
 		if(!typeVariables.contains(wrappedType))
 			typeVariables.add(wrappedType);
 	}
-
-
-
+/*
+	@Override
+	public boolean canBindTypeParameters(Map<TypeVariable, Type> typeVariableMap) {
+		return typeVariableMap.get(wrappedType) != null;
+	}
+*/
+	
 	@Override
 	public Type bindVariables(Map<TypeVariable, Type> typeVariableMap) {
 		Type mappedType = typeVariableMap.get(wrappedType);

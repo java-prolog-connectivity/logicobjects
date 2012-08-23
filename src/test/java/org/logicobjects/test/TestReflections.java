@@ -19,7 +19,7 @@ import org.reflections.util.FilterBuilder;
 import com.google.common.base.Predicate;
 
 
-public class TestReflections extends LocalLogicTest{
+public class TestReflections extends LocalLogicTest {
 /*
 	public static interface I{}
 	

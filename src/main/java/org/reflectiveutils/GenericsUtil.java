@@ -11,7 +11,13 @@ import org.reflectiveutils.wrappertype.SingleTypeWrapper;
 import org.reflectiveutils.wrappertype.VariableTypeWrapper;
 
 
+
 public class GenericsUtil {
+	
+	public Type bindTypeGivenDescendant(Type ancestor, Type descendant) {
+		Map<TypeVariable, Type> typeVariableMap = unifyWithDescendant(ancestor, descendant);
+		return AbstractTypeWrapper.wrap(ancestor).bindVariables(ancestor, typeVariableMap);
+	}
 
 	/**
 	 * This method unifies the variable type arguments in an ancestor type according to the types in a descendant
@@ -19,26 +25,36 @@ public class GenericsUtil {
 	 * @param descendant A descendant type without type variables
 	 * @return a map of type variables to concrete types
 	 */
-	public Map<TypeVariable, Type> unify(Type ancestor, Type descendant) {
-		return unify(AbstractTypeWrapper.wrap(ancestor), AbstractTypeWrapper.wrap(descendant));
+	public Map<TypeVariable, Type> unifyWithDescendant(Type ancestor, Type descendant) {
+		return unifyWithDescendant(AbstractTypeWrapper.wrap(ancestor), AbstractTypeWrapper.wrap(descendant));
 	}
 	
-	public Map<TypeVariable, Type> unify(AbstractTypeWrapper ancestor, AbstractTypeWrapper descendant) {
+	public Map<TypeVariable, Type> unifyWithDescendant(AbstractTypeWrapper ancestor, AbstractTypeWrapper descendant) {
 		if(!ancestor.isAssignableFrom(descendant)) {
 			throw new NotAncestorException(ancestor, descendant);
 		}
 		if(ancestor instanceof ArrayTypeWrapper) {
-			return unify(((ArrayTypeWrapper) ancestor).getBaseType(), ((ArrayTypeWrapper) ancestor).getBaseType());
+			return unifyWithDescendant(((ArrayTypeWrapper) ancestor).getBaseType(), ((ArrayTypeWrapper) descendant).getBaseType());
 		}
 		
 		Map<TypeVariable, Type> typeVariables = new HashMap<TypeVariable, Type>(); //the map to return
 		
-		if(!ancestor.hasActualTypeArguments())  //if there are no type arguments, there are no type variables to unify
+		if(ancestor instanceof VariableTypeWrapper) {
+			unify(ancestor, descendant, typeVariables);
+			return typeVariables;
+		}
+		
+
+		if(!ancestor.hasTypeParameters())  //if there are no type parameters, there are no type variables to unify
 			return typeVariables;  //return empty map
 		
-		SingleTypeWrapper ancestorWithoutTypeArguments = (SingleTypeWrapper)AbstractTypeWrapper.wrap(ancestor.asClass()); //type variables suppressed
+		SingleTypeWrapper ancestorWithoutTypeArguments = (SingleTypeWrapper)AbstractTypeWrapper.wrap(ancestor.asClass()); //type arguments (if any) suppressed
 		AbstractTypeWrapper[] ancestorBoundTypes = findAncestorTypeParameters(ancestorWithoutTypeArguments, (SingleTypeWrapper)descendant); //how the parameter types in the ancestor looks like when looking at the descendant types
-		AbstractTypeWrapper[] ancestorUnboundTypes = AbstractTypeWrapper.wrap(ancestor.getActualTypeArguments());  //the current type arguments in the ancestor. Some type arguments should include unbound type variables
+		AbstractTypeWrapper[] ancestorUnboundTypes;
+		if(ancestor.hasActualTypeArguments())
+			ancestorUnboundTypes = AbstractTypeWrapper.wrap(ancestor.getActualTypeArguments());  //the current type arguments in the ancestor. Some type arguments should include unbound type variables
+		else
+			ancestorUnboundTypes = AbstractTypeWrapper.wrap(ancestor.getTypeParameters());
 		
 		for(int i=0; i<ancestorUnboundTypes.length; i++) {
 			AbstractTypeWrapper ancestorUnboundType = ancestorUnboundTypes[i];
@@ -57,6 +73,11 @@ public class GenericsUtil {
 	 * @param typeVariables
 	 */
 	public void unify(AbstractTypeWrapper unboundType, AbstractTypeWrapper boundType, Map<TypeVariable, Type> typeVariables) {
+		if(unboundType instanceof ArrayTypeWrapper) {
+			unify(((ArrayTypeWrapper) unboundType).getBaseType(), ((ArrayTypeWrapper) boundType).getBaseType(), typeVariables);
+			return;
+		}
+		
 		if(unboundType instanceof VariableTypeWrapper) {
 			VariableTypeWrapper variableType = (VariableTypeWrapper)unboundType;
 			if(!variableType.isWildcard()) {
@@ -83,10 +104,14 @@ public class GenericsUtil {
 					}
 				}
 			}
-			
 		}
 	}
 	
+	public void unify(Type unboundType, Type boundType, Map<TypeVariable, Type> typeVariables) {
+		unify(AbstractTypeWrapper.wrap(unboundType),  AbstractTypeWrapper.wrap(boundType), typeVariables);
+		
+	}
+
 	public void unify(AbstractTypeWrapper[] unboundType, AbstractTypeWrapper[] boundType, Map<TypeVariable, Type> typeVariables) {
 		assert(unboundType.length == boundType.length);
 		for(int i = 0; i<unboundType.length; i++) {
