@@ -12,8 +12,7 @@ public class FixtureGenerics {
 	public static abstract class Class1<O,P,Q> implements MyMap<O,Q>{}
 		
 	public static abstract class Class2<R,S> extends Class1<R, String, S> {}
-	
-	//public static abstract class Class3<U> extends Class2<U,List<String>> {}
+
 	public static abstract class Class3<U> extends Class2<U,List<U>> {}
 	
 	public static abstract class Class4<W> extends Class3<Map> {}
@@ -23,11 +22,12 @@ public class FixtureGenerics {
 	
 	public static abstract class Class6 extends Class5 {}
 	
+	public static abstract class Class7<X, Y> extends Class4<Y> {}
 	
 	public Class4<Iterator<Map<?,String>>> myField;
 	
 	
-	public static abstract class Class7<X, Y> extends Class4<Y> {}
+	
 	
 	
 	

@@ -95,6 +95,13 @@ public class SingleTypeWrapper extends AbstractTypeWrapper {
 		return false;
 	}
 	
+	public Type getOwnerType() {
+		if(wrappedType instanceof ParameterizedType)
+			return ((ParameterizedType)wrappedType).getOwnerType();
+		else
+			return ((Class)wrappedType).getEnclosingClass();
+	}
+	
 	/**
 	 * Bind the type variables sent in the map to any free type variables in the actual arguments list
 	 * if the wrapped type is not a Parameterized Type (i.e., without actual type arguments) the method does not do anything
@@ -110,7 +117,7 @@ public class SingleTypeWrapper extends AbstractTypeWrapper {
 				actualTypeArguments = bindVariables(getTypeParameters(), typeVariableMap);
 			}
 			if(actualTypeArguments != null)
-				boundType = new ParameterizedTypeImpl(actualTypeArguments, ((ParameterizedType)wrappedType).getOwnerType(), (Class) ((ParameterizedType)wrappedType).getRawType());
+				boundType = new ParameterizedTypeImpl(actualTypeArguments, getOwnerType(), asClass());
 		}
 		if(boundType == null) {
 			boundType = wrappedType;
