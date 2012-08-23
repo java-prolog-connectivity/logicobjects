@@ -7,8 +7,8 @@ import java.util.Iterator;
 import jpl.Query;
 
 import org.logicobjects.instrumentation.ParsedLogicMethod;
-import org.reflectiveutils.AbstractTypeWrapper;
 import org.reflectiveutils.GenericsUtil;
+import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
 /*
  * Adapt a logic query as an Iterator object
@@ -18,7 +18,7 @@ import org.reflectiveutils.GenericsUtil;
  * WrapperAdapter<Iterator<LogicAnswerType>,LogicAnswerType>
  * since SolutionEnumeration provides a 'close' method that must be called before disposing the object
  */
-public class IteratorCompositionAdapter<LogicAnswerType> extends
+public class IteratorWrapperAdapter<LogicAnswerType> extends
 		WrapperAdapter<SolutionEnumeration<LogicAnswerType>, LogicAnswerType> {
 
 

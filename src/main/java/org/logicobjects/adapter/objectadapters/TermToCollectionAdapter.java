@@ -9,8 +9,8 @@ import jpl.Term;
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
 import org.logicobjects.util.LogicUtil;
-import org.reflectiveutils.AbstractTypeWrapper;
 import org.reflectiveutils.GenericsUtil;
+import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
 public class TermToCollectionAdapter extends TermToObjectAdapter<Collection> {
 

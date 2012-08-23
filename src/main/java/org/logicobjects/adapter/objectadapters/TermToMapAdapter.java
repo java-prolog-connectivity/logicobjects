@@ -1,6 +1,5 @@
 package org.logicobjects.adapter.objectadapters;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.Hashtable;
 import java.util.Map;
@@ -12,7 +11,7 @@ import jpl.Term;
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
 import org.logicobjects.util.LogicUtil;
-import org.reflectiveutils.AbstractTypeWrapper.SingleTypeWrapper;
+import org.reflectiveutils.wrappertype.SingleTypeWrapper;
 
 public class TermToMapAdapter extends TermToObjectAdapter<Map> {
 

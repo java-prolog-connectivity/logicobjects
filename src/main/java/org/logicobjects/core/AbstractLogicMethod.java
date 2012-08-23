@@ -30,7 +30,7 @@ import org.logicobjects.instrumentation.AbstractLogicMethodParser;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
 import org.logicobjects.instrumentation.ParsingData;
 import org.logicobjects.util.LogicUtil;
-import org.reflectiveutils.AbstractTypeWrapper;
+import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -13,8 +13,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.reflectiveutils.AbstractTypeWrapper;
-import org.reflectiveutils.AbstractTypeWrapper.SingleTypeWrapper;
+import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
+import org.reflectiveutils.wrappertype.SingleTypeWrapper;
 
 /*
  * Default implementation classes for certain interfaces

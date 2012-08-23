@@ -1,16 +1,9 @@
 package org.logicobjects.adapter.methodresult.solutioncomposition;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-
-import jpl.Query;
 
 import org.logicobjects.adapter.methodresult.MethodResultAdapter;
 import org.logicobjects.adapter.methodresult.eachsolution.EachSolutionAdapter;
-import org.logicobjects.instrumentation.ParsedLogicMethod;
-
-import org.reflectiveutils.AbstractTypeWrapper;
-import org.reflectiveutils.AbstractTypeWrapper.SingleTypeWrapper;
 
 /*
  * This adapter adapts one or more answers of type EachSolutionType as an object of type MethodResultType.

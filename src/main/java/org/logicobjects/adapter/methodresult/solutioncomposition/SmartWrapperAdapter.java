@@ -8,8 +8,8 @@ import jpl.Query;
 
 import org.logicobjects.core.LogicObjectFactory;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
-import org.reflectiveutils.AbstractTypeWrapper;
 import org.reflectiveutils.GenericsUtil;
+import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
 public class SmartWrapperAdapter extends WrapperAdapter<Object, Object>  {
 

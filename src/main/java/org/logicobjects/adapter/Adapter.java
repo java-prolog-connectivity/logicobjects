@@ -3,8 +3,8 @@ package org.logicobjects.adapter;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
-import org.reflectiveutils.AbstractTypeWrapper;
 import org.reflectiveutils.GenericsUtil;
+import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
 /*
  * An abstract adapter with convenient methods for finding out their generic types at runtime

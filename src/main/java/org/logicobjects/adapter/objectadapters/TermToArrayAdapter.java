@@ -1,18 +1,15 @@
 package org.logicobjects.adapter.objectadapters;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 
-import jpl.Atom;
 import jpl.Term;
-import jpl.Util;
 
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
 import org.logicobjects.util.LogicUtil;
-import org.reflectiveutils.AbstractTypeWrapper;
-import org.reflectiveutils.AbstractTypeWrapper.ArrayTypeWrapper;
+import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
+import org.reflectiveutils.wrappertype.ArrayTypeWrapper;
 
 public class TermToArrayAdapter extends TermToObjectAdapter<Object[]> {
 

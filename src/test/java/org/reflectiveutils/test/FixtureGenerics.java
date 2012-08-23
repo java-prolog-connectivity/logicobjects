@@ -13,16 +13,28 @@ public class FixtureGenerics {
 		
 	public static abstract class Class2<R,S> extends Class1<R, String, S> {}
 	
-	public static abstract class Class3<U> extends Class2<U,List<String>> {}
+	//public static abstract class Class3<U> extends Class2<U,List<String>> {}
+	public static abstract class Class3<U> extends Class2<U,List<U>> {}
 	
-	public static abstract class Class4<W> extends Class2<Set<String>,W> {}
+	public static abstract class Class4<W> extends Class3<Map> {}
 	
-	public static abstract class Class5 extends Class3<Map> {}
+	
+	public static abstract class Class5 extends Class4<Map> {}
 	
 	public static abstract class Class6 extends Class5 {}
 	
-	public Class4<Iterator<Map<?,String>>> class4;
+	
+	public Class4<Iterator<Map<?,String>>> myField;
+	
 	
 	public static abstract class Class7<X, Y> extends Class4<Y> {}
 	
+	
+	
+	public static abstract class MyMap2<X, Y> implements Map<List<X>, Y> {}
+	
+	public static abstract class MyMap3<X> extends MyMap2<List<X>, X> {}
+	
+	public static abstract class MyMap4 extends MyMap3<String> {}
 }
+

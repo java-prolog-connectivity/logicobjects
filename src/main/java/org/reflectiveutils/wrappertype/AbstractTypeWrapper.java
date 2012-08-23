@@ -1,26 +1,23 @@
-package org.reflectiveutils;
+package org.reflectiveutils.wrappertype;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.logicobjects.annotation.LObject;
+import org.reflectiveutils.ReflectionUtil;
 
 /*
- * The objective of this class is to reduce the amount of castings and instanceof operations that otherwise certain adapters will have to do
+ * The objective of this class is to reduce the amount of castings and instanceof operations that otherwise classes dealing with Java type classes will have to do
  * 
  */
 public abstract class AbstractTypeWrapper {
 	
-	Type wrappedType;
+	protected Type wrappedType;
 	
 	public AbstractTypeWrapper(Type wrappedType) {
 		setWrappedType(wrappedType);
@@ -34,12 +31,74 @@ public abstract class AbstractTypeWrapper {
 		this.wrappedType = wrappedType;
 	}
 	
+	public boolean isAssignableFrom(Type type) {
+		return isAssignableFrom(AbstractTypeWrapper.wrap(type));
+	}
+	
 	public abstract Class asClass();
+	public abstract Type[] getActualTypeArguments();
 	public abstract boolean hasActualTypeArguments();
-	public abstract boolean isAssignableFrom(Type type);
+	public abstract boolean isAssignableFrom(AbstractTypeWrapper type);
+	/**
+	 * Collects all the type variables nested in the type. Type Variables are inserted in the order they are found from left to right. No duplicates are collected. Wildcard Types are also included.
+	 * @param types is the list collection the found type variable.
+	 */
+	protected abstract void collectTypeVariables(List<Type> types);
+	
+	/**
+	 * @return all the type variables nested in the type. Type Variables are inserted in the order they are found from left to right. No duplicates are collected. Wildcard Types are also included.
+	 */
+	public List<Type> getTypeVariables() {
+		List<Type> typeVariables = new ArrayList<Type>();
+		collectTypeVariables(typeVariables);
+		return typeVariables;
+	}
+	
+	/**
+	 * @return the named type variables nested in the type. Type Variables are inserted in the order they are found from left to right. No duplicates are collected. Wildcard Types are NOT included.
+	 */
+	public List<TypeVariable> getNamedTypeVariables() {
+		List<TypeVariable> namedTypeVariables = new ArrayList<TypeVariable>();
+		for(Type typeVariable : getTypeVariables()) {
+			if(typeVariable instanceof TypeVariable)
+				namedTypeVariables.add((TypeVariable) typeVariable);
+		}
+		return namedTypeVariables;
+	}
+	
+	/**
+	 *  
+	 * @return a boolean indicating if the type has named type variables
+	 */
+	public boolean hasNamedTypeVariables() {
+		return !getNamedTypeVariables().isEmpty();
+	}
+	
+	/**
+	 * 
+	 * @param typeVariableMap is a map containing mappings from type variables to concrete types
+	 * @return an equivalent type to the wrapped time, with the difference that all its named type variables have been substituted by types given by a map
+	 */
+	public abstract Type bindVariables(Map<TypeVariable, Type> typeVariableMap);
+	
+	public static Type bindVariables(Type type, Map<TypeVariable, Type> typeVariableMap) {
+		return AbstractTypeWrapper.wrap(type).bindVariables(typeVariableMap);
+	}
+	
+	public static Type[] bindVariables(Type[] types, Map<TypeVariable, Type> typeVariableMap) {
+		Type[] boundTypes = new Type[types.length];
+		for(int i=0; i<boundTypes.length; i++)
+			boundTypes[i] = bindVariables(types[i], typeVariableMap);
+		return boundTypes;
+	}
+
+	@Override
+	public String toString() {
+		return "("+getClass().getSimpleName()+")" + getWrappedType().toString();
+	}
 	
 	public void print() {
-		System.out.println("TypeWrapper class: "+getClass().getName());
+		System.out.println(toString());
 	}
 	
 	public static AbstractTypeWrapper wrap(Type type) {
@@ -69,258 +128,15 @@ public abstract class AbstractTypeWrapper {
 	
 	
 	
-	public static class SingleTypeWrapper extends AbstractTypeWrapper {
-		
-		public SingleTypeWrapper(Type wrappedType) {
-			super(wrappedType);
-		}
-
-		boolean isInterface() {
-			return asClass().isInterface();
-		}
-
-		boolean isAbstract() {
-			return Modifier.isAbstract(asClass().getModifiers());  //primitive type classes answer yes to this
-		}
-
-		@Override
-		public boolean hasActualTypeArguments() {
-			return ParameterizedType.class.isAssignableFrom(wrappedType.getClass());
-		}
-
-		public Type[] getActualTypeArguments() {
-			if(hasActualTypeArguments()) {
-				return ((ParameterizedType)wrappedType).getActualTypeArguments();
-			} else
-				return new Type[] {};
-		}
-
-		public boolean hasTypeParameters() {
-			return getTypeParameters().length>0;
-		}
-		
-		public TypeVariable[] getTypeParameters() {
-			return asClass().getTypeParameters();
-		}
-		
-		@Override
-		public Class asClass() {
-			if(hasActualTypeArguments())
-				return (Class)((ParameterizedType)wrappedType).getRawType();
-			else
-				return (Class)wrappedType;
-		}
-
-		@Override
-		public boolean isAssignableFrom(Type type) {
-			AbstractTypeWrapper paramWrapper = AbstractTypeWrapper.wrap(type);
-			if(paramWrapper instanceof VariableTypeWrapper)
-				return true;
-			if(!(paramWrapper instanceof SingleTypeWrapper))
-				return false;
-			return asClass().isAssignableFrom(SingleTypeWrapper.class.cast(paramWrapper).asClass());
-		}
-
-		@Override
-		public void print() {
-			super.print();
-			if(isInterface())
-				System.out.println("Interface");
-			else if(isAbstract())
-				System.out.println("Abstract class");
-			else
-				System.out.println("Concrete class");
-			System.out.println("Class: "+asClass().getName());
-			if(hasActualTypeArguments())
-				System.out.println("Parameters: "+getActualTypeArguments().length);
-			for(int i = 0; i<getActualTypeArguments().length; i++) {
-				System.out.println("Parameter: "+i+": "+getActualTypeArguments()[i].toString());
-			}
-		}
-
-/*
-		@Override
-		public boolean isErased() {
-			return false;
-		}
-
-		@Override
-		public boolean isArray() {
-			return false;
-		}
-*/
-	}
 	
 	
-	public static class ArrayTypeWrapper extends AbstractTypeWrapper {
+	
 
-		public ArrayTypeWrapper(Type wrappedType) {
-			super(wrappedType);
-		}
-		
-		public static boolean isArray(Type type) {
-			return ( GenericArrayType.class.isAssignableFrom(type.getClass()) || (Class.class.isAssignableFrom(type.getClass()) && ((Class)type).isArray()) );
-		}
-		
-		@Override
-		public boolean hasActualTypeArguments() {
-			return GenericArrayType.class.isAssignableFrom(wrappedType.getClass());
-		}
-/*
-		@Override
-		public Type[] getParameters() {
-			if(isParameterized()) {
-				if( ((GenericArrayType)wrappedType).getGenericComponentType() instanceof ParameterizedType) 
-					return ((ParameterizedType)((GenericArrayType)wrappedType).getGenericComponentType()).getActualTypeArguments();
-				else
-					return new Type[] {((GenericArrayType)wrappedType).getGenericComponentType()};
-			} else
-			return new Type[] {};
-		}
-*/
-		
-		public Type getComponentType() {
-			if(hasActualTypeArguments()) {
-				return ((GenericArrayType)wrappedType).getGenericComponentType();
-			} else {
-				return ((Class)wrappedType).getComponentType();
-			}
-				
-		}
-/*
-		@Override
-		public boolean isErased() {
-			return false;
-		}
 
-		@Override
-		public boolean isArray() {
-			return true;
-		}
-*/
-		
-		public int dimensions() {
-			int componentDimension = 0;
-			if(isArray(getComponentType())) {
-				componentDimension = new ArrayTypeWrapper(getComponentType()).dimensions();
-			}
-			return 1 + componentDimension;
-		}
-		
-		public Type getBaseType() {
-			if(isArray(getComponentType()))
-				return (new ArrayTypeWrapper(getComponentType())).getBaseType();
-			else
-				return getComponentType();		
-		}
-
-		@Override
-		public boolean isAssignableFrom(Type type) {
-			AbstractTypeWrapper paramWrapper = AbstractTypeWrapper.wrap(type);
-			if(paramWrapper instanceof VariableTypeWrapper)
-				return true;
-			if( !(paramWrapper instanceof ArrayTypeWrapper) )
-				return false;
-			if(!(dimensions() == ArrayTypeWrapper.class.cast(paramWrapper).dimensions()) )
-				return false;
-			return AbstractTypeWrapper.wrap(getBaseType()).isAssignableFrom(ArrayTypeWrapper.class.cast(paramWrapper).getBaseType());
-		}
-
-		@Override
-		public Class asClass() {
-			if(!hasActualTypeArguments())
-				return (Class) wrappedType;
-			else {
-				Class componentClass = AbstractTypeWrapper.wrap(getComponentType()).asClass();
-				return Array.newInstance(componentClass, 0).getClass();
-			}
-		}
-
-		@Override
-		public void print() {
-			super.print();
-			System.out.println("Class: "+asClass().getName());
-			System.out.println("Dimensions: "+dimensions());
-			if(hasActualTypeArguments())
-				System.out.println("Parameterized array");
-			System.out.println("Base type: "+getBaseType().toString());
-		}
-	}
 	
 	
-	public static class VariableTypeWrapper extends AbstractTypeWrapper {
-
-		public VariableTypeWrapper(Type wrappedType) {
-			super(wrappedType);
-		}
-
-
-
-		@Override
-		public boolean hasActualTypeArguments() {
-			if(true) throw new UnsupportedOperationException();
-			return false;
-		}
-/*
-		@Override
-		public boolean isErased() {
-			return true;
-		}
-		
-		@Override
-		public Type[] getParameters() {
-			if(true) throw new UnsupportedOperationException();
-			return null;
-		}
-
-		@Override
-		public boolean isArray() {
-			if(true) throw new UnsupportedOperationException();
-			return false;
-		}
-*/
-
-
-
-		@Override
-		public boolean isAssignableFrom(Type type) {
-			return true;
-		}
-		
-		/*
-		 * Answers if wrappedType is an instanceof WildcardType
-		 */
-		public boolean isWildcard() {
-			return wrappedType instanceof WildcardType;
-		}
-
-		@Override
-		public Class asClass() {
-			return Object.class;
-		}
-		
-		public String getName() {
-			if(isWildcard())
-				return "?"; //no name
-				
-			else
-				return ((TypeVariable)wrappedType).getName();
-		}
-
-
-
-		@Override
-		public void print() {
-			super.print();
-			System.out.println("Name: "+getName());
-			
-		}
-	}
-
-
-
-
-
+	
+	//TODO delete
 	public static void infoType(Type type) {
 		try {
 			AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
@@ -404,6 +220,12 @@ public abstract class AbstractTypeWrapper {
 	
 	
 
+	
+	
+	
+	
+	
+	//TODO delete
 	public static class P<T> {
 		@LObject(name = "x")
 		int i;
@@ -501,13 +323,7 @@ public abstract class AbstractTypeWrapper {
 	public static class C extends P {
 
 	}
-	
-	
-	
-	
-	
-	
-	
+
 	
 	public static void main(String[] args) {
 		
@@ -588,4 +404,6 @@ public abstract class AbstractTypeWrapper {
 		System.out.println(s.getClass());
 		*/
 	}
+
+
 }

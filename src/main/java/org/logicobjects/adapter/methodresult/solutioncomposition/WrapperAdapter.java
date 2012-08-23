@@ -1,13 +1,12 @@
 package org.logicobjects.adapter.methodresult.solutioncomposition;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-import jpl.Query;
+import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
+import org.reflectiveutils.wrappertype.SingleTypeWrapper;
 
-import org.logicobjects.instrumentation.ParsedLogicMethod;
-import org.reflectiveutils.AbstractTypeWrapper;
-import org.reflectiveutils.AbstractTypeWrapper.SingleTypeWrapper;
+
+//public abstract class MyWrapper extends WrapperAdapter<List<X>, X>    List<String>
 
 public abstract class WrapperAdapter<MethodResultType, EachSolutionType> extends
 		SolutionCompositionAdapter<MethodResultType, EachSolutionType> {

@@ -1,5 +1,7 @@
 package org.reflectiveutils;
 
+import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
+
 
 public class NotAncestorException extends RuntimeException {
 
@@ -9,6 +11,10 @@ public class NotAncestorException extends RuntimeException {
 	public NotAncestorException(Class ancestor, Class descendant) {
 		this.ancestor = ancestor;
 		this.descendant = descendant;
+	}
+	
+	public NotAncestorException(AbstractTypeWrapper ancestor, AbstractTypeWrapper descendant) {
+		this(ancestor.asClass(), descendant.asClass());
 	}
 
 	@Override

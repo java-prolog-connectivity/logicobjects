@@ -1,18 +1,15 @@
 package org.logicobjects.adapter.methodresult.solutioncomposition;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 
 import jpl.Query;
 
-import org.logicobjects.instrumentation.ParsedLogicMethod;
-import org.reflectiveutils.AbstractTypeWrapper;
-import org.reflectiveutils.AbstractTypeWrapper.ArrayTypeWrapper;
-import org.reflectiveutils.GenericsUtil;
+import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
+import org.reflectiveutils.wrappertype.ArrayTypeWrapper;
 
-public class ArrayCompositionAdapter<LogicAnswerType> extends WrapperAdapter<LogicAnswerType[], LogicAnswerType>  {
+public class ArrayWrapperAdapter<LogicAnswerType> extends WrapperAdapter<LogicAnswerType[], LogicAnswerType>  {
 
 
 	@Override

@@ -10,7 +10,7 @@ import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.core.LogicObject;
 import org.logicobjects.core.LogicObjectFactory;
 import org.logicobjects.util.LogicUtil;
-import org.reflectiveutils.AbstractTypeWrapper;
+import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
 public class ClassAdaptingContext extends AnnotatedAdaptingContext {
 

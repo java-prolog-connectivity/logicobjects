@@ -9,7 +9,7 @@ import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.core.LogicObject;
 import org.logicobjects.core.LogicObjectFactory;
-import org.reflectiveutils.AbstractTypeWrapper;
+import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
 /**
  * This class help to guide the transformation to or from a term, given the context of this transformation
