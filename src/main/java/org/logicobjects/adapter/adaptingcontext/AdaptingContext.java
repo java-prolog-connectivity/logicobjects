@@ -14,7 +14,7 @@ import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 /**
  * This class help to guide the transformation to or from a term, given the context of this transformation
  * For example, it this necessary because the term is going to be assigned to a field ? or the term is the result of a method invocation ?
- * @author sergioc78
+ * @author scastro
  *
  */
 public abstract class AdaptingContext {

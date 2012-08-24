@@ -5,12 +5,17 @@ import jpl.Term;
 
 import org.logicobjects.core.AbstractLogicMethod;
 
+/**
+ * This class represents a fully parsed logic method
+ * A logic method can be interpreted with its execution context: the object it belongs to and its runtime parameters 
+ * @author scastro
+ *
+ */
 public class ParsedLogicMethod {
 
 	private AbstractLogicMethod logicMethod; //the logic method to be parsed
-	
 	private Object targetObject; //the instance of the class providing context for the parsing
-	private Object[] originalParameters; //the parameters sent to the method providing context to the parsing (in fact after being adapted by the individual adapters and parameters array adapter if any)
+	private Object[] originalParameters; //the parameters sent to the method providing context to the parsing (after being adapted by the individual adapters and parameters array adapter if any)
 	private String computedQueryString; //the query
 	private String computedMethodName; //this is here just because in the future it can be interesting to parse the method name (now it is just a constant)
 	private Object[] computedParameters; //the parameters

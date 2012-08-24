@@ -1,6 +1,7 @@
 package org.logicobjects.instrumentation;
 
 
+
 public class ParsingData {
 
 	private String queryString;
@@ -26,4 +27,6 @@ public class ParsingData {
 		this.solutionString = solutionString;
 	}
 
+	
+	
 }

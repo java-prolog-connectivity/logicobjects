@@ -3,7 +3,7 @@ package org.logicobjects.util;
 /**
  * Helper class to denote null values for default annotation attributes
  * (This workaround is necessary since null is not a possible value when declaring default values in annotations)
- * @author sergioc78
+ * @author scastro
  *
  */
 public class AnnotationConstants {

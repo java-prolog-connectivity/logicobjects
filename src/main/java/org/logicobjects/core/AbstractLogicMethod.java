@@ -71,8 +71,8 @@ public abstract class AbstractLogicMethod {
 	
 
 	public MethodResultAdapter getMethodAdapter(ParsedLogicMethod parsedLogicMethod) {
-		LWrapper aLWrapper = (LWrapper)getAnnotation(LWrapper.class);
-		LSolution aLSolution = (LSolution)getAnnotation(LSolution.class);
+		LWrapper aLWrapper = getAnnotation(LWrapper.class);
+		LSolution aLSolution = getAnnotation(LSolution.class);
 		/**
 		 * if this is true, the user has not specified the solution of the method
 		 * By default, the solution will be a Map of variables names to bindings

@@ -1,15 +1,9 @@
 package org.logicobjects.util;
 
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import jpl.Atom;
 import jpl.Compound;
@@ -20,7 +14,7 @@ import jpl.Variable;
 
 /**
  * Utility class for interacting with a Prolog engine
- * @author sergioc78
+ * @author scastro
  *
  */
 public class LogicUtil {

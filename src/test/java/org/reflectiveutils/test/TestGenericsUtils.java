@@ -23,7 +23,7 @@ import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
 /**
  * 
- * @author sergioc78
+ * @author scastro
  *
  */
 public class TestGenericsUtils {

@@ -9,7 +9,7 @@ import java.lang.reflect.Type;
  * sun.reflect.generics.reflectiveObjects.GenericArrayTypeImpl
  * (this implementation was not used since it is internal to a VM implementation)
  * 
- * @author sergioc78
+ * @author scastro
  * 
  */
 public class GenericArrayTypeImpl implements GenericArrayType {

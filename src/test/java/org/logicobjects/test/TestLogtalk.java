@@ -11,7 +11,7 @@ import static junit.framework.TestCase.*;
 
 /**
  * This class test some Logtalk functionality (to be completed)
- * @author sergioc78
+ * @author scastro
  *
  */
 public class TestLogtalk extends LocalLogicTest {

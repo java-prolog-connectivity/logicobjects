@@ -8,7 +8,7 @@ import java.util.Arrays;
 /**
  * Disclaimer: toString, equals and hashCode methods are adapted from sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl
  * (this implementation was not used since it is internal to a VM implementation)
- * @author sergioc78
+ * @author scastro
  *
  */
 public class ParameterizedTypeImpl implements ParameterizedType {

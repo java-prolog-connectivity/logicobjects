@@ -9,7 +9,7 @@ import org.logicobjects.annotation.LDelegationObject;
  * NOTE: The class is a workaround to the problem than in Java annotations cannot extend other annotations or implement an interface,
  *   since @LObject and @LDelegationObject are quite similar, this class and its subclasses define methods to access common functionality from these two annotations
  *   (without having to be aware which of the two ones are the used ones behind the curtains).
- * @author sergioc78
+ * @author scastro
  *
  */
 public abstract class LObjectGenericDescription {

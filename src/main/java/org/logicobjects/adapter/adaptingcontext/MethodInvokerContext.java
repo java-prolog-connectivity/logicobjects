@@ -10,7 +10,7 @@ import org.logicobjects.core.LogicClass;
  * This class represents the context of a logic method invocation
  * The Java object needs to be transformed to a Term first in order to execute a logic method
  * 
- * @author sergioc78
+ * @author scastro
  *
  */
 public class MethodInvokerContext extends ClassAdaptingContext {

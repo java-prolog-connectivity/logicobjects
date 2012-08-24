@@ -12,7 +12,7 @@ package org.logicobjects.instrumentation;
  * (Java object symbols)
  * ! : a suffix to the previous symbols. If added, the object will not be transformed to a term, but will be passed to Logtalk as a java  object
  * & : same as '!', but with delayed evaluation
- * @author sergioc78
+ * @author scastro
  *
  */
 import java.lang.reflect.Method;
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Auxiliary class providing operations for parsing logic method parameters
- * @author sergioc78
+ * @author scastro
  *
  */
 public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> {
@@ -94,17 +94,16 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	public static final String RETURN_TAG = "~RET~";
 
 	
-
+	private Method method;  
 	
-	private Method method;
+	//THE FOLLOWING VALUES ARE CALCULATED WHEN PARSING
 	private LM logicMethod;
+	private ParsingData unparsedData;
 	private String allLogicStrings;
-	private List<String> foundSymbols;
 	private List<String> expressions;
 	private Map<String, String> expressionsReplacementMap;
-	private String eachSolutionValue;
-
-	private ParsingData unparsedData;
+	private List<String> foundSymbols;
+	
 	
 	public static AbstractLogicMethodParser create(Method method) {
 		return new AbstractLogicMethodParser(method) {};
@@ -123,36 +122,38 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 
 	public AbstractLogicMethodParser parse() {
 		logicMethod = (LM) AbstractLogicMethod.create(method);
-		unparsedData = logicMethod.getDataToParse();
+		unparsedData = logicMethod.getDataToParse(); //the data to parse depends on the kind of logic method that was instantiated in a previous step
 		
-		String paramsLogicString = concatenateTokens(getParametersToParse());
-		allLogicStrings = QUERY_TAG + getQueryToParse() + PARAMETERS_TAG + paramsLogicString + RETURN_TAG + getSolutionToParse();
-		expressions = getJavaExpressions(allLogicStrings);
+		allLogicStrings = QUERY_TAG + getQueryToParse() + PARAMETERS_TAG + getUnparsedLogicParamsString() + RETURN_TAG + getSolutionToParse();
+		expressions = getJavaExpressions(allLogicStrings); //gather all java expressions
 		expressionsReplacementMap = expressionsReplacementMap(expressions);
 		foundSymbols = getAllSymbols(allLogicStrings);
 		return this;
 	}
 
 
+	private String asNotNullString(String s) {
+		return s!=null?s:"";
+	}
+	
+	private String[] asNotNullStringArray(String[] a) {
+		return a!=null?a:new String[] {};
+	}
+	
 	public String getQueryToParse() {
-		if(unparsedData.getQueryString() == null)
-			return "";
-		else
-			return unparsedData.getQueryString();
+		return asNotNullString(unparsedData.getQueryString());
+	}
+	
+	public String getUnparsedLogicParamsString() {
+		return concatenateParameters(getParametersToParse());
 	}
 	
 	public String[] getParametersToParse() {
-		if(unparsedData.getParameters() == null)
-			return new String[]{};
-		else
-			return unparsedData.getParameters();
+		return asNotNullStringArray(unparsedData.getParameters());
 	}
 	
 	public String getSolutionToParse() {
-		if(unparsedData.getSolutionString() == null)
-			return "";
-		else
-			return unparsedData.getSolutionString();
+		return asNotNullString(unparsedData.getSolutionString());
 	}
 	
 	public LM getLogicMethod() {
@@ -202,14 +203,14 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 		return solvedEachSolutionValue;
 	}
 */
-	private static String concatenateTokens(Object[] tokens) {
-		String concatenatedParams = "";
-		for(int i=0; i<tokens.length; i++) {
-			concatenatedParams+=tokens[i];
-			if(i<tokens.length-1)
-				concatenatedParams+=PARAMETERS_SEPARATOR;
+	private static String concatenateParameters(Object[] params) {
+		StringBuilder concatenatedParams = new StringBuilder();
+		for(int i=0; i<params.length; i++) {
+			concatenatedParams.append(params[i]);
+			if(i<params.length-1)
+				concatenatedParams.append(PARAMETERS_SEPARATOR);
 		}
-		return concatenatedParams;
+		return concatenatedParams.toString();
 	}
 	
 	private static String[] splitConcatenatedTokens(String tokensString) {
@@ -427,7 +428,11 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 		return GENERATED_METHOD_PREFIX + normalizedMethodName + "_exp" + position;
 	}
 	
-	
+	/**
+	 * 
+	 * @param position the method name is a function of an expression position
+	 * @return a method name which return value will replace an expression (returns only the method simple name, parentheses are not included)
+	 */
 	private String methodNameForExpression(int position) {
 		return methodNameForExpression(getMethod(), position);
 	}
@@ -537,17 +542,22 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 		return dictionary;
 	}
 	
+	/**
+	 * 
+	 * @param delimitedExpressions all the expressions found. These expressions include delimiter characters
+	 * @return a map mapping "delimited" expressions (including delimiters characters) to method names
+	 */
 	private Map<String, String> expressionsReplacementMap(List<String> delimitedExpressions) {		
 		Map<String, String> expressionsReplacementMap = new HashMap<String, String>();
 		for(int i = 0; i<delimitedExpressions.size(); i++) {
 			String delimitedExpression = delimitedExpressions.get(i);
-			String expression = AbstractLogicMethodParser.getExpressionValue(delimitedExpression);
+			String expression = AbstractLogicMethodParser.getExpressionValue(delimitedExpression);  //suppress the delimiter characters
 			String substitutionValue;
 			if(AbstractLogicMethodParser.isValidJavaExpression(expression)) {
-				substitutionValue = methodNameForExpression(i + 1);//i+1 to work with a 1-based index
+				substitutionValue = methodNameForExpression(i + 1); //calculate a method name for this expression given the expression position. Using as index i+1 to work with 1-based index. Later the expression will be replaced by a call to this method
 			} else {
 				logger.warn("The expression: " + delimitedExpression + "in the method "+ getMethod().toGenericString()+" is not valid. It will be ignored.");
-				substitutionValue = "";
+				substitutionValue = "";  //the expression will be replaced by an empty string
 			}
 			expressionsReplacementMap.put(delimitedExpression, substitutionValue);
 		}

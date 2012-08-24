@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * This annotation specify which is the logtalk object receiving the message of declared logic methods
  * However, when converting this class into a term, this annotation will be ignored
  * A class should not be annotated at the same time with LObject and LDelegationObject
- * @author sergioc78
+ * @author scastro
  *
  */
 @Target({ElementType.TYPE, ElementType.FIELD})

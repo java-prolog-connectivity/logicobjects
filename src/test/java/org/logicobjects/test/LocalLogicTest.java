@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Base class for logic tests.
  * It ensures that the engine has been properly configured.
- * @author sergioc78
+ * @author scastro
  *
  */
 public class LocalLogicTest /*extends TestCase*/ {

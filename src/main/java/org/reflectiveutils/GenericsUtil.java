@@ -14,6 +14,12 @@ import org.reflectiveutils.wrappertype.VariableTypeWrapper;
 
 public class GenericsUtil {
 	
+	/**
+	 * Answers a parameterized type with its actual type arguments depending on the descendant
+	 * @param ancestor is the type to parameterize
+	 * @param descendant gives the type arguments to the ancestor type
+	 * @return
+	 */
 	public Type bindTypeGivenDescendant(Type ancestor, Type descendant) {
 		Map<TypeVariable, Type> typeVariableMap = unifyWithDescendant(ancestor, descendant);
 		return AbstractTypeWrapper.wrap(ancestor).bindVariables(ancestor, typeVariableMap);
