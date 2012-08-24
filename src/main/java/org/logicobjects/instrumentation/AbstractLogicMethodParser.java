@@ -1,11 +1,11 @@
 package org.logicobjects.instrumentation;
 
 /**
- * Symbols used to express parameters:
+ * Symbols used to express method arguments:
  * 
  * (Term symbols)
- * $NUMBER : a java method parameter as a term (e.g., '$1' means the first parameter)
- * $$ : all the java method parameters as terms. The parameters are separated by a ','
+ * $NUMBER : a java method argument as a term (e.g., '$1' means the first argument)
+ * $$ : all the java method arguments as terms. The arguments are separated by a ','
  * @this : the object declaring the method as term
  * @propertyName : a bean property of the object as term
  * 
@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Auxiliary class providing operations for parsing logic method parameters
+ * Auxiliary class providing operations for parsing logic method arguments
  * @author scastro
  *
  */
@@ -62,19 +62,16 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	
 	
 	public static final String INSTANCE_PROPERTY_PREFIX = "@";
-	//private static final String INSTANCE_PROPERTY_PREFIX_REX = "\\@";
 	
-	public static final String PARAMETERS_PREFIX = "$";
-	//private static final String PARAMETERS_PREFIX_REX = "\\$";
+	public static final String ARGUMENT_PREFIX = "$";
 	
 	public static final String THIS_SUFFIX = "0";
 	
-	public static final String THIS_SYMBOL = PARAMETERS_PREFIX + THIS_SUFFIX;
+	public static final String THIS_SYMBOL = ARGUMENT_PREFIX + THIS_SUFFIX;
 	
-	public static final String ALL_PARAMS_SUFFIX = "$";
-	//private static final String ALL_PARAMS_SUFFIX_REX = "\\*";
+	public static final String ALL_ARGUMENTS_SUFFIX = "$";
 	
-	public static final String ALL_PARAMS_SYMBOL = PARAMETERS_PREFIX + ALL_PARAMS_SUFFIX;
+	public static final String ALL_ARGUMENTS_SYMBOL = ARGUMENT_PREFIX + ALL_ARGUMENTS_SUFFIX;
 	
 	public static final String JAVA_NAME_REX = "([a-zA-Z_\\$][\\w\\$]*)";
 	
@@ -85,20 +82,20 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	 */
 	//public static final String DELIMITED_JAVA_REX = Pattern.quote(BEGIN_JAVA_EXPRESSION) + "(.*?)" + Pattern.quote(END_JAVA_EXPRESSION);
 	
-	public static final String PARAMETERS_SEPARATOR = "~~~";
+	public static final String ARGUMENTS_SEPARATOR = "~~~";
 	
-	public static final String PARAMETERS_TAG = "~PARAMETERS~";
+	public static final String ARGUMENTS_TAG = "~ARGUMENTS~";
 	
 	public static final String QUERY_TAG = "~QUERY~";
 	
 	public static final String RETURN_TAG = "~RET~";
 
 	
-	private Method method;  
+	//private Method method;  
 	
 	//THE FOLLOWING VALUES ARE CALCULATED WHEN PARSING
 	private LM logicMethod;
-	private ParsingData unparsedData;
+	//private ParsingData unparsedData;
 	private String allLogicStrings;
 	private List<String> expressions;
 	private Map<String, String> expressionsReplacementMap;
@@ -107,24 +104,26 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	
 	public static AbstractLogicMethodParser create(Method method) {
 		return new AbstractLogicMethodParser(method) {};
-		/*
-		if(LogicMethod.isLogicMethod(method))
-			return new LogicMethodParser(method);
-		else
-			return new RawQueryParser(method);
-		*/
+	}
+	
+	public static AbstractLogicMethodParser create(AbstractLogicMethod logicMethod) {
+		return new AbstractLogicMethodParser(logicMethod) {};
 	}
 	
 	AbstractLogicMethodParser(Method method) {
-		this.method = method;
-		//parse();
+		this((LM) AbstractLogicMethod.create(method));
+	}
+	
+	AbstractLogicMethodParser(LM logicMethod) {
+		this.logicMethod = logicMethod;
 	}
 
 	public AbstractLogicMethodParser parse() {
-		logicMethod = (LM) AbstractLogicMethod.create(method);
-		unparsedData = logicMethod.getDataToParse(); //the data to parse depends on the kind of logic method that was instantiated in a previous step
-		
-		allLogicStrings = QUERY_TAG + getQueryToParse() + PARAMETERS_TAG + getUnparsedLogicParamsString() + RETURN_TAG + getSolutionToParse();
+		LogicMethodParsingData unparsedData = logicMethod.getDataToParse(); //the data to parse depends on the kind of logic method that was instantiated in a previous step
+		String queryToParse = asNotNullString(unparsedData.getQueryString());
+		String unparsedLogicArgumentsString = concatenateMethodArguments(asNotNullStringArray(unparsedData.getMethodArguments()));
+		String solutionToParse = asNotNullString(unparsedData.getSolutionString());
+		allLogicStrings = QUERY_TAG + queryToParse + ARGUMENTS_TAG + unparsedLogicArgumentsString + RETURN_TAG + solutionToParse;
 		expressions = getJavaExpressions(allLogicStrings); //gather all java expressions
 		expressionsReplacementMap = expressionsReplacementMap(expressions);
 		foundSymbols = getAllSymbols(allLogicStrings);
@@ -139,7 +138,7 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	private String[] asNotNullStringArray(String[] a) {
 		return a!=null?a:new String[] {};
 	}
-	
+	/*
 	public String getQueryToParse() {
 		return asNotNullString(unparsedData.getQueryString());
 	}
@@ -155,7 +154,7 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	public String getSolutionToParse() {
 		return asNotNullString(unparsedData.getSolutionString());
 	}
-	
+	*/
 	public LM getLogicMethod() {
 		return logicMethod;
 	}
@@ -165,24 +164,39 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	}
 
 
-
-	public ParsingData parsedData(Object targetObject, Object[] oldParams) {
-		String allLogicStringsProcessed = replaceSymbolsAndExpressions(allLogicStrings, foundSymbols, expressionsReplacementMap, targetObject, oldParams);
-		ParsingData parsedData = decomposeLogicString(allLogicStringsProcessed);
+	public ParsedLogicMethod parsedLogicMethod(Object targetObject, Object[] arguments) {
+		LogicMethodParsingData parsedData = parsedData(targetObject, arguments);
+		return new ParsedLogicMethod(getLogicMethod(), targetObject, arguments, parsedData);
+	}
+	
+	/**
+	 * Given a context data (a concrete instance receiving this method invocation and the method arguments) find out general parsing data of a logic method
+	 * @param targetObject
+	 * @param oldArguments
+	 * @return
+	 */
+	private LogicMethodParsingData parsedData(Object targetObject, Object[] oldArguments) {
+		String allLogicStringsProcessed = replaceSymbolsAndExpressions(allLogicStrings, foundSymbols, expressionsReplacementMap, targetObject, oldArguments);
+		LogicMethodParsingData parsedData = decomposeLogicString(allLogicStringsProcessed);
 		return parsedData;
 	}
 
-	public static ParsingData decomposeLogicString(String allLogicStringsProcessed) {
-		ParsingData parsedData = new ParsingData();
-		Pattern pattern = Pattern.compile(Pattern.quote(QUERY_TAG)+"(.*)"+Pattern.quote(PARAMETERS_TAG)+"(.*)"+Pattern.quote(RETURN_TAG)+"(.*)");
+	/**
+	 * This method is public just for testing purposes
+	 * @param allLogicStringsProcessed
+	 * @return
+	 */
+	public static LogicMethodParsingData decomposeLogicString(String allLogicStringsProcessed) {
+		LogicMethodParsingData parsedData = new LogicMethodParsingData();
+		Pattern pattern = Pattern.compile(Pattern.quote(QUERY_TAG)+"(.*)"+Pattern.quote(ARGUMENTS_TAG)+"(.*)"+Pattern.quote(RETURN_TAG)+"(.*)");
 		Matcher matcher = pattern.matcher(allLogicStringsProcessed);
 		matcher.find();
 		String queryString = matcher.group(1);
 		if(!queryString.isEmpty())
 			parsedData.setQueryString(queryString);
-		String params = matcher.group(2);
-		if(!params.isEmpty())
-			parsedData.setParameters(splitConcatenatedTokens(params));
+		String arguments = matcher.group(2);
+		if(!arguments.isEmpty())
+			parsedData.setMethodArguments(splitConcatenatedTokens(arguments));
 		String result = matcher.group(3);
 		if(!result.isEmpty())
 			parsedData.setSolutionString(result);
@@ -203,18 +217,18 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 		return solvedEachSolutionValue;
 	}
 */
-	private static String concatenateParameters(Object[] params) {
-		StringBuilder concatenatedParams = new StringBuilder();
-		for(int i=0; i<params.length; i++) {
-			concatenatedParams.append(params[i]);
-			if(i<params.length-1)
-				concatenatedParams.append(PARAMETERS_SEPARATOR);
+	private static String concatenateMethodArguments(Object[] args) {
+		StringBuilder concatenatedArgs = new StringBuilder();
+		for(int i=0; i<args.length; i++) {
+			concatenatedArgs.append(args[i]);
+			if(i<args.length-1)
+				concatenatedArgs.append(ARGUMENTS_SEPARATOR);
 		}
-		return concatenatedParams.toString();
+		return concatenatedArgs.toString();
 	}
 	
 	private static String[] splitConcatenatedTokens(String tokensString) {
-		return tokensString.split(PARAMETERS_SEPARATOR);
+		return tokensString.split(ARGUMENTS_SEPARATOR);
 	}
 	
 	
@@ -224,8 +238,8 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	 * @param pos a 1-based index of the java parameter
 	 * @return the parameter symbol representation
 	 */
-	public static String parameterSymbol(int pos) {
-		return PARAMETERS_PREFIX+pos;
+	public static String methodArgumentSymbol(int pos) {
+		return ARGUMENT_PREFIX+pos;
 	}
 	
 	/**
@@ -261,12 +275,12 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	
 	/**
 	 * 
-	 * @param concatenatedParams
+	 * @param concatenatedArguments
 	 * @return A list of symbol params referenced in the string sent as a parameter
 	 */
-	public List<String> getAllSymbols(String concatenatedParams) {
-		concatenatedParams = suppressJavaExpressions(concatenatedParams);
-		return scanSymbols(concatenatedParams);
+	public List<String> getAllSymbols(String concatenatedArguments) {
+		concatenatedArguments = suppressJavaExpressions(concatenatedArguments);
+		return scanSymbols(concatenatedArguments);
 	}
 
 	/**
@@ -276,7 +290,7 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	 */
 	public static List<String> scanSymbols(String s) {
 		Set<String> symbolsSet = new LinkedHashSet<String>();
-		Pattern pattern = Pattern.compile("("+Pattern.quote(PARAMETERS_PREFIX)+"(\\d+|"+Pattern.quote(ALL_PARAMS_SUFFIX)+"))|"+Pattern.quote(INSTANCE_PROPERTY_PREFIX)+JAVA_NAME_REX);
+		Pattern pattern = Pattern.compile("("+Pattern.quote(ARGUMENT_PREFIX)+"(\\d+|"+Pattern.quote(ALL_ARGUMENTS_SUFFIX)+"))|"+Pattern.quote(INSTANCE_PROPERTY_PREFIX)+JAVA_NAME_REX);
 		Matcher findingMatcher = pattern.matcher(s);
 		while(findingMatcher.find()) {
 			String match = findingMatcher.group();
@@ -459,11 +473,11 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 	/**
 	 * 
 	 * @param logicString a string with all the new params concatenated
-	 * @param oldParams the java method params
+	 * @param oldArguments the java method params
 	 * @return
 	 */
-	private String replaceSymbolsAndExpressions(String logicString, List<String> setSymbols, Map<String, String> expressionsMap, Object targetObject, Object[] oldParams) {
-		Map<String, String> symbolsMap = symbolsReplacementMap(targetObject, oldParams, setSymbols);
+	private String replaceSymbolsAndExpressions(String logicString, List<String> setSymbols, Map<String, String> expressionsMap, Object targetObject, Object[] oldArguments) {
+		Map<String, String> symbolsMap = symbolsReplacementMap(targetObject, oldArguments, setSymbols);
 
 		
 		List<String> expressions = new ArrayList<String>(expressionsMap.keySet());
@@ -488,7 +502,7 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 					replacementValue = "";
 				else {
 					Method helperMethod = targetObject.getClass().getMethod(methodName,logicMethod.getWrappedMethod().getParameterTypes());
-					Object expressionResult = helperMethod.invoke(targetObject, oldParams); //result contains the value of the java expression
+					Object expressionResult = helperMethod.invoke(targetObject, oldArguments); //result contains the value of the java expression
 					Term expressionAsTerm = ObjectToTermAdapter.asTerm(expressionResult);
 					replacementValue = expressionAsTerm.toString();
 				}
@@ -505,27 +519,27 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 
 	/**
 	 * Builds a dictionary of symbol params to values
-	 * @param parameters the java method parameters
+	 * @param args the java method parameters
 	 * @return
 	 */
-	private Map<String, String> symbolsReplacementMap(Object targetObject, Object[] parameters, List<String> symbols) {
+	private Map<String, String> symbolsReplacementMap(Object targetObject, Object[] args, List<String> symbols) {
 		Map<String, String> dictionary = new HashMap<String, String>();
-		if(parameters.length > 0) {
+		if(args.length > 0) {
 			LogicEngine engine = LogicEngine.getDefault();
 			List<Term> listTerms = new ArrayList<Term>();
-			boolean allParamsRequired = symbols.contains(AbstractLogicMethodParser.ALL_PARAMS_SYMBOL);
-			for(int i = 0; i<parameters.length; i++) {
-				String paramName = AbstractLogicMethodParser.parameterSymbol(i+1);
-				if(allParamsRequired || symbols.contains(paramName)) {
-					Term termParam = ObjectToTermAdapter.asTerm(parameters[i]);
-					if(engine.nonAnonymousVariablesNames(termParam).size() > 0)
-						throw new RuntimeException("Parameter objects cannot contain free non-anonymous variables: "+termParam);//in order to avoid name collisions
-					dictionary.put(paramName, termParam.toString());
-					listTerms.add(termParam);
+			boolean allArgumentsRequired = symbols.contains(AbstractLogicMethodParser.ALL_ARGUMENTS_SYMBOL);
+			for(int i = 0; i<args.length; i++) {
+				String paramName = AbstractLogicMethodParser.methodArgumentSymbol(i+1);
+				if(allArgumentsRequired || symbols.contains(paramName)) {
+					Term termArgument = ObjectToTermAdapter.asTerm(args[i]);
+					if(engine.nonAnonymousVariablesNames(termArgument).size() > 0)
+						throw new RuntimeException("Argument objects cannot contain free non-anonymous variables: "+termArgument);//in order to avoid name collisions
+					dictionary.put(paramName, termArgument.toString());
+					listTerms.add(termArgument);
 				}
 			}
-			if(allParamsRequired)
-				dictionary.put(AbstractLogicMethodParser.ALL_PARAMS_SYMBOL, engine.termListToTextSequence(listTerms));
+			if(allArgumentsRequired)
+				dictionary.put(AbstractLogicMethodParser.ALL_ARGUMENTS_SYMBOL, engine.termListToTextSequence(listTerms));
 		}
 		if(symbols.contains(AbstractLogicMethodParser.THIS_SYMBOL)) {
 			Term thisAsTerm = new ObjectToTermAdapter().adapt(targetObject);

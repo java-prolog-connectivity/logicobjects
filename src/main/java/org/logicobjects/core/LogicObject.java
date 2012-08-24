@@ -24,8 +24,8 @@ public class LogicObject implements ITermObject {
 	
 	
 	private String name;
-	private Object[] objectParams;
-	private Term[] termParams;
+	private Object[] objectProperties;
+	private Term[] termArguments;
 	//private Term asTerm;
 	
 	public LogicObject(Term term) {
@@ -36,11 +36,11 @@ public class LogicObject implements ITermObject {
 		this(name, new Object[]{});
 	}
 	
-	public LogicObject(String name, Object[] objectParams) {
+	public LogicObject(String name, Object[] objectProperties) {
 		setName(name);
-		if(objectParams == null)
-			objectParams = new Object[]{};
-		setObjectParams(objectParams);
+		if(objectProperties == null)
+			objectProperties = new Object[]{};
+		setObjectProperties(objectProperties);
 	}
 
 	
@@ -52,34 +52,34 @@ public class LogicObject implements ITermObject {
 		this.name = name;
 	}
 
-	public Object[] getObjectParams() {
-		return objectParams;
+	public Object[] getObjectProperties() {
+		return objectProperties;
 	}
 
-	public void setObjectParams(Object[] objectParams) {
-		setTermParams(ArrayToTermAdapter.arrayAsTerms(objectParams));		
-		this.objectParams = objectParams;
+	public void setObjectProperties(Object[] objectProperties) {
+		setTermArguments(ArrayToTermAdapter.arrayAsTerms(objectProperties));		
+		this.objectProperties = objectProperties;
 	}
 
-	public Term[] getTermParams() {
-		return termParams;
+	public Term[] getTermArguments() {
+		return termArguments;
 	}
 
-	public void setTermParams(Term[] termParams) {
-		this.termParams = termParams;
+	public void setTermArguments(Term[] termArguments) {
+		this.termArguments = termArguments;
 	}
 
 	@Override
 	public Term asTerm() {
 		if( isParametrizedObject() )
-			return new Compound(getName(), getTermParams());
+			return new Compound(getName(), getTermArguments());
 		else
 			return new Atom(getName());
 	}
 	
 	
 	public boolean isParametrizedObject() {
-		return getTermParams().length > 0;
+		return getTermArguments().length > 0;
 	}
 	
 	public Query invokeMethod(String methodName, Object[] messageArgs) {

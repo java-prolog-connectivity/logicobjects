@@ -4,13 +4,13 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.ALL_PARAMS_SUFFIX;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.ALL_ARGUMENTS_SUFFIX;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.BEGIN_IMMEDIATE_JAVA_EXPRESSION;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.END_JAVA_EXPRESSION_BLOCK;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.INSTANCE_PROPERTY_PREFIX;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.JAVA_NAME_REX;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.PARAMETERS_PREFIX;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.PARAMETERS_TAG;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.ARGUMENT_PREFIX;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.ARGUMENTS_TAG;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.QUERY_TAG;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.RETURN_TAG;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.scanSymbols;
@@ -19,14 +19,14 @@ import static org.logicobjects.instrumentation.AbstractLogicMethodParser.getJava
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.isInstancePropertySymbol;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.isValidJavaExpression;
 import static org.logicobjects.instrumentation.AbstractLogicMethodParser.normalizeExpression;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.parameterSymbol;
+import static org.logicobjects.instrumentation.AbstractLogicMethodParser.methodArgumentSymbol;
 
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
 import org.logicobjects.instrumentation.AbstractLogicMethodParser;
-import org.logicobjects.instrumentation.ParsingData;
+import org.logicobjects.instrumentation.LogicMethodParsingData;
 
 
 public class TestParsingExpressions extends LocalLogicTest {
@@ -65,8 +65,8 @@ public class TestParsingExpressions extends LocalLogicTest {
 	
 	@Test
 	public void testParametersSymbols() {
-		assertEquals(parameterSymbol(1), PARAMETERS_PREFIX+1);
-		assertEquals(parameterSymbol(10), PARAMETERS_PREFIX+10);
+		assertEquals(methodArgumentSymbol(1), ARGUMENT_PREFIX+1);
+		assertEquals(methodArgumentSymbol(10), ARGUMENT_PREFIX+10);
 	}
 	
 	@Test
@@ -77,16 +77,16 @@ public class TestParsingExpressions extends LocalLogicTest {
 		List<String> symbols = scanSymbols(
 			INSTANCE_PROPERTY_PREFIX+"this"
 			+" xxx " 
-			+ PARAMETERS_PREFIX + "1" 
+			+ ARGUMENT_PREFIX + "1" 
 			+ " xxx " 
 			+ INSTANCE_PROPERTY_PREFIX+"this" + //this should be ignored, since the symbol already exists
 			" xxx " 
-			+ PARAMETERS_PREFIX + ALL_PARAMS_SUFFIX
+			+ ARGUMENT_PREFIX + ALL_ARGUMENTS_SUFFIX
 			//+ beginExp + PARAMETERS_PREFIX + "2" + endExp //this should be ignored since it is inside a Java block
 		);
 		assertEquals(symbols.get(0), INSTANCE_PROPERTY_PREFIX+"this");
-		assertEquals(symbols.get(1), PARAMETERS_PREFIX + "1");
-		assertEquals(symbols.get(2), PARAMETERS_PREFIX + ALL_PARAMS_SUFFIX);
+		assertEquals(symbols.get(1), ARGUMENT_PREFIX + "1");
+		assertEquals(symbols.get(2), ARGUMENT_PREFIX + ALL_ARGUMENTS_SUFFIX);
 		assertEquals(symbols.size(), 3);
 	}
 	
@@ -138,19 +138,19 @@ public class TestParsingExpressions extends LocalLogicTest {
 		String query = "myQuery";
 		String params = "myParams";
 		String returnValue = "returnValue";
-		String testString = QUERY_TAG+query+PARAMETERS_TAG+params+RETURN_TAG+returnValue;
-		ParsingData parsedData = AbstractLogicMethodParser.decomposeLogicString(testString);
+		String testString = QUERY_TAG+query+ARGUMENTS_TAG+params+RETURN_TAG+returnValue;
+		LogicMethodParsingData parsedData = AbstractLogicMethodParser.decomposeLogicString(testString);
 		
 		assertEquals(parsedData.getQueryString(), query);
-		assertEquals(parsedData.getParameters()[0], params);
+		assertEquals(parsedData.getMethodArguments()[0], params);
 		assertEquals(parsedData.getSolutionString(), returnValue);
 		
 		query = "";
 		params = "";
-		testString = QUERY_TAG+query+PARAMETERS_TAG+params+RETURN_TAG+returnValue;
+		testString = QUERY_TAG+query+ARGUMENTS_TAG+params+RETURN_TAG+returnValue;
 		parsedData = AbstractLogicMethodParser.decomposeLogicString(testString);
 		assertEquals(parsedData.getQueryString(), null);
-		assertEquals(parsedData.getParameters(), null);
+		assertEquals(parsedData.getMethodArguments(), null);
 		assertEquals(parsedData.getSolutionString(), returnValue);
 	}
 

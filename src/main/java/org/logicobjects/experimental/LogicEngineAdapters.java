@@ -1,11 +1,11 @@
 package org.logicobjects.experimental;
 
-import org.logicobjects.adapter.methodparameters.ParametersAdapter;
+import org.logicobjects.adapter.methodparameters.MethodArgumentsAdapter;
 
 public class LogicEngineAdapters {
 	
 	public static class PrologFlagAdapters {
-		public static class PrologFlag_ParametersAdapter extends ParametersAdapter {
+		public static class PrologFlag_ParametersAdapter extends MethodArgumentsAdapter {
 			/*
 			@Override
 			public Object[] adapt(Object[] source) {

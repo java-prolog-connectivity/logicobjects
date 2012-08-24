@@ -3,9 +3,9 @@ package org.logicobjects.adapter.methodparameters;
 import org.logicobjects.adapter.LogicAdapter;
 
 /**
- * Adapt method parameters as terms, according to the parameters of the adapter
+ * Adapt method arguments as terms, according to the arguments of the adapter
  */
-public class ParametersAdapter extends LogicAdapter<Object[], Object[]> {
+public class MethodArgumentsAdapter extends LogicAdapter<Object[], Object[]> {
 
 	@Override
 	public Object[] adapt(Object[] source) {

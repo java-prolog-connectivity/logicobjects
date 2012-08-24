@@ -7,7 +7,7 @@ import org.logicobjects.core.AbstractLogicMethod;
 
 /**
  * This class represents a fully parsed logic method
- * A logic method can be interpreted with its execution context: the object it belongs to and its runtime parameters 
+ * A logic method can be interpreted with its execution context: the object it belongs to and its runtime method arguments 
  * @author scastro
  *
  */
@@ -15,17 +15,21 @@ public class ParsedLogicMethod {
 
 	private AbstractLogicMethod logicMethod; //the logic method to be parsed
 	private Object targetObject; //the instance of the class providing context for the parsing
-	private Object[] originalParameters; //the parameters sent to the method providing context to the parsing (after being adapted by the individual adapters and parameters array adapter if any)
+	private Object[] originalMethodArguments; //the original method arguments sent to the method providing context to the parsing (after being adapted by the individual adapters and method arguments array adapter if any)
+	
+	private LogicMethodParsingData parsedData; //the parsed string data
+	
 	private String computedQueryString; //the query
 	private String computedMethodName; //this is here just because in the future it can be interesting to parse the method name (now it is just a constant)
-	private Object[] computedParameters; //the parameters
-	private ParsingData parsedData;
+	private Object[] computedMethodArguments; //the method arguments
 	
-	public ParsedLogicMethod(AbstractLogicMethod logicMethod, Object targetObject, Object[] originalParameters, ParsingData parsedData) {
+	
+	public ParsedLogicMethod(AbstractLogicMethod logicMethod, Object targetObject, Object[] originalMethodArguments, LogicMethodParsingData parsedData) {
 		this.logicMethod = logicMethod;
 		this.targetObject = targetObject;
-		this.originalParameters = originalParameters;
+		this.originalMethodArguments = originalMethodArguments;
 		this.parsedData = parsedData;
+		logicMethod.configureParsedLogicMethod(this);
 	}
 	
 	public AbstractLogicMethod getLogicMethod() {
@@ -36,14 +40,32 @@ public class ParsedLogicMethod {
 		return targetObject;
 	}
 
-	public Object[] getOriginalParameters() {
-		return originalParameters;
+	public Object[] getOriginalMethodArguments() {
+		return originalMethodArguments;
 	}
 	
-	public ParsingData getParsedData() {
+	public LogicMethodParsingData getParsedData() {
 		return parsedData;
 	}
 
+	/*
+	public String getComputedMethodName() {
+		
+	}
+	
+	public String getComputedQueryString() {
+		return parsedData.getQueryString();
+	}
+	
+	public Object[] getComputedMethodArguments() {
+		return parsedData.getMethodArguments();
+	}
+	
+	public String getComputedSolutionString() {
+		return parsedData.getSolutionString();
+	}
+	*/
+	
 	public String getComputedQueryString() {
 		return computedQueryString;
 	}
@@ -52,12 +74,12 @@ public class ParsedLogicMethod {
 		this.computedQueryString = computedQueryString;
 	}
 
-	public Object[] getComputedParameters() {
-		return computedParameters;
+	public Object[] getComputedMethodArguments() {
+		return computedMethodArguments;
 	}
 
-	public void setComputedParameters(Object[] computedParameters) {
-		this.computedParameters = computedParameters;
+	public void setComputedMethodArguments(Object[] computedMethodArguments) {
+		this.computedMethodArguments = computedMethodArguments;
 	}
 
 	public String getComputedMethodName() {
@@ -68,6 +90,7 @@ public class ParsedLogicMethod {
 		this.computedMethodName = computedMethodName;
 	}
 
+	
 	public Query asQuery() {
 		return logicMethod.asQuery(this);
 	}

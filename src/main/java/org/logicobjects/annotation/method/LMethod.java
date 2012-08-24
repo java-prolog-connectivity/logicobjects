@@ -15,4 +15,9 @@ public @interface LMethod {
 	String name() default "";
 	String[] args() default {AnnotationConstants.NULL};  //if no parameters are explicitly added, the logic method will have the same parameters than the Java method
 
+	public static class LMethodUtil {
+		public static String[] getArgs(LMethod aLMethod) {
+			return AnnotationConstants.isNullArray(aLMethod.args())?null:aLMethod.args();
+		}
+	}
 }

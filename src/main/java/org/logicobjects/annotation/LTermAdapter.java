@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.logicobjects.adapter.ObjectToTermAdapter;
-import org.logicobjects.util.AnnotationConstants.NO_ADAPTER;
+import org.logicobjects.util.AnnotationConstants.NULL;
 
 /*
  *  Defines an adapter for transforming an object into a term
@@ -14,17 +14,17 @@ import org.logicobjects.util.AnnotationConstants.NO_ADAPTER;
 @Target({ElementType.TYPE, ElementType.FIELD, ElementType.PARAMETER}) 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LTermAdapter {
-	Class value() default NO_ADAPTER.class; //value() is a synonym of adapter()
-	Class adapter() default NO_ADAPTER.class;
+	Class value() default NULL.class; //value() is a synonym of adapter()
+	Class adapter() default NULL.class;
 	String[] args() default {};
 	
 	public static class LTermAdapterUtil {
 		
 		public static Class getAdapterClass(LTermAdapter aLTermAdapter) {
 			Class adapterClass = aLTermAdapter.adapter();
-			if(adapterClass == null || adapterClass.equals(NO_ADAPTER.class))
+			if(adapterClass == null || adapterClass.equals(NULL.class))
 				adapterClass = aLTermAdapter.value();
-			if(adapterClass.equals(NO_ADAPTER.class))
+			if(adapterClass.equals(NULL.class))
 				adapterClass = null;
 			return adapterClass;
 		}

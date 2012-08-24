@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
 //TODO Maybe choose a better name ? LMethodDispatcher, LMethodInvoker, LProxyObject, LPseudoObject ...
 public @interface LDelegationObject {
 	String name() default "";  //the name of the logic object
-	String[] params() default {}; //the parameters of the logic object
+	String[] args() default {}; //the arguments of the logic object
 
 	String[] imports() default {};
 	String[] modules() default {};

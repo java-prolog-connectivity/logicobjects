@@ -8,7 +8,7 @@ import jpl.Term;
 import org.logicobjects.annotation.method.LSolution;
 import org.logicobjects.instrumentation.AbstractLogicMethodParser;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
-import org.logicobjects.instrumentation.ParsingData;
+import org.logicobjects.instrumentation.LogicMethodParsingData;
 
 public class MultiPredicateQuery extends RawLogicQuery {
 
@@ -29,7 +29,7 @@ public class MultiPredicateQuery extends RawLogicQuery {
 	}
 
 	@Override
-	public String[] getParameters() {
+	public String[] getLogicMethodArguments() {
 		return null;
 	}
 
@@ -45,16 +45,16 @@ public class MultiPredicateQuery extends RawLogicQuery {
 	}
 	
 	@Override
-	public ParsingData getDataToParse() {
-		ParsingData parsingData = new ParsingData();
+	public LogicMethodParsingData getDataToParse() {
+		LogicMethodParsingData parsingData = new LogicMethodParsingData();
 		parsingData.setQueryString(getUnparsedQuery());
-		parsingData.setParameters(getParameters());
+		parsingData.setMethodArguments(getLogicMethodArguments());
 		parsingData.setSolutionString(getEachSolutionValue());
 		return parsingData;
 	}
 
 	@Override
-	protected void computeQueryString(ParsedLogicMethod parsedLogicMethod) {
+	protected void configureParsedLogicMethodQueryString(ParsedLogicMethod parsedLogicMethod) {
 		parsedLogicMethod.setComputedQueryString(parsedLogicMethod.getParsedData().getQueryString()); 
 	}
 	

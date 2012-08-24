@@ -12,7 +12,7 @@ public class AnnotationConstants {
 	 * Class used as a default for annotation attributes indicating an Adapter class
 	 * This trick is needed since null values are not allowed in annotation attributes
 	 */
-	public static final class NO_ADAPTER {}
+	public static final class NULL {}
 	
 	public static final String NULL = "_NULL_CONSTANT_";
 	

@@ -10,9 +10,9 @@ import org.logicobjects.core.LogicEngine;
 
 public class LogicMethodInvoker {
 
-	public static Object invoke(Object targetObject, Method method, Object[] params) {
+	public static Object invoke(Object targetObject, Method method, Object[] arguments) {
 		AbstractLogicMethod logicMethod = AbstractLogicMethod.create((method));
-		ParsedLogicMethod parsedLogicMethod = logicMethod.parse(targetObject, params);
+		ParsedLogicMethod parsedLogicMethod = logicMethod.parse(targetObject, arguments);
 		Query query = parsedLogicMethod.asQuery();
 		MethodResultAdapter resultAdapter = logicMethod.getMethodAdapter(parsedLogicMethod);
 		Object result = resultAdapter.adapt(query);

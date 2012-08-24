@@ -10,6 +10,10 @@ import org.logicobjects.annotation.method.LSolution;
 public abstract class MyRawQueries {
 
 	@LSolution("L")
+	@LQuery("L=$1")
+	public abstract int returnsParameter(int p);
+	
+	@LSolution("L")
 	@LQuery("${1}=L")
 	public abstract int intMethod1();
 	

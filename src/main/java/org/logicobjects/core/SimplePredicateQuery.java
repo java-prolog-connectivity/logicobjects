@@ -5,9 +5,10 @@ import java.lang.reflect.Method;
 import jpl.Atom;
 import jpl.Query;
 
+import org.logicobjects.annotation.method.LQuery.LQueryUtil;
 import org.logicobjects.annotation.method.LSolution;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
-import org.logicobjects.instrumentation.ParsingData;
+import org.logicobjects.instrumentation.LogicMethodParsingData;
 import org.logicobjects.util.AnnotationConstants;
 
 public class SimplePredicateQuery extends RawLogicQuery {
@@ -28,12 +29,12 @@ public class SimplePredicateQuery extends RawLogicQuery {
 	
 	/**
 	 * 
-	 * @return the query parameters as specified in the annotation
+	 * @return the query arguments as specified in the annotation
 	 */
-	public String[] getParameters() {
-		if(aLQuery == null || AnnotationConstants.isNullArray(aLQuery.args()))
-			return null;
-		return aLQuery.args();
+	public String[] getLogicMethodArguments() {
+		if(aLQuery != null)
+			return LQueryUtil.getArgs(aLQuery);
+		return null;
 	}
 	
 	@Override
@@ -45,19 +46,19 @@ public class SimplePredicateQuery extends RawLogicQuery {
 	}
 
 	@Override
-	public ParsingData getDataToParse() {
-		ParsingData parsingData = new ParsingData();
-		parsingData.setParameters(getParameters());
+	public LogicMethodParsingData getDataToParse() {
+		LogicMethodParsingData parsingData = new LogicMethodParsingData();
+		parsingData.setMethodArguments(getLogicMethodArguments());
 		parsingData.setSolutionString(getEachSolutionValue());
 		return parsingData;
 	}
 
 	@Override
-	protected void computeQueryString(ParsedLogicMethod parsedLogicMethod) {
+	protected void configureParsedLogicMethodQueryString(ParsedLogicMethod parsedLogicMethod) {
 		if(isLogicExpression()) {
 			parsedLogicMethod.setComputedQueryString("true");
 		} else {
-			super.computeQueryString(parsedLogicMethod); //the query will be the method name
+			super.configureParsedLogicMethodQueryString(parsedLogicMethod); //the query will be the method name
 		}
 	}
 	

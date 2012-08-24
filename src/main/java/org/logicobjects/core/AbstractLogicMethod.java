@@ -10,7 +10,7 @@ import jpl.Query;
 import jpl.Term;
 
 import org.logicobjects.adapter.ObjectToTermAdapter;
-import org.logicobjects.adapter.methodparameters.ParametersAdapter;
+import org.logicobjects.adapter.methodparameters.MethodArgumentsAdapter;
 import org.logicobjects.adapter.methodresult.HasSolutionAdapter;
 import org.logicobjects.adapter.methodresult.MethodResultAdapter;
 import org.logicobjects.adapter.methodresult.NumberOfSolutionsAdapter;
@@ -22,13 +22,13 @@ import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
 import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.annotation.LTermAdapter.LTermAdapterUtil;
-import org.logicobjects.annotation.method.LArgsAdapter;
-import org.logicobjects.annotation.method.LArgsAdapter.LArgsAdapterUtil;
+import org.logicobjects.annotation.method.LArgumentsAdapter;
+import org.logicobjects.annotation.method.LArgumentsAdapter.LArgsAdapterUtil;
 import org.logicobjects.annotation.method.LSolution;
 import org.logicobjects.annotation.method.LWrapper;
 import org.logicobjects.instrumentation.AbstractLogicMethodParser;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
-import org.logicobjects.instrumentation.ParsingData;
+import org.logicobjects.instrumentation.LogicMethodParsingData;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 import org.slf4j.Logger;
@@ -36,10 +36,15 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.primitives.Primitives;
 
+
+/**
+ * This class wraps a Java method acting as a logic method
+ * 
+ * @author scastro
+ *
+ */
 public abstract class AbstractLogicMethod {
 	private Logger logger = LoggerFactory.getLogger(AbstractLogicMethod.class);
-	
-	private AbstractLogicMethodParser methodParser;
 	private Method method;
 	
 	//private String queryString;
@@ -142,24 +147,24 @@ public abstract class AbstractLogicMethod {
 	}
 	
 	/**
-	 * If declared, this array transform the original array of parameters to a new object array
+	 * If declared, this array transform the original array of method arguments to a new object array
 	 * @return
 	 */
-	public ParametersAdapter getArrayParametersAdapter() {
-		LArgsAdapter aLParamsAdapter = getAnnotation(LArgsAdapter.class);
-		if(aLParamsAdapter == null)
+	public MethodArgumentsAdapter getMethodArgumentsArrayAdapter() {
+		LArgumentsAdapter aLArgsAdapter = getAnnotation(LArgumentsAdapter.class);
+		if(aLArgsAdapter == null)
 			return null;
 		try {
-			ParametersAdapter parametersAdapter = (ParametersAdapter)LArgsAdapterUtil.getAdapterClass(aLParamsAdapter).newInstance();
-			return parametersAdapter;
+			MethodArgumentsAdapter argumentsAdapter = (MethodArgumentsAdapter)LArgsAdapterUtil.getAdapterClass(aLArgsAdapter).newInstance();
+			return argumentsAdapter;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	public ObjectToTermAdapter[] getEachParameterAdapters() {
+	public ObjectToTermAdapter[] getEachMethodArgumentAdapters() {
 		Annotation[][] parameterAnnotationsTable = getWrappedMethod().getParameterAnnotations(); //a bidimensional array with all the annotations in the method parameters
-		ObjectToTermAdapter[] parametersAdapters = new ObjectToTermAdapter[parameterAnnotationsTable.length];
+		ObjectToTermAdapter[] allMethodArgumentAdapters = new ObjectToTermAdapter[parameterAnnotationsTable.length];
 		for(int i = 0; i < parameterAnnotationsTable.length; i++) {
 			Annotation[] parameterAnnotations = parameterAnnotationsTable[i];
 			for(Annotation parameterAnnotation : parameterAnnotations) {
@@ -168,65 +173,63 @@ public abstract class AbstractLogicMethod {
 					aLTermAdapter = LTermAdapter.class.cast(parameterAnnotation);
 				} catch (ClassCastException e) {} //annotations others than LParameter will be ignored here
 				if(aLTermAdapter != null) {
-					Class parameterAdapterClass = LTermAdapterUtil.getAdapterClass(aLTermAdapter);
-					if(parameterAdapterClass != null) {
-						ObjectToTermAdapter parameterAdapter = null;
+					Class methodArgumentAdapterClass = LTermAdapterUtil.getAdapterClass(aLTermAdapter);
+					if(methodArgumentAdapterClass != null) {
+						ObjectToTermAdapter methodArgumentAdapter = null;
 						try {
-							parameterAdapter = (ObjectToTermAdapter)parameterAdapterClass.newInstance(); //the parameters should be transformed using an instance of the parametersAdapterClass
+							methodArgumentAdapter = (ObjectToTermAdapter)methodArgumentAdapterClass.newInstance(); //the method arguments should be transformed using an instance of the MethodArgumentsAdapterClass
 						} catch(Exception e) {
 							throw new RuntimeException(e);
 						}
-						parameterAdapter.setParameters(aLTermAdapter.value());
-						parametersAdapters[i] = parameterAdapter;
+						methodArgumentAdapter.setParameters(aLTermAdapter.value());
+						allMethodArgumentAdapters[i] = methodArgumentAdapter;
 					}
 					
 				}
 			}
 		}
-		return parametersAdapters;
+		return allMethodArgumentAdapters;
 	}
 	
 	public boolean declaresLogicParameters() {
-		return getParameters() != null;
+		return getLogicMethodArguments() != null;
 	}
 	
 	
-	public Object[] adaptOriginalParameters(Object[] originalParameters) {
-		Object[] adaptedParams = originalParameters;
-		ObjectToTermAdapter[] parameterAdapters = getEachParameterAdapters();
-		for(int i = 0; i <  parameterAdapters.length; i++) {
-			ObjectToTermAdapter parameterAdapter = parameterAdapters[i];
-			if(parameterAdapter != null) {
-				adaptedParams[i] = parameterAdapter.adapt(adaptedParams[i]);
+	public Object[] adaptOriginalMethodArguments(Object[] originalMethodArguments) {
+		Object[] adaptedMethodArguments = originalMethodArguments;
+		ObjectToTermAdapter[] methodArgumentAdapters = getEachMethodArgumentAdapters();
+		for(int i = 0; i <  methodArgumentAdapters.length; i++) {
+			ObjectToTermAdapter methodArgumentAdapter = methodArgumentAdapters[i];
+			if(methodArgumentAdapter != null) {
+				adaptedMethodArguments[i] = methodArgumentAdapter.adapt(adaptedMethodArguments[i]);
 			}
 		}
 	
-		ParametersAdapter parametersAdapter = getArrayParametersAdapter();
-		if(parametersAdapter != null)
-			adaptedParams = parametersAdapter.adapt(adaptedParams);
+		MethodArgumentsAdapter methodArgumentsAdapter = getMethodArgumentsArrayAdapter();
+		if(methodArgumentsAdapter != null)
+			adaptedMethodArguments = methodArgumentsAdapter.adapt(adaptedMethodArguments);
 		
-		return adaptedParams;
+		return adaptedMethodArguments;
 	}
 	
+	/*
 	public AbstractLogicMethodParser getMethodParser() {
 		if(methodParser == null)
 			methodParser = AbstractLogicMethodParser.create(method);
 		return methodParser;
 	}
-	
+	*/
 
-	public ParsedLogicMethod parse(Object targetObject, Object[] originalParameters) {
-		Object[] adaptedParams = adaptOriginalParameters(originalParameters);
-		ParsingData parsedData = getMethodParser().parse().parsedData(targetObject, adaptedParams);
-		ParsedLogicMethod parsedLogicMethod = new ParsedLogicMethod(this, targetObject, adaptedParams, parsedData);
-		computeParameters(parsedLogicMethod);
-		computeMethodName(parsedLogicMethod);
-		computeQueryString(parsedLogicMethod);		
+	public ParsedLogicMethod parse(Object targetObject, Object[] originalMethodArguments) {
+		Object[] adaptedMethodArguments = adaptOriginalMethodArguments(originalMethodArguments);
+		//ParsingData parsedData = AbstractLogicMethodParser.create(this).parse().parsedData(targetObject, adaptedMethodArguments);
+		
+		ParsedLogicMethod parsedLogicMethod = AbstractLogicMethodParser.create(this).parse().parsedLogicMethod(targetObject, adaptedMethodArguments);
+		//configureParsedLogicMethod(parsedLogicMethod);
 		return parsedLogicMethod;
 	}
-
-
-
+	
 	public String logicMethodName() {
 		String logicMethodName;
 		if(customMethodName() == null || customMethodName().isEmpty()) {  //test if a method name has been indicated at the annotation
@@ -252,46 +255,54 @@ public abstract class AbstractLogicMethod {
 	}
 	
 	/**
-	 * Answers the method and its parameters as a logic term
+	 * Answers the method and its arguments as a logic term
 	 * @param parsedLogicMethod
 	 * @return
 	 */
 	public Term asTerm(ParsedLogicMethod parsedLogicMethod) {
-		return LogicUtil.asTerm(parsedLogicMethod.getComputedMethodName(), ArrayToTermAdapter.arrayAsTerms(parsedLogicMethod.getComputedParameters()));
+		return LogicUtil.asTerm(parsedLogicMethod.getComputedMethodName(), ArrayToTermAdapter.arrayAsTerms(parsedLogicMethod.getComputedMethodArguments()));
 	}
 	
-	protected void computeParameters(ParsedLogicMethod parsedLogicMethod) {
-		Object[] params = null;
+	
+	public void configureParsedLogicMethod(ParsedLogicMethod parsedLogicMethod) {
+		configureParsedLogicMethodArguments(parsedLogicMethod);
+		configureParsedLogicMethodName(parsedLogicMethod);
+		configureParsedLogicMethodQueryString(parsedLogicMethod);	
+	}
+	
+	protected void configureParsedLogicMethodArguments(ParsedLogicMethod parsedLogicMethod) {
+		Object[] arguments = null;
 		
-		//we convert the string representation of every param in a term
+		//we convert the string representation of every argument in a term
 		if(declaresLogicParameters()) {
 			LogicEngine engine = LogicEngine.getDefault();
 			List<Term> newTermParams = new ArrayList<Term>();
-			for(Object stringTerm : parsedLogicMethod.getParsedData().getParameters()) {
+			for(Object stringTerm : parsedLogicMethod.getParsedData().getMethodArguments()) {
 				newTermParams.add(engine.textToTerm(stringTerm.toString()));
 			}
-			params = newTermParams.toArray(new Term[] {});
+			arguments = newTermParams.toArray(new Term[] {});
 		} else {
-			params = parsedLogicMethod.getOriginalParameters();
+			arguments = parsedLogicMethod.getOriginalMethodArguments();
 		}
-		parsedLogicMethod.setComputedParameters(params);
+		parsedLogicMethod.setComputedMethodArguments(arguments);
+	}
+
+	private void configureParsedLogicMethodName(ParsedLogicMethod parsedLogicMethod) {
+		parsedLogicMethod.setComputedMethodName(logicMethodName());
 	}
 	
 	/**
 	 * The default implementation ignores any information in the parsedLogicMethod parameter, this could change in the future if it is found that the method name should be parsed
 	 */
-	protected void computeQueryString(ParsedLogicMethod parsedLogicMethod) {
+	protected void configureParsedLogicMethodQueryString(ParsedLogicMethod parsedLogicMethod) {
 		parsedLogicMethod.setComputedQueryString(logicMethodName()); //by default, the query to be executed is the method name (if parameters are present they will be added)
 	}
 	
-	private void computeMethodName(ParsedLogicMethod parsedLogicMethod) {
-		parsedLogicMethod.setComputedMethodName(logicMethodName());
-	}
 	
 	
-	public abstract String[] getParameters();
+	public abstract LogicMethodParsingData getDataToParse();
+	public abstract String[] getLogicMethodArguments();
 	public abstract Query asQuery(ParsedLogicMethod parsedLogicMethod);
-	public abstract ParsingData getDataToParse();
 	public abstract String customMethodName();
 	
 }

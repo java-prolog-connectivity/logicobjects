@@ -11,9 +11,10 @@ import org.logicobjects.adapter.LogicObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.MethodInvokerContext;
 import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
 import org.logicobjects.annotation.method.LMethod;
+import org.logicobjects.annotation.method.LMethod.LMethodUtil;
 import org.logicobjects.annotation.method.LSolution;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
-import org.logicobjects.instrumentation.ParsingData;
+import org.logicobjects.instrumentation.LogicMethodParsingData;
 import org.logicobjects.util.AnnotationConstants;
 import org.logicobjects.util.LogicUtil;
 
@@ -35,12 +36,11 @@ public class LogicMethod extends AbstractLogicMethod {
 	
 	/**
 	 * 
-	 * @return the method parameters as specified in the annotation
+	 * @return the method arguments as specified in the annotation
 	 */
-	public String[] getParameters() {
-		if(AnnotationConstants.isNullArray(aLMethod.args()))
-			return null;
-		return aLMethod.args();
+	@Override
+	public String[] getLogicMethodArguments() {
+		return LMethodUtil.getArgs(aLMethod);
 	}
 
 	@Override
@@ -48,15 +48,15 @@ public class LogicMethod extends AbstractLogicMethod {
 		Object targetObject = parsedMethodData.getTargetObject();
 		LogicObject lo = new LogicObjectAdapter().adapt(targetObject, new MethodInvokerContext(targetObject.getClass()));
 		String logicMethodName = parsedMethodData.getComputedMethodName();
-		return lo.invokeMethod(logicMethodName, parsedMethodData.getComputedParameters());
+		return lo.invokeMethod(logicMethodName, parsedMethodData.getComputedMethodArguments());
 	}
 
 
 	
 	@Override
-	public ParsingData getDataToParse() {
-		ParsingData parsingData = new ParsingData();
-		parsingData.setParameters(getParameters());
+	public LogicMethodParsingData getDataToParse() {
+		LogicMethodParsingData parsingData = new LogicMethodParsingData();
+		parsingData.setMethodArguments(getLogicMethodArguments());
 		parsingData.setSolutionString(getEachSolutionValue());
 		return parsingData;
 	}

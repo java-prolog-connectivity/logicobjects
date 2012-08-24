@@ -10,7 +10,7 @@ import java.util.List;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LObject {
 	String name() default "";  //the name of the logic object
-	String[] args() default {}; //the parameters of the logic object
+	String[] args() default {}; //the arguments of the logic object
 
 	String[] imports() default {};
 	String[] modules() default {};

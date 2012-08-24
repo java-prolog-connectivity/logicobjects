@@ -82,7 +82,7 @@ public abstract class LObjectGenericDescription {
 		}
 
 		public String[] args() {
-			return aLDelegationObject.params();
+			return aLDelegationObject.args();
 		}
 
 		public String[] imports() {

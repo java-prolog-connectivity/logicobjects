@@ -33,32 +33,23 @@ public class LogicObjectAdapter extends Adapter<Object, LogicObject> {
 			return new LogicObject(new ObjectToTermAdapter().adapt(object, adaptingContext));
 		}
 	}
-	
-	/*
-	public LogicObject asLogicObject(Object object, LObject logicObjectAnnotation) {
-		String objectName = logicObjectAnnotation.name();
-		String[] propertyNames = logicObjectAnnotation.params();
-		Term[] parameters = getParameters(object, propertyNames);
-		return new LogicObject(objectName, parameters);
-	}
-	*/
-	
+
 	public LogicObject asLogicObject(Object object, String objectName, String[] propertyNames) {
-		Term[] parameters = fieldsAsTerms(object, propertyNames);
-		return new LogicObject(objectName, parameters);
+		Term[] arguments = fieldsAsTerms(object, propertyNames);
+		return new LogicObject(objectName, arguments);
 	}
 	
 	private Term[] fieldsAsTerms(Object object, String[] propertyNames) {
-		List<Term> parameters = new ArrayList<Term>();
+		List<Term> arguments = new ArrayList<Term>();
 		for(String propertyName : propertyNames) {
 			try {
 				Term term = fieldAsTerm(object, propertyName);
-				parameters.add(term);
+				arguments.add(term);
 			} catch(Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
-		return parameters.toArray(new Term[] {});
+		return arguments.toArray(new Term[] {});
 	}
 	
 	public static Term fieldAsTerm(Object object, String propertyName) {
