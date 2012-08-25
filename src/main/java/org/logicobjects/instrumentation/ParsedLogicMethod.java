@@ -23,7 +23,13 @@ public class ParsedLogicMethod {
 	private String computedMethodName; //this is here just because in the future it can be interesting to parse the method name (now it is just a constant)
 	private Object[] computedMethodArguments; //the method arguments
 	
-	
+	/**
+	 * 
+	 * @param logicMethod knows how to configure this object given a parsedData object
+	 * @param targetObject the object that receives the logic method invocation
+	 * @param originalMethodArguments the arguments of the logic method
+	 * @param parsedData contains the parsed method data
+	 */
 	public ParsedLogicMethod(AbstractLogicMethod logicMethod, Object targetObject, Object[] originalMethodArguments, LogicMethodParsingData parsedData) {
 		this.logicMethod = logicMethod;
 		this.targetObject = targetObject;

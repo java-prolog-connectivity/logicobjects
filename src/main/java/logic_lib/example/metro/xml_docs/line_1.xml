@@ -20,7 +20,7 @@
 <predicates>
 <public>
 <predicate>
-<name><![CDATA[name/1]]></name>
+<name><![CDATA[name/2]]></name>
 <scope>public</scope>
 <compilation>static</compilation>
 </predicate>

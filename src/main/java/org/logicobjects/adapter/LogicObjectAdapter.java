@@ -1,14 +1,10 @@
 package org.logicobjects.adapter;
 
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 import jpl.Term;
+
 import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
-import org.logicobjects.adapter.adaptingcontext.FieldAdaptingContext;
 import org.logicobjects.core.LogicObject;
-import org.reflectiveutils.ReflectionUtil;
 
 public class LogicObjectAdapter extends Adapter<Object, LogicObject> {
 
@@ -34,28 +30,20 @@ public class LogicObjectAdapter extends Adapter<Object, LogicObject> {
 		}
 	}
 
+	/**
+	 * How a Java object is adapted to a logic object sometimes depends on the context.
+	 * Though often the translation can be deduced only from the class of the object,
+	 * this method helps a programmer to specify a specific names and properties despite the information present in the class
+	 * @param object
+	 * @param objectName
+	 * @param propertyNames
+	 * @return
+	 */
 	public LogicObject asLogicObject(Object object, String objectName, String[] propertyNames) {
-		Term[] arguments = fieldsAsTerms(object, propertyNames);
+		Term[] arguments = LogicObject.propertiesAsTerms(object, propertyNames);
 		return new LogicObject(objectName, arguments);
 	}
 	
-	private Term[] fieldsAsTerms(Object object, String[] propertyNames) {
-		List<Term> arguments = new ArrayList<Term>();
-		for(String propertyName : propertyNames) {
-			try {
-				Term term = fieldAsTerm(object, propertyName);
-				arguments.add(term);
-			} catch(Exception e) {
-				throw new RuntimeException(e);
-			}
-		}
-		return arguments.toArray(new Term[] {});
-	}
 	
-	public static Term fieldAsTerm(Object object, String propertyName) {
-		Object propertyValue = ReflectionUtil.getFieldValue(object, propertyName);
-		Field field = ReflectionUtil.getField(object, propertyName);
-		return new ObjectToTermAdapter().adapt(propertyValue, new FieldAdaptingContext(field));
-	}
 	
 }

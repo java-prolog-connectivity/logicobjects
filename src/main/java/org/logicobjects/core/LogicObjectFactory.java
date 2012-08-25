@@ -99,5 +99,10 @@ public class LogicObjectFactory {
 		
 	}
 	
+	
+	public LogicMetaObject createLogicMetaObject(Class clazz) {
+		LogicMetaObject metaObject = null;
+		return metaObject;
+	}
 }
 

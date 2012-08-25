@@ -19,9 +19,17 @@ import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.visitor.FindFirstTypeVisitor;
 import org.reflectiveutils.visitor.TypeVisitor.InterfaceMode;
 
+/**
+ * A class providing a description for instantiating logic objects
+ * Part of the data is in the logic side 
+ * @author scastro
+ *
+ */
 public class LogicClass {
 	
 	private Class clazz;
+	private LogicMetaObject metaObject;
+	
 	
 	public LogicClass(Class clazz) {
 		this.clazz = clazz;
@@ -29,6 +37,12 @@ public class LogicClass {
 	
 	public Class getWrappedClass() {
 		return clazz;
+	}
+	
+	public LogicMetaObject getMetaObject() {
+		if(metaObject == null)
+			metaObject = LogicObjectFactory.getDefault().createLogicMetaObject(clazz);
+		return metaObject;
 	}
 	
 	public String getLObjectName() {

@@ -29,10 +29,10 @@ import java.util.regex.Pattern;
 
 import jpl.Term;
 
-import org.logicobjects.adapter.LogicObjectAdapter;
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.core.AbstractLogicMethod;
 import org.logicobjects.core.LogicEngine;
+import org.logicobjects.core.LogicObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -549,7 +549,7 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 		for(String setSymbol : symbols) {
 			if(AbstractLogicMethodParser.isInstancePropertySymbol(setSymbol)) {
 				String instanceVarName = AbstractLogicMethodParser.getPropertyName(setSymbol);
-				Term instanceVarAsTerm = instanceVarAsTerm = LogicObjectAdapter.fieldAsTerm(targetObject, instanceVarName); //TODO this method should be in ObjectToTermAdapter
+				Term instanceVarAsTerm = instanceVarAsTerm = LogicObject.propertyAsTerm(targetObject, instanceVarName); //TODO this method should be in ObjectToTermAdapter
 				dictionary.put(setSymbol, instanceVarAsTerm.toString());
 			}
 		}

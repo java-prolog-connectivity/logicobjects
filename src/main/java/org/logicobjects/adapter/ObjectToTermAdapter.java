@@ -13,6 +13,7 @@ import jpl.Atom;
 import jpl.Term;
 
 import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
+import org.logicobjects.adapter.adaptingcontext.ClassAdaptingContext;
 import org.logicobjects.adapter.objectadapters.AnyCollectionToTermAdapter;
 import org.logicobjects.adapter.objectadapters.CalendarToTermAdapter;
 import org.logicobjects.adapter.objectadapters.ImplementationMap;
@@ -39,8 +40,10 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 		if(adaptingContext != null && adaptingContext.canAdaptToTerm()) {
 			try {
 				return adaptingContext.adaptToTerm(object);
-			} catch(RuntimeException e) {
-				if(!ImplementationMap.isCollectionObject(object))
+			} catch(RuntimeException e) { //the adapting context failed trying to adapt to object to a term
+				//catch the exception and do nothing if it is a collection object.
+				//that could mean that the adapting context is targeting the individual components of the collection instead of the entire collection itself
+				if(!ImplementationMap.isCollectionObject(object)) 
 					throw e;
 			}
 		} else {
@@ -78,7 +81,9 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 				return new CalendarToTermAdapter().adapt((Calendar) object);
 			} else if(XMLGregorianCalendar.class.isAssignableFrom(object.getClass())) {
 				return new XMLGregorianCalendarToTermAdapter().adapt((XMLGregorianCalendar) object);
-			}
+			} else if(object instanceof Entry) {
+				return new EntryToTermAdapter().adapt((Entry) object, adaptingContext);
+			} 
 			Class guidingClass = LogicClass.findGuidingClass(object.getClass());
 			if(guidingClass != null) {
 				if(LogicClass.isTermObjectClass(guidingClass))
@@ -90,10 +95,8 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 				
 				LObject logicObjectAnnotation = (LObject)guidingClass.getAnnotation(LObject.class);
 				if(logicObjectAnnotation!=null) {
-					LogicClass logicClass = new LogicClass(guidingClass);
-					return new LogicObjectAdapter().asLogicObject(object, logicClass.getLObjectName(), logicClass.getLObjectArgs()).asTerm();
+					return adapt(object, new ClassAdaptingContext(guidingClass));
 				}
-					
 				throw new ObjectToTermException(object);  //if we arrive here something went wrong
 			} else if(object instanceof Term) {
 				return (Term)object;
@@ -102,9 +105,6 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 			} 
 		}
 		
-		if(object instanceof Entry) {
-			return new EntryToTermAdapter().adapt((Entry) object, adaptingContext);
-		} 
 		if(ImplementationMap.isCollectionObject(object)) 
 			return new AnyCollectionToTermAdapter().adapt(object, adaptingContext);
 		

@@ -25,6 +25,12 @@ public abstract class AdaptingContext {
 
 	protected abstract LObjectGenericDescription getLogicObjectDescription();
 	
+	/**
+	 * In case the name is not explicitly specified (e.g., with an annotation), it will have to be inferred
+	 * It can be inferred from a class name (if the transformation context is a class instance to a logic object), from a field name (if the context is the transformation of a field), etc
+	 * Different context override this method to specify how they infer the logic name of the object
+	 * @return
+	 */
 	public abstract String infereLogicObjectName();
 
 	

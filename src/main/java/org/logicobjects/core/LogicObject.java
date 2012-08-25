@@ -1,12 +1,15 @@
 package org.logicobjects.core;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 import jpl.Atom;
 import jpl.Compound;
 import jpl.Query;
 import jpl.Term;
 
+import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.FieldAdaptingContext;
 import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
@@ -103,5 +106,24 @@ public class LogicObject implements ITermObject {
 		}
 	}
 
+	public static Term[] propertiesAsTerms(Object object, String[] propertyNames) {
+		List<Term> arguments = new ArrayList<Term>();
+		for(String propertyName : propertyNames) {
+			try {
+				Term term = propertyAsTerm(object, propertyName);
+				arguments.add(term);
+			} catch(Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return arguments.toArray(new Term[] {});
+	}
+	
+	public static Term propertyAsTerm(Object object, String propertyName) {
+		Object propertyValue = ReflectionUtil.getFieldValue(object, propertyName);
+		Field field = ReflectionUtil.getField(object, propertyName);
+		return new ObjectToTermAdapter().adapt(propertyValue, new FieldAdaptingContext(field));
+	}
+	
 }
 
