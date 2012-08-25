@@ -40,7 +40,9 @@ public class LogicMethod extends AbstractLogicMethod {
 	 */
 	@Override
 	public String[] getLogicMethodArguments() {
-		return LMethodUtil.getArgs(aLMethod);
+		if(aLMethod != null)
+			return LMethodUtil.getArgs(aLMethod);
+		return null;
 	}
 
 	@Override
@@ -56,6 +58,8 @@ public class LogicMethod extends AbstractLogicMethod {
 	@Override
 	public LogicMethodParsingData getDataToParse() {
 		LogicMethodParsingData parsingData = new LogicMethodParsingData();
+		if(hasCustomMethodName()) //this is to avoid parsing method names such as $1. This is a valid Java method name, but would be interpreted by the parser as "a String given by the first argument of the logic method"
+			parsingData.setQueryString(logicMethodName());
 		parsingData.setMethodArguments(getLogicMethodArguments());
 		parsingData.setSolutionString(getEachSolutionValue());
 		return parsingData;

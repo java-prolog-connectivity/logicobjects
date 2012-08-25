@@ -191,7 +191,7 @@ public abstract class AbstractLogicMethod {
 		return allMethodArgumentAdapters;
 	}
 	
-	public boolean declaresLogicParameters() {
+	public boolean hasLogicMethodArguments() {
 		return getLogicMethodArguments() != null;
 	}
 	
@@ -230,12 +230,16 @@ public abstract class AbstractLogicMethod {
 		return parsedLogicMethod;
 	}
 	
+	public boolean hasCustomMethodName() {
+		return !(customMethodName() == null || customMethodName().isEmpty());
+	}
+	
 	public String logicMethodName() {
 		String logicMethodName;
-		if(customMethodName() == null || customMethodName().isEmpty()) {  //test if a method name has been indicated at the annotation
-			logicMethodName = LogicUtil.javaNameToProlog(getWrappedMethod().getName()); //if no name is provided in the annotation, it will be the method name after converting it to prolog naming conventions
-		} else {
+		if(hasCustomMethodName()) {  //test if a method name has been indicated at the annotation
 			logicMethodName = customMethodName();
+		} else {
+			logicMethodName = LogicUtil.javaNameToProlog(getWrappedMethod().getName()); //if no name is provided in the annotation, it will be the method name after converting it to prolog naming conventions
 		}
 		return logicMethodName;
 	}
@@ -274,34 +278,50 @@ public abstract class AbstractLogicMethod {
 		Object[] arguments = null;
 		
 		//we convert the string representation of every argument in a term
-		if(declaresLogicParameters()) {
+		if(hasLogicMethodArguments()) {
 			LogicEngine engine = LogicEngine.getDefault();
-			List<Term> newTermParams = new ArrayList<Term>();
+			List<Term> newTermArgs = new ArrayList<Term>();
 			for(Object stringTerm : parsedLogicMethod.getParsedData().getMethodArguments()) {
-				newTermParams.add(engine.textToTerm(stringTerm.toString()));
+				newTermArgs.add(engine.textToTerm(stringTerm.toString()));
 			}
-			arguments = newTermParams.toArray(new Term[] {});
+			arguments = newTermArgs.toArray(new Term[] {});
 		} else {
 			arguments = parsedLogicMethod.getOriginalMethodArguments();
 		}
 		parsedLogicMethod.setComputedMethodArguments(arguments);
 	}
 
-	private void configureParsedLogicMethodName(ParsedLogicMethod parsedLogicMethod) {
-		parsedLogicMethod.setComputedMethodName(logicMethodName());
+	protected void configureParsedLogicMethodName(ParsedLogicMethod parsedLogicMethod) {
+		if(hasCustomMethodName())
+			parsedLogicMethod.setComputedMethodName(parsedLogicMethod.getParsedData().getQueryString());
+		else
+			parsedLogicMethod.setComputedMethodName(logicMethodName());
 	}
 	
 	/**
 	 * The default implementation ignores any information in the parsedLogicMethod parameter, this could change in the future if it is found that the method name should be parsed
 	 */
 	protected void configureParsedLogicMethodQueryString(ParsedLogicMethod parsedLogicMethod) {
-		parsedLogicMethod.setComputedQueryString(logicMethodName()); //by default, the query to be executed is the method name (if parameters are present they will be added)
+		if(hasCustomMethodName())
+			parsedLogicMethod.setComputedQueryString(parsedLogicMethod.getParsedData().getQueryString());
+		else
+			parsedLogicMethod.setComputedQueryString(logicMethodName()); //by default, the query to be executed is the method name (if arguments are present they will be taken into account)
 	}
 	
 	
 	
+	/**
+	 * 
+	 * @return relevant unparsed logic method data
+	 */
 	public abstract LogicMethodParsingData getDataToParse();
+	
+	/**
+	 * 
+	 * @return the method arguments as specified in the annotation
+	 */
 	public abstract String[] getLogicMethodArguments();
+	
 	public abstract Query asQuery(ParsedLogicMethod parsedLogicMethod);
 	public abstract String customMethodName();
 	

@@ -48,6 +48,9 @@ public class SimplePredicateQuery extends RawLogicQuery {
 	@Override
 	public LogicMethodParsingData getDataToParse() {
 		LogicMethodParsingData parsingData = new LogicMethodParsingData();
+		//TODO this code is duplicated, taking from LogicMethod
+		if(hasCustomMethodName()) //this is to avoid parsing method names such as $1. This is a valid Java method name, but would be interpreted by the parser as "a String given by the first argument of the logic method"
+			parsingData.setQueryString(logicMethodName());
 		parsingData.setMethodArguments(getLogicMethodArguments());
 		parsingData.setSolutionString(getEachSolutionValue());
 		return parsingData;

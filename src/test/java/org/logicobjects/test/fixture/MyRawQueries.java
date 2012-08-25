@@ -48,6 +48,10 @@ public abstract class MyRawQueries {
 	public abstract String prologDialect();
 	
 	@LSolution("FlagValue")
+	@LQuery(predicate = "$1", args={"dialect", "FlagValue"})
+	public abstract String customMethodNamePrologDialect(String prologDialectString);
+	
+	@LSolution("FlagValue")
 	@LQuery(args={"$1", "FlagValue"})
 	public abstract String currentPrologFlag(String flagName);
 	
