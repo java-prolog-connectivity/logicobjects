@@ -1,5 +1,9 @@
 package org.logicobjects.core;
 
+import java.util.List;
+
+import jpl.Term;
+
 
 public class BootstrapLogicEngine extends LogicEngine {
 /*
@@ -33,6 +37,12 @@ public class BootstrapLogicEngine extends LogicEngine {
 	public boolean flushOutput() {
 		if(true) throw new UnsupportedOperationException();
 		return false;
+	}
+
+	@Override
+	public List<Term> currentObjects() {
+		if(true) throw new UnsupportedOperationException();
+		return null;
 	}
 	
 

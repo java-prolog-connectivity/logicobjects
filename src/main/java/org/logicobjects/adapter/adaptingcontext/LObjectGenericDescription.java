@@ -15,7 +15,8 @@ import org.logicobjects.annotation.LDelegationObject;
 public abstract class LObjectGenericDescription {
 
 	public abstract String name(); 
-	public abstract String[] args(); 
+	public abstract String[] args();
+	public abstract String argsArray();
 	public abstract String[] imports();
 	public abstract String[] modules();
 	public abstract boolean automaticImport();
@@ -53,6 +54,11 @@ public abstract class LObjectGenericDescription {
 			return aLObject.args();
 		}
 
+		@Override
+		public String argsArray() {
+			return aLObject.argsArray();
+		}
+		
 		public String[] imports() {
 			return aLObject.imports();
 		}
@@ -85,6 +91,11 @@ public abstract class LObjectGenericDescription {
 			return aLDelegationObject.args();
 		}
 
+		@Override
+		public String argsArray() {
+			return aLDelegationObject.argsArray();
+		}
+		
 		public String[] imports() {
 			return aLDelegationObject.imports();
 		}

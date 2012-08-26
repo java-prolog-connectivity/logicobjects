@@ -33,7 +33,7 @@ public class MethodInvokerContext extends ClassAdaptingContext {
 	
 	@Override
 	public LObjectGenericDescription getLogicObjectDescription() {
-		Class invokerClass = LogicClass.findDelegationObjectClass(getContext());
+		Class invokerClass = LogicClass.findDelegationObjectClass(getContextClass());
 		if(invokerClass == null)
 			return null;
 		LDelegationObject aLDelegationObject = (LDelegationObject) invokerClass.getAnnotation(LDelegationObject.class);

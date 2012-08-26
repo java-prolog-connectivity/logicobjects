@@ -39,13 +39,14 @@ public class LogicObject implements ITermObject {
 		this(name, new Object[]{});
 	}
 	
-	public LogicObject(String name, Object[] objectProperties) {
+	public LogicObject(String name, Object[] arguments) {
 		setName(name);
-		if(objectProperties == null)
-			objectProperties = new Object[]{};
-		setObjectProperties(objectProperties);
+		if(arguments == null)
+			arguments = new Object[]{};
+		setObjectProperties(arguments);
 	}
 
+	
 	
 	public String getName() {
 		return name;
@@ -64,11 +65,11 @@ public class LogicObject implements ITermObject {
 		this.objectProperties = objectProperties;
 	}
 
-	public Term[] getTermArguments() {
+	private Term[] getTermArguments() {
 		return termArguments;
 	}
 
-	public void setTermArguments(Term[] termArguments) {
+	private void setTermArguments(Term[] termArguments) {
 		this.termArguments = termArguments;
 	}
 

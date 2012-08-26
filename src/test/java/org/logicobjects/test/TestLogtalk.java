@@ -1,13 +1,14 @@
 package org.logicobjects.test;
 
+import static junit.framework.Assert.assertTrue;
+
+import java.util.List;
+
 import jpl.Atom;
-import jpl.Compound;
 import jpl.Term;
-import jpl.Util;
-import jpl.Variable;
+
 import org.junit.Test;
 import org.logicobjects.core.LogicEngine;
-import static junit.framework.TestCase.*;
 
 /**
  * This class test some Logtalk functionality (to be completed)
@@ -30,5 +31,10 @@ public class TestLogtalk extends LocalLogicTest {
 		assertTrue(LogicEngine.getDefault().isUnaryOperator("::"));
 	}
 
+	@Test
+	public void testCurrentObjects() {
+		List<Term> currentObjects = LogicEngine.getDefault().currentObjects();
+		assertTrue(currentObjects.contains(new Atom("logtalk")));
+	}
 	
 }

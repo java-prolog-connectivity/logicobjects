@@ -25,6 +25,8 @@ public abstract class AdaptingContext {
 
 	protected abstract LObjectGenericDescription getLogicObjectDescription();
 	
+	protected abstract Class getContextClass();
+	
 	/**
 	 * In case the name is not explicitly specified (e.g., with an annotation), it will have to be inferred
 	 * It can be inferred from a class name (if the transformation context is a class instance to a logic object), from a field name (if the context is the transformation of a field), etc
@@ -62,7 +64,9 @@ public abstract class AdaptingContext {
 		String logicObjectName = logicObjectDescription.name();
 		if(logicObjectName.isEmpty())
 			logicObjectName = infereLogicObjectName();
-		return new LogicObjectAdapter().asLogicObject(object, logicObjectName, logicObjectDescription.args()).asTerm();
+		//return new LogicObjectAdapter().asLogicObject(object, logicObjectName, logicObjectDescription.args()).asTerm();
+		Term[] arguments = LogicObject.propertiesAsTerms(object, logicObjectDescription.args());
+		return new LogicObject(logicObjectName, arguments).asTerm();
 	}
 	
 	public Term adaptToTerm(Object object) {
@@ -86,14 +90,20 @@ public abstract class AdaptingContext {
 		return typeWrapper.asClass().cast(objectAdapter.adapt(term));
 	}
 	
+	
 	/*
 	 * This method transform a term in a logic object of a specified class using the information present in a LObjectGenericDescription object.
 	 */
-	protected Object adaptToObjectFromDescription(Term term, Type type, LObjectGenericDescription lObjectDescription) {
+	protected Object adaptToObjectFromDescription(Term term, Type type, LObjectGenericDescription lMethodInvokerDescription) {
 		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
 		try {
-			Object lObject = LogicObjectFactory.getDefault().create(typeWrapper.asClass());
-			LogicObject.setProperties(lObject, lObjectDescription.args(), term);
+			Object lObject = null;
+			if(typeWrapper.isAssignableFrom(getContextClass())) {
+                lObject = LogicObjectFactory.getDefault().create(getContextClass());
+            } else {
+            	lObject = LogicObjectFactory.getDefault().create(typeWrapper.asClass());
+            }
+			LogicObject.setProperties(lObject, lMethodInvokerDescription.args(), term);
 			return lObject;
 		} catch (Exception e) {
 			throw new RuntimeException(e);

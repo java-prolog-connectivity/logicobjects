@@ -90,7 +90,8 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 				if ( logicObjectClass != null && (typeWrapper.isAssignableFrom(logicObjectClass) || logicObjectClass.isAssignableFrom(typeWrapper.asClass())) ) { 
 					//System.out.println("************* Logic class found !!!");
 					//System.out.println(logicObjectClass.getName());
-					return (To)new ClassAdaptingContext(logicObjectClass).adaptToLObject(term, type);
+					//return (To)new ClassAdaptingContext(logicObjectClass).adaptToLObject(term, type);
+					return adapt(term, type, new ClassAdaptingContext(logicObjectClass));
 				} //else
 					//System.out.println("************* Logic class NOT found !!!");
 				//System.out.println(typeWrapper.getClass());
@@ -102,8 +103,10 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 						return null;
 					}
 					logicObjectClass = LogicClass.findLogicClass(singleTypeWrapper.asClass());  //find out if the expected type is a logic object
-					if( logicObjectClass != null ) 
-						return (To) new ClassAdaptingContext(logicObjectClass).adaptToLObject(term, type);
+					if( logicObjectClass != null ) {
+						//return (To) new ClassAdaptingContext(logicObjectClass).adaptToLObject(term, type);
+						return adapt(term, type, new ClassAdaptingContext(logicObjectClass));
+					}
 					
 					if(singleTypeWrapper.asClass().equals(Entry.class)) {
 						Type entryParameters[] = new GenericsUtil().findAncestorTypeParameters(Entry.class, singleTypeWrapper.getWrappedType());

@@ -39,14 +39,23 @@ public class LogicClass {
 		return clazz;
 	}
 	
+	/**
+	 * The meta object is needed to answer meta questions about the logic object represented by this class
+	 * For example, which are the parameter names
+	 * @return
+	 */
 	public LogicMetaObject getMetaObject() {
 		if(metaObject == null)
 			metaObject = LogicObjectFactory.getDefault().createLogicMetaObject(clazz);
 		return metaObject;
 	}
 	
+	private LObject getLObjectAnnotation() {
+		return (LObject) clazz.getAnnotation(LObject.class);
+	}
+	
 	public String getLObjectName() {
-		LObject lObjectAnnotation = (LObject) clazz.getAnnotation(LObject.class);
+		LObject lObjectAnnotation = getLObjectAnnotation();
 		String name = lObjectAnnotation.name();
 		if(!name.isEmpty())
 			return name;
@@ -55,22 +64,22 @@ public class LogicClass {
 	}
 	
 	public String[] getLObjectArgs() {
-		LObject lObjectAnnotation = (LObject) clazz.getAnnotation(LObject.class);
+		LObject lObjectAnnotation = getLObjectAnnotation();
 		return lObjectAnnotation.args();
 	}
 	
 	public String[] getImports() {
-		LObject lObjectAnnotation = (LObject) clazz.getAnnotation(LObject.class);
+		LObject lObjectAnnotation = getLObjectAnnotation();
 		return lObjectAnnotation.imports();
 	}
 	
 	public String[] getModules() {
-		LObject lObjectAnnotation = (LObject) clazz.getAnnotation(LObject.class);
+		LObject lObjectAnnotation = getLObjectAnnotation();
 		return lObjectAnnotation.modules();
 	}
 	
 	public boolean automaticImport() {
-		LObject lObjectAnnotation = (LObject) clazz.getAnnotation(LObject.class);
+		LObject lObjectAnnotation = getLObjectAnnotation();
 		return lObjectAnnotation.automaticImport();
 	}
 	
@@ -85,9 +94,7 @@ public class LogicClass {
 			return false;
 		
 		LObjectGenericDescription lMethodInvokerDescription = LObjectGenericDescription.create(clazz);  //look at the annotations of the class and return an object having information about how to load dependencies
-		
-		//LObject aLObject = getLogicObjectAnnotation(clazz);
-		
+
 		if(!lMethodInvokerDescription.automaticImport())
 			return false;
 		
@@ -192,7 +199,7 @@ public class LogicClass {
 		addIfLgtFileExists(clazz.getSimpleName(), clazz, defaultImports);
 		addIfLgtFileExists(LogicUtil.javaClassNameToProlog(clazz.getSimpleName()), clazz, defaultImports);
 		
-		LObject logicObject = getLogicObjectAnnotation(clazz);
+		LObject logicObject = getLogicObjectAnnotationInHierarchy(clazz);
 		if(logicObject != null)
 			addIfLgtFileExists(logicObject.name(), clazz, defaultImports);
 		return defaultImports.toArray(new String[] {});
@@ -203,7 +210,7 @@ public class LogicClass {
 	
 
 	
-	public static LObject getLogicObjectAnnotation(Class clazz) {
+	public static LObject getLogicObjectAnnotationInHierarchy(Class clazz) {
 		Class annotatedClass = findLogicClass(clazz);
 		if(annotatedClass != null)
 			return (LObject)annotatedClass.getAnnotation(LObject.class);

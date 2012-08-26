@@ -16,6 +16,11 @@ public class MethodAdaptingContext extends AccessibleObjectAdaptingContext {
 	}
 
 	@Override
+	protected Class getContextClass() {
+		return method.getReturnType();
+	}
+	
+	@Override
 	public String infereLogicObjectName() {
 		return LogicUtil.javaClassNameToProlog(method.getReturnType().getSimpleName());
 	}

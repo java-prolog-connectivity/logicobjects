@@ -19,6 +19,7 @@ import org.logicobjects.adapter.ObjectToTermException;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LSolution;
+import org.logicobjects.annotation.method.LWrapper;
 import org.logicobjects.core.flags.LogtalkFlag;
 import org.logicobjects.util.LogicObjectsPreferences;
 import org.slf4j.Logger;
@@ -38,7 +39,7 @@ public abstract class LogicEngine {
 	public static Term FALSE_TERM = new Atom("false");
 	
 	protected static final String VARIABLE_PREFIX = "LOGIC_OBJECTS_"; //prefix for generated framework variables 
-	protected static final Variable anonymousVar = new Variable("_");
+	public static final Variable ANONYMOUS_VAR = new Variable("_");
 
 	//ENGINES AND PREFERENCES STATIC VARIABLES
 	private static boolean bootstrapping;
@@ -201,7 +202,7 @@ public abstract class LogicEngine {
 	
 	public List<String> termVariablesNames(Term term) {
 		String varMappingVarName = VARIABLE_PREFIX+"VarMapping";
-		Query query = new Query(new Compound("atom_to_term", new Term[] { new Atom(term.toString()), anonymousVar, new Variable(varMappingVarName)}));
+		Query query = new Query(new Compound("atom_to_term", new Term[] { new Atom(term.toString()), ANONYMOUS_VAR, new Variable(varMappingVarName)}));
 		Map solution = query.oneSolution();
 		Term varMappingTerm = (Term) solution.get(varMappingVarName);
 		Term[] varBindings = Util.listToTermArray(varMappingTerm);
@@ -416,8 +417,30 @@ public abstract class LogicEngine {
 			return new Term[] {};
 	}
 	
-
+	/**
+	 * 
+	 * @param object
+	 * @return a list of arities of all the Logtalk objects in the logic side having as name the parameter of the Java method
+	 */
+	//currently assuming that the cardinalities of the objects in the logtalk side are returned ordered from the lowest to the highest
+	public List<Integer> numberParametersLogtalkObject(String object) {
+		List<Term> currentObjects = currentObjects();
+		List<Integer> numberParams = new ArrayList<Integer>();
+		for(Term currentObject: currentObjects) {
+			if(currentObject instanceof Atom) {
+				Atom atom = (Atom)currentObject;
+				if(atom.name().equals(object))
+					numberParams.add(0);
+			} else if(currentObject instanceof Compound) {
+				Compound compound = (Compound)currentObject;
+				if(compound.name().equals(object))
+					numberParams.add(compound.arity());
+			}
+		}
+		return numberParams;
+	}
 	
+	//TODO delete
 	public static void main(String[] args) {
 		System.out.println("***********************************");
 		LogicEngine eng = getDefault();
@@ -457,6 +480,11 @@ public abstract class LogicEngine {
 	@LSolution("FlagValue")
 	@LMethod(args={"$1", "FlagValue"})
 	public abstract String currentPrologFlag(String flagName);
+
+	@LWrapper
+	@LSolution("LogtalkObject")
+	@LMethod(name="current_object", args = {"LogtalkObject"})
+	public abstract List<Term> currentObjects();
 
 }
 

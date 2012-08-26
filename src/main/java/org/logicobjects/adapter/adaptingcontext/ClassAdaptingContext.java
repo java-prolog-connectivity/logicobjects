@@ -20,18 +20,19 @@ public class ClassAdaptingContext extends AnnotatedAdaptingContext {
 		this.clazz = clazz;
 	}
 	
-	public Class getContext() {
+	@Override
+	protected Class getContextClass() {
 		return clazz;
 	}
 	
 	@Override
 	public LObjectAdapter getTermToObjectAdapterAnnotation() {
-		return (LObjectAdapter) getContext().getAnnotation(LObjectAdapter.class);
+		return (LObjectAdapter) getContextClass().getAnnotation(LObjectAdapter.class);
 	}
 	
 	@Override
 	public LTermAdapter getObjectToTermAdapterAnnotation() {
-		return (LTermAdapter) getContext().getAnnotation(LTermAdapter.class);
+		return (LTermAdapter) getContextClass().getAnnotation(LTermAdapter.class);
 	}
 
 	@Override
@@ -41,27 +42,10 @@ public class ClassAdaptingContext extends AnnotatedAdaptingContext {
 
 	@Override
 	public LObjectGenericDescription getLogicObjectDescription() {
-		LObject aLObject = (LObject) getContext().getAnnotation(LObject.class);
+		LObject aLObject = (LObject) getContextClass().getAnnotation(LObject.class);
 		if(aLObject != null)
 			return LObjectGenericDescription.create(aLObject);
 		return null;
-	}
-	
-	@Override
-	protected Object adaptToObjectFromDescription(Term term, Type type, LObjectGenericDescription lMethodInvokerDescription) {
-		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
-		try {
-			Object lObject = null;
-			if(typeWrapper.isAssignableFrom(getContext())) {
-                lObject = LogicObjectFactory.getDefault().create(getContext());
-            } else {
-            	lObject = LogicObjectFactory.getDefault().create(typeWrapper.asClass());
-            }
-			LogicObject.setProperties(lObject, lMethodInvokerDescription.args(), term);
-			return lObject;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 	
 }
