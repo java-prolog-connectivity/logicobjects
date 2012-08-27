@@ -11,10 +11,11 @@ import jpl.Term;
 
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.TermToObjectAdapter;
-import org.logicobjects.adapter.adaptingcontext.FieldAdaptingContext;
 import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.ReflectionUtil;
+import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
+import org.reflectiveutils.wrappertype.ArrayTypeWrapper;
 
 
 public class LogicObject implements ITermObject {
@@ -25,29 +26,22 @@ public class LogicObject implements ITermObject {
 		return new Compound(LOGTALK_OPERATOR, new Term[] {object, LogicUtil.asTerm(messageName, messageArguments)});
 	}
 	
-	
 	private String name;
-	private Object[] objectProperties;
 	private Term[] termArguments;
-	//private Term asTerm;
-	
+
 	public LogicObject(Term term) {
 		this(term.name(), term.args());
 	}
 	
 	public LogicObject(String name) {
-		this(name, new Object[]{});
+		this(name, new Term[]{});
 	}
 	
-	public LogicObject(String name, Object[] arguments) {
+	public LogicObject(String name, Term[] termArguments) {
 		setName(name);
-		if(arguments == null)
-			arguments = new Object[]{};
-		setObjectProperties(arguments);
+		setTermArguments(termArguments);
 	}
 
-	
-	
 	public String getName() {
 		return name;
 	}
@@ -56,14 +50,6 @@ public class LogicObject implements ITermObject {
 		this.name = name;
 	}
 
-	public Object[] getObjectProperties() {
-		return objectProperties;
-	}
-
-	public void setObjectProperties(Object[] objectProperties) {
-		setTermArguments(ArrayToTermAdapter.arrayAsTerms(objectProperties));		
-		this.objectProperties = objectProperties;
-	}
 
 	private Term[] getTermArguments() {
 		return termArguments;
@@ -83,11 +69,15 @@ public class LogicObject implements ITermObject {
 	
 	
 	public boolean isParametrizedObject() {
-		return getTermArguments().length > 0;
+		return arity() > 0;
 	}
 	
-	public Query invokeMethod(String methodName, Object[] messageArgs) {
-		Compound compound = logtalkMessage(asTerm(), methodName, ArrayToTermAdapter.arrayAsTerms(messageArgs));
+	public int arity() {
+		return getTermArguments().length;
+	}
+	
+	public Query asQuery(String methodName, Object[] messageArgs) {
+		Compound compound = logtalkMessage(asTerm(), methodName, ArrayToTermAdapter.objectsAsTerms(messageArgs));
 		Query query = new Query(compound);
 		return query;
 	}
@@ -98,11 +88,27 @@ public class LogicObject implements ITermObject {
 	}
 	
 	
+	
+	
+	
+	
+	
+	
+	
+	public static void setPropertiesArray(Object lObject, String argsArray, Term term) {
+		Field field = ReflectionUtil.getField(lObject, argsArray);
+		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(field.getGenericType());
+		if(!(typeWrapper instanceof ArrayTypeWrapper))
+			throw new RuntimeException("The property " + argsArray + " is not an array instance variable in object " + lObject);
+		Term[] termArguments = term.args();
+		ReflectionUtil.setFieldValue(lObject, argsArray, new TermToObjectAdapter().adaptField(termArguments, field));
+	}
+	
 	public static void setProperties(Object lObject, String[] properties, Term term) {
 		for(int i=0; i<properties.length; i++) {
 			String propertyName = properties[i];
 			Field field = ReflectionUtil.getField(lObject, propertyName);
-			Object fieldValue = new TermToObjectAdapter().adapt(term.arg(i+1), field.getGenericType(), new FieldAdaptingContext(field));
+			Object fieldValue = new TermToObjectAdapter().adaptField(term.arg(i+1), field);
 			ReflectionUtil.setFieldValue(lObject, propertyName, fieldValue);
 		}
 	}
@@ -123,8 +129,10 @@ public class LogicObject implements ITermObject {
 	public static Term propertyAsTerm(Object object, String propertyName) {
 		Object propertyValue = ReflectionUtil.getFieldValue(object, propertyName);
 		Field field = ReflectionUtil.getField(object, propertyName);
-		return new ObjectToTermAdapter().adapt(propertyValue, new FieldAdaptingContext(field));
+		return new ObjectToTermAdapter().adaptField(propertyValue, field);
 	}
+
+
 	
 }
 

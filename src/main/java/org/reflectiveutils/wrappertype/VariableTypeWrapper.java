@@ -76,8 +76,7 @@ public class VariableTypeWrapper extends AbstractTypeWrapper {
 	
 	public String getName() {
 		if(isWildcard())
-			return "?"; //no name
-			
+			return "?"; //no name	
 		else
 			return ((TypeVariable)wrappedType).getName();
 	}

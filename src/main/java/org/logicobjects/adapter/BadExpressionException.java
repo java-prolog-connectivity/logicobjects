@@ -1,5 +1,10 @@
 package org.logicobjects.adapter;
 
+/**
+ * Thrown when a Java expression embedded in a logic term is not valid
+ * @author scastro
+ *
+ */
 public class BadExpressionException extends RuntimeException {
 	private String methodName;
 	private String expression;

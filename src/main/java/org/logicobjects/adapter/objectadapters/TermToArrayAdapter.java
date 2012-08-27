@@ -5,8 +5,9 @@ import java.lang.reflect.Type;
 
 import jpl.Term;
 
+import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.TermToObjectAdapter;
-import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
+import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 import org.reflectiveutils.wrappertype.ArrayTypeWrapper;
@@ -18,7 +19,7 @@ public class TermToArrayAdapter extends TermToObjectAdapter<Object[]> {
 	}
 
 
-	public Object[] adapt(Term listTerm, Type type, AdaptingContext adaptingContext) {
+	public Object[] adapt(Term listTerm, Type type, AdaptationContext adaptingContext) {
 		ArrayTypeWrapper typeWrapper = new ArrayTypeWrapper(type);
 		Type componentType = typeWrapper.getComponentType();
 		Term[] termItems= LogicUtil.listToTermArray(listTerm);
@@ -35,7 +36,17 @@ public class TermToArrayAdapter extends TermToObjectAdapter<Object[]> {
 	}
 	
 	
+	public static Object[] termsAsObjects(Term[] terms) {
+		return termsAsObjects(terms, null);
+	}
 	
+	public static Object[] termsAsObjects(Term[] terms, AdaptationContext adaptingContext) {
+		Object[] objects = new Object[terms.length];
+		for(int i=0; i<terms.length; i++) {
+			objects[i] = new TermToObjectAdapter().adapt(terms[i], Object.class, adaptingContext);
+		}
+		return objects;
+	}
 
 	
 	

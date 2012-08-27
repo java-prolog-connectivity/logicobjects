@@ -1,5 +1,6 @@
 package org.reflectiveutils.wrappertype;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -43,7 +44,20 @@ public abstract class AbstractTypeWrapper {
 	public abstract boolean isAssignableFrom(AbstractTypeWrapper type);
 	//public abstract boolean canBindTypeVariables(Map<TypeVariable, Type> typeVariableMap);
 	
+	/**
+	 * 
+	 * @param length
+	 * @return an array of the wrapped type
+	 * the component type of the returned array is given by the class representation of the wrapped type
+	 * This implies that for Variable Type the returned array will be Object[] and not VariableType[]
+	 * This is because the class representation (in the current implementation) of variable types is Object
+	 * Then the component type of an array of the wrapped type should be consistent with this class representation
+	 */
+	public Object[] asArray(int length) {
+		return (Object[]) Array.newInstance(asClass(), length);
+	}
 	
+
 	/**
 	 * Collects all the type variables nested in the type. Type Variables are inserted in the order they are found from left to right. No duplicates are collected. Wildcard Types are also included.
 	 * @param types is the list collection the found type variable.

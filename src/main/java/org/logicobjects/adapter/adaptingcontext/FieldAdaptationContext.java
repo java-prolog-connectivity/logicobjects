@@ -5,10 +5,10 @@ import java.lang.reflect.Field;
 
 import org.logicobjects.util.LogicUtil;
 
-public class FieldAdaptingContext extends AccessibleObjectAdaptingContext {
+public class FieldAdaptationContext extends AnnotatedElementAdaptationContext {
 	private Field field;
 	
-	public FieldAdaptingContext(Field field) {
+	public FieldAdaptationContext(Field field) {
 		this.field = field;
 	}
 	
@@ -18,13 +18,9 @@ public class FieldAdaptingContext extends AccessibleObjectAdaptingContext {
 	}
 	
 	@Override
-	protected Class getContextClass() {
+	public Class getContextClass() {
 		return field.getType();
 	}
 
-	@Override
-	public String infereLogicObjectName() {
-		return LogicUtil.javaClassNameToProlog(field.getType().getSimpleName());
-	}
 
 }

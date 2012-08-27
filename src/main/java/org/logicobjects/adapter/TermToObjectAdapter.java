@@ -1,5 +1,6 @@
 package org.logicobjects.adapter;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -18,8 +19,10 @@ import jpl.Compound;
 import jpl.Term;
 import jpl.Variable;
 
-import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
-import org.logicobjects.adapter.adaptingcontext.ClassAdaptingContext;
+import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
+import org.logicobjects.adapter.adaptingcontext.ClassAdaptationContext;
+import org.logicobjects.adapter.adaptingcontext.FieldAdaptationContext;
+import org.logicobjects.adapter.adaptingcontext.MethodAdaptationContext;
 import org.logicobjects.adapter.objectadapters.TermToArrayAdapter;
 import org.logicobjects.adapter.objectadapters.TermToCalendarAdapter;
 import org.logicobjects.adapter.objectadapters.TermToCollectionAdapter;
@@ -43,10 +46,7 @@ import com.google.common.primitives.Primitives;
 public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 	
 	private static Logger logger = LoggerFactory.getLogger(TermToObjectAdapter.class);
-	
 
-	
-	
 	private LogicEngine engine;
 	public TermToObjectAdapter() {
 		engine = LogicEngine.getDefault();
@@ -67,47 +67,51 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 		return adapt(term, type, null);
 	}
 
-	public To adapt(Term term, Type type, AdaptingContext adaptingContext) {
+	public To adaptField(Term term, Field field) {
+		return adapt(term, field.getGenericType(), new FieldAdaptationContext(field));
+	}
+	
+	public To[] adaptField(Term term[], Field field) {
+		return adaptTerms(term, field.getGenericType(), new FieldAdaptationContext(field));
+	}
+	
+	public To adaptMethod(Term term, Method method) {
+		return adapt(term, method.getGenericReturnType(), new MethodAdaptationContext(method));
+	}
+	
+	public To[] adaptMethod(Term term[], Method method) {
+		return adaptTerms(term, method.getGenericReturnType(), new MethodAdaptationContext(method));
+	}
+	
+	public To[] adaptTerms(Term[] terms, Type type, AdaptationContext adaptingContext) {
+		Object[] objects = new Object[terms.length];
+		for(int i = 0; i<terms.length; i++)
+			objects[i] = adapt(terms[i], type, adaptingContext);
+		return (To[]) objects;
+	}
+	
+	public To adapt(Term term, Type type, AdaptationContext adaptingContext) {
 		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
+		boolean errorMappingFromAnnotations = false;
 		if( (typeWrapper instanceof VariableTypeWrapper) ) //the type is erased
 			return adapt(term, Object.class, adaptingContext);
-
-		if(adaptingContext != null && adaptingContext.canAdaptToLObject()) {
+		try {
+			return new TermToAnnotatedObjectAdapter<To>().adapt(term, type, adaptingContext);
+		} catch(IncompatibleAdapterException | UnrecognizedAdaptationContextException e) {
+			//do nothing, these exceptions mean the adapter recognizes it cannot transform the term to an object, but no error has been produced
+		} catch(RuntimeException e) {
+			errorMappingFromAnnotations = true;
+			if(!engine.isList(term)) //TODO verify this...
+				throw e;
+		}
+		if(!errorMappingFromAnnotations) {
 			try {
-				return (To) adaptingContext.adaptToLObject(term, type);
-			} catch(RuntimeException e) {
-				if(!engine.isList(term))
-					throw e;
-			}
-		} else {
-			try {
-				Class logicObjectClass = LogicObjectFactory.getDefault().getContext().findLogicClass(term);  
-
-				/*
-				 * find out if the term could be mapped to a logic object
-				 * the additional type compatibilities verifications are necessary since the fact that the term 'could' be converted to a logic object does not mean that it 'should'
-				 */
-				if ( logicObjectClass != null && (typeWrapper.isAssignableFrom(logicObjectClass) || logicObjectClass.isAssignableFrom(typeWrapper.asClass())) ) { 
-					//System.out.println("************* Logic class found !!!");
-					//System.out.println(logicObjectClass.getName());
-					//return (To)new ClassAdaptingContext(logicObjectClass).adaptToLObject(term, type);
-					return adapt(term, type, new ClassAdaptingContext(logicObjectClass));
-				} //else
-					//System.out.println("************* Logic class NOT found !!!");
-				//System.out.println(typeWrapper.getClass());
 				if( typeWrapper instanceof SingleTypeWrapper ) { //the type is not an array and not an erased type (but still it can be a collection)
 					SingleTypeWrapper singleTypeWrapper = SingleTypeWrapper.class.cast(typeWrapper);
-					
 					if(term instanceof Variable && !Term.class.isAssignableFrom(singleTypeWrapper.asClass())) {//found a variable, and the method is not explicitly returning terms
 						logger.warn("Attempting to transform the variable term " + term + " to an object of class " + singleTypeWrapper.asClass() + ". Transformed as null.");
 						return null;
 					}
-					logicObjectClass = LogicClass.findLogicClass(singleTypeWrapper.asClass());  //find out if the expected type is a logic object
-					if( logicObjectClass != null ) {
-						//return (To) new ClassAdaptingContext(logicObjectClass).adaptToLObject(term, type);
-						return adapt(term, type, new ClassAdaptingContext(logicObjectClass));
-					}
-					
 					if(singleTypeWrapper.asClass().equals(Entry.class)) {
 						Type entryParameters[] = new GenericsUtil().findAncestorTypeParameters(Entry.class, singleTypeWrapper.getWrappedType());
 						return (To) new TermToEntryAdapter().adapt((Compound)term, entryParameters[0], entryParameters[1], adaptingContext);
@@ -169,7 +173,8 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 			} catch(Exception e) {
 				throw new RuntimeException(e);
 			}
-		}			
+		}
+		
 		if(engine.isList(term)) {
 			return adaptListTerm(term, type, adaptingContext);
 		}
@@ -196,7 +201,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 	}
 	
 	
-	private To adaptListTerm(Term term, Type type, AdaptingContext adaptingContext) {
+	private To adaptListTerm(Term term, Type type, AdaptationContext adaptingContext) {
 		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
 		if(typeWrapper instanceof ArrayTypeWrapper) {
 			return (To) new TermToArrayAdapter().adapt(term, type, adaptingContext);

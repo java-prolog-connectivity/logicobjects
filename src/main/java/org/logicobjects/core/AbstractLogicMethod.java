@@ -264,7 +264,7 @@ public abstract class AbstractLogicMethod {
 	 * @return
 	 */
 	public Term asTerm(ParsedLogicMethod parsedLogicMethod) {
-		return LogicUtil.asTerm(parsedLogicMethod.getComputedMethodName(), ArrayToTermAdapter.arrayAsTerms(parsedLogicMethod.getComputedMethodArguments()));
+		return LogicUtil.asTerm(parsedLogicMethod.getComputedMethodName(), ArrayToTermAdapter.objectsAsTerms(parsedLogicMethod.getComputedMethodArguments()));
 	}
 	
 	

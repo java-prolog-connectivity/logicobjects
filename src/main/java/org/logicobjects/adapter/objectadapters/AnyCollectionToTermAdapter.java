@@ -8,13 +8,13 @@ import jpl.Term;
 
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.ObjectToTermException;
-import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
+import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
 
 
 public class AnyCollectionToTermAdapter extends ObjectToTermAdapter<Object> {
 
 	@Override
-	public Term adapt(Object object, AdaptingContext adaptingContext) {
+	public Term adapt(Object object, AdaptationContext adaptingContext) {
 		if(object instanceof Map) {
 			return new MapToTermAdapter().adapt((Map)object, adaptingContext);
 		}  else if(object instanceof Object[]) {

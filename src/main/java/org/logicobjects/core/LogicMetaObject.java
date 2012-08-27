@@ -2,7 +2,7 @@ package org.logicobjects.core;
 
 /**
  * A class containing operations for logic meta-calls
- * Contains operations than objects in the logic side can recive, but that are not part of the interface of the method in the Java side
+ * Contains operations than objects in the logic side can receive, but that are not part of the interface of the method in the Java side
  * @author scastro
  *
  */

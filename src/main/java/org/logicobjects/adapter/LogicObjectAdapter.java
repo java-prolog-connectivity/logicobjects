@@ -4,7 +4,8 @@ package org.logicobjects.adapter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
+import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
+import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
 import org.logicobjects.core.LogicClass;
 import org.logicobjects.core.LogicEngine;
 import org.logicobjects.core.LogicObject;
@@ -16,7 +17,7 @@ public class LogicObjectAdapter extends Adapter<Object, LogicObject> {
 		return adapt(source, null);
 	}
 	
-	public LogicObject adapt(Object source, AdaptingContext adaptingContext) {
+	public LogicObject adapt(Object source, AdaptationContext adaptingContext) {
 		return asLogicObject(source, adaptingContext);
 	}
 	/*
@@ -26,7 +27,7 @@ public class LogicObjectAdapter extends Adapter<Object, LogicObject> {
 	*/
 	
 	
-	public LogicObject asLogicObject(Object object, AdaptingContext adaptingContext) {
+	public LogicObject asLogicObject(Object object, AdaptationContext adaptingContext) {
 		if(object instanceof LogicObject) {
 			return (LogicObject)object;
 		} else if(object instanceof Class) {//create logic object with anonymous logic vars as parameters (useful for invoking only meta methods in the logic side)
@@ -44,7 +45,7 @@ public class LogicObjectAdapter extends Adapter<Object, LogicObject> {
 			List arguments = new ArrayList();
 			for(int i=0; i<arity; i++)
 				arguments.add(LogicEngine.ANONYMOUS_VAR);
-			return new LogicObject(name, arguments.toArray());
+			return new LogicObject(name, ArrayToTermAdapter.objectsAsTerms(arguments.toArray()));
 		} else {
 			return new LogicObject(new ObjectToTermAdapter().adapt(object, adaptingContext));
 		}

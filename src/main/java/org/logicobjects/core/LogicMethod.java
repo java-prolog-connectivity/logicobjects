@@ -8,7 +8,7 @@ import jpl.Query;
 import jpl.Term;
 
 import org.logicobjects.adapter.LogicObjectAdapter;
-import org.logicobjects.adapter.adaptingcontext.MethodInvokerContext;
+import org.logicobjects.adapter.adaptingcontext.MethodInvokerAdaptationContext;
 import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LMethod.LMethodUtil;
@@ -48,9 +48,9 @@ public class LogicMethod extends AbstractLogicMethod {
 	@Override
 	public Query asQuery(ParsedLogicMethod parsedMethodData) {
 		Object targetObject = parsedMethodData.getTargetObject();
-		LogicObject lo = new LogicObjectAdapter().adapt(targetObject, new MethodInvokerContext(targetObject.getClass()));
+		LogicObject lo = new LogicObjectAdapter().adapt(targetObject, new MethodInvokerAdaptationContext(targetObject.getClass()));
 		String logicMethodName = parsedMethodData.getComputedMethodName();
-		return lo.invokeMethod(logicMethodName, parsedMethodData.getComputedMethodArguments());
+		return lo.asQuery(logicMethodName, parsedMethodData.getComputedMethodArguments());
 	}
 
 

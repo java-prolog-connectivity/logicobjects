@@ -1,9 +1,5 @@
 package org.logicobjects.adapter.methodresult;
 
-import java.lang.reflect.Method;
-
-import org.logicobjects.instrumentation.ParsedLogicMethod;
-
 import jpl.Query;
 
 

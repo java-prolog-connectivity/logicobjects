@@ -9,7 +9,7 @@ import jpl.Compound;
 import jpl.Term;
 
 import org.logicobjects.adapter.TermToObjectAdapter;
-import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
+import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.wrappertype.SingleTypeWrapper;
 
@@ -20,14 +20,14 @@ public class TermToMapAdapter extends TermToObjectAdapter<Map> {
 	}
 	
 	@Override
-	public Map adapt(Term listTerm, Type type, AdaptingContext adaptingContext) {
+	public Map adapt(Term listTerm, Type type, AdaptationContext adaptingContext) {
 		Map map = (Map) ImplementationMap.getDefault().instantiateObject(type);
 		fillMap(listTerm, type, adaptingContext, map);//this does not seem to be the right type
 		return map;
 	}
 
 	
-	public Map fillMap(Term listTerm, Type type, AdaptingContext adaptingContext, Map map) {
+	public Map fillMap(Term listTerm, Type type, AdaptationContext adaptingContext, Map map) {
 		//SingleTypeWrapper typeWrapper = (SingleTypeWrapper) AbstractTypeWrapper.wrap(type);
 		Type entryType = getEntryType(map);
 		//Type[] mapTypeParameters = AbstractTypeWrapper.unwrap(new GenericsUtil().findParametersInstantiations(Map.class, type));
@@ -52,7 +52,7 @@ public class TermToMapAdapter extends TermToObjectAdapter<Map> {
 			return adapt(term, Object.class, Object.class, null);
 		}
 		
-		public Entry adapt(Compound term, Type keyType, Type valueType, AdaptingContext adaptingContext) {
+		public Entry adapt(Compound term, Type keyType, Type valueType, AdaptationContext adaptingContext) {
 			Hashtable hash = new Hashtable();
 			hash.put(new TermToObjectAdapter().adapt(term.arg(1), keyType, adaptingContext), adapt(term.arg(2), valueType, adaptingContext));
 			return (Entry)hash.entrySet().toArray()[0];

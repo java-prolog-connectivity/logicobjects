@@ -4,16 +4,16 @@ import java.lang.reflect.Type;
 
 public class IncompatibleAdapterException extends RuntimeException {
 	
-	private Type type;
-	private Adapter adapter;
+	private Class adapterClass;
+	private Object object;
 	
-	public IncompatibleAdapterException(Type type, Adapter adapter) {
-		this.type = type;
-		this.adapter= adapter;
+	public IncompatibleAdapterException(Class adapterClass, Object object) {
+		this.adapterClass= adapterClass;
+		this.object = object;
 	}
-	
+
 	@Override
 	public String getMessage() {
-		return "The type "+type.toString()+" is not compatible with the adapter "+adapter.toString();
+		return "The object "+ object+" cannot be adapted by " + adapterClass.getSimpleName();
 	}
 }

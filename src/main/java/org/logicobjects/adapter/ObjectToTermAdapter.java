@@ -1,5 +1,8 @@
 package org.logicobjects.adapter;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Calendar;
@@ -12,8 +15,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import jpl.Atom;
 import jpl.Term;
 
-import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
-import org.logicobjects.adapter.adaptingcontext.ClassAdaptingContext;
+import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
+import org.logicobjects.adapter.adaptingcontext.ClassAdaptationContext;
+import org.logicobjects.adapter.adaptingcontext.FieldAdaptationContext;
+import org.logicobjects.adapter.adaptingcontext.MethodAdaptationContext;
 import org.logicobjects.adapter.objectadapters.AnyCollectionToTermAdapter;
 import org.logicobjects.adapter.objectadapters.CalendarToTermAdapter;
 import org.logicobjects.adapter.objectadapters.ImplementationMap;
@@ -29,24 +34,48 @@ import com.google.common.primitives.Primitives;
 
 public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 	
-	
 	@Override
 	public Term adapt(From object) {
 		return adapt(object, null);
 	}
 
+	public Term adaptField(From object, Field field) {
+		return adapt(object, new FieldAdaptationContext(field));
+	}
 	
-	public Term adapt(From object, AdaptingContext adaptingContext) {
-		if(adaptingContext != null && adaptingContext.canAdaptToTerm()) {
-			try {
-				return adaptingContext.adaptToTerm(object);
-			} catch(RuntimeException e) { //the adapting context failed trying to adapt to object to a term
-				//catch the exception and do nothing if it is a collection object.
-				//that could mean that the adapting context is targeting the individual components of the collection instead of the entire collection itself
-				if(!ImplementationMap.isCollectionObject(object)) 
-					throw e;
-			}
-		} else {
+	public Term[] adaptField(From[] objects, Field field) {
+		return adaptObjects(objects, new FieldAdaptationContext(field));
+	}
+	
+	public Term adaptMethod(From object, Method method) {
+		return adapt(object, new MethodAdaptationContext(method));
+	}
+	
+	public Term[] adaptMethod(From[] objects, Method method) {
+		return adaptObjects(objects, new MethodAdaptationContext(method));
+	}
+	
+	public Term[] adaptObjects(From[] objects, AdaptationContext adaptingContext) {
+		Term[] terms = new Term[objects.length];
+		for(int i = 0; i<objects.length; i++)
+			terms[i] = adapt(objects[i], adaptingContext);
+		return terms;
+	}
+	
+	public Term adapt(From object, AdaptationContext adaptingContext) {
+		boolean errorMappingFromAnnotations = false;
+		try {
+			return new AnnotatedObjectToTermAdapter<From>().adapt(object, adaptingContext);
+		} catch(IncompatibleAdapterException | UnrecognizedAdaptationContextException e) {
+			//do nothing, these exceptions mean the adapter recognizes it cannot transform the term to an object, but no error has been produced
+		} catch(RuntimeException e) {
+			errorMappingFromAnnotations = true;
+			//catch the exception and do nothing if it is a collection object.
+			//that could mean that the adapting context is targeting the individual components of the collection instead of the entire collection itself
+			if(!ImplementationMap.isCollectionObject(object))  //TODO verify this...
+				throw e;
+		}
+		if(!errorMappingFromAnnotations) {
 			if(object.getClass().equals(String.class)){
 				String text = object.toString();
 				/*
@@ -88,15 +117,6 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 			if(guidingClass != null) {
 				if(LogicClass.isTermObjectClass(guidingClass))
 					return ((ITermObject)object).asTerm();
-				
-				LTermAdapter termAdapterAnnotation = (LTermAdapter)guidingClass.getAnnotation(LTermAdapter.class);
-				if(termAdapterAnnotation!=null) 
-					return LTermAdapterUtil.newAdapter(termAdapterAnnotation).adapt(object);
-				
-				LObject logicObjectAnnotation = (LObject)guidingClass.getAnnotation(LObject.class);
-				if(logicObjectAnnotation!=null) {
-					return adapt(object, new ClassAdaptingContext(guidingClass));
-				}
 				throw new ObjectToTermException(object);  //if we arrive here something went wrong
 			} else if(object instanceof Term) {
 				return (Term)object;
@@ -104,7 +124,7 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 				return ((ITermObject)object).asTerm();
 			} 
 		}
-		
+
 		if(ImplementationMap.isCollectionObject(object)) 
 			return new AnyCollectionToTermAdapter().adapt(object, adaptingContext);
 		

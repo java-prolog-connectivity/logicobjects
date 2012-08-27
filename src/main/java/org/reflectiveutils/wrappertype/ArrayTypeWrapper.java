@@ -88,6 +88,7 @@ public class ArrayTypeWrapper extends AbstractTypeWrapper {
 			return getComponentType();		
 	}
 
+
 	@Override
 	public boolean isAssignableFrom(AbstractTypeWrapper type) {
 		if(type instanceof VariableTypeWrapper)

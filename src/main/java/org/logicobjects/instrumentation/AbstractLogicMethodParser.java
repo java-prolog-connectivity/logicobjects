@@ -549,7 +549,7 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 		for(String setSymbol : symbols) {
 			if(AbstractLogicMethodParser.isInstancePropertySymbol(setSymbol)) {
 				String instanceVarName = AbstractLogicMethodParser.getPropertyName(setSymbol);
-				Term instanceVarAsTerm = instanceVarAsTerm = LogicObject.propertyAsTerm(targetObject, instanceVarName); //TODO this method should be in ObjectToTermAdapter
+				Term instanceVarAsTerm = instanceVarAsTerm = LogicObject.propertyAsTerm(targetObject, instanceVarName);//TODO problem !!!
 				dictionary.put(setSymbol, instanceVarAsTerm.toString());
 			}
 		}

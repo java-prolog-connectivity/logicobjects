@@ -7,7 +7,7 @@ import java.util.Collection;
 import jpl.Term;
 
 import org.logicobjects.adapter.TermToObjectAdapter;
-import org.logicobjects.adapter.adaptingcontext.AdaptingContext;
+import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.GenericsUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
@@ -19,13 +19,13 @@ public class TermToCollectionAdapter extends TermToObjectAdapter<Collection> {
 	}
 	
 	
-	public Collection adapt(Term listTerm, Type type, AdaptingContext adaptingContext) {
+	public Collection adapt(Term listTerm, Type type, AdaptationContext adaptingContext) {
 		Collection collection = (Collection) ImplementationMap.getDefault().instantiateObject(type);
 		fillCollection(listTerm, type, adaptingContext, collection);
 		return collection;
 	}
 	
-	public Collection fillCollection(Term listTerm, Type type, AdaptingContext adaptingContext, Collection collection) {
+	public Collection fillCollection(Term listTerm, Type type, AdaptationContext adaptingContext, Collection collection) {
 		//SingleTypeWrapper typeWrapper = (SingleTypeWrapper) AbstractTypeWrapper.wrap(type);
 		/*
 		 * We ask for the parameterized types of Iterable instead of Collection, because Iterable is more general.

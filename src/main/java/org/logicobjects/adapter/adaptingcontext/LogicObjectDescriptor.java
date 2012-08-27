@@ -1,7 +1,9 @@
 package org.logicobjects.adapter.adaptingcontext;
 
-import org.logicobjects.annotation.LObject;
+import java.lang.annotation.Annotation;
+
 import org.logicobjects.annotation.LDelegationObject;
+import org.logicobjects.annotation.LObject;
 
 
 /**
@@ -12,7 +14,7 @@ import org.logicobjects.annotation.LDelegationObject;
  * @author scastro
  *
  */
-public abstract class LObjectGenericDescription {
+public abstract class LogicObjectDescriptor {
 
 	public abstract String name(); 
 	public abstract String[] args();
@@ -21,7 +23,7 @@ public abstract class LObjectGenericDescription {
 	public abstract String[] modules();
 	public abstract boolean automaticImport();
 
-	public static LObjectGenericDescription create(Class clazz) {
+	public static LogicObjectDescriptor create(Class clazz) {
 		LObject aLObject = (LObject) clazz.getAnnotation(LObject.class);
 		if(aLObject != null)
 			return create(aLObject);
@@ -31,18 +33,19 @@ public abstract class LObjectGenericDescription {
 		throw new RuntimeException("Impossible to create Method invoker description from class: " + clazz.getSimpleName());
 	}
 	
-	public static LObjectGenericDescription create(LObject aLObject) {
-		return new LObjectDescription(aLObject);
+	public static LogicObjectDescriptor create(LObject aLObject) {
+		return new LObjectAnnotationDescriptor(aLObject);
 	}
 	
-	public static LObjectGenericDescription create(LDelegationObject aLDelegationObject) {
-		return new LDelegationObjectDescription(aLDelegationObject);
+	public static LogicObjectDescriptor create(LDelegationObject aLDelegationObject) {
+		return new LDelegationObjectAnnotationDescriptor(aLDelegationObject);
 	}
 	
-	public static class LObjectDescription extends LObjectGenericDescription {
+	
+	static class LObjectAnnotationDescriptor extends LogicObjectDescriptor {
 		LObject aLObject;
 
-		public LObjectDescription(LObject aLObject) {
+		public LObjectAnnotationDescriptor(LObject aLObject) {
 			this.aLObject = aLObject;
 		}
 		
@@ -71,15 +74,16 @@ public abstract class LObjectGenericDescription {
 			return aLObject.automaticImport();
 		}
 
+
 	}
 	
 	
 	
 	
-	public static class LDelegationObjectDescription extends LObjectGenericDescription {
+	static class LDelegationObjectAnnotationDescriptor extends LogicObjectDescriptor {
 		LDelegationObject aLDelegationObject;
 
-		public LDelegationObjectDescription(LDelegationObject aLDelegationObject) {
+		public LDelegationObjectAnnotationDescriptor(LDelegationObject aLDelegationObject) {
 			this.aLDelegationObject = aLDelegationObject;
 		}
 		
@@ -107,6 +111,7 @@ public abstract class LObjectGenericDescription {
 		public boolean automaticImport() {
 			return aLDelegationObject.automaticImport();
 		}
+
 
 	}
 	

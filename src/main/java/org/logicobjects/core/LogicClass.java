@@ -11,7 +11,7 @@ import java.util.Set;
 import jpl.Term;
 
 import org.logicobjects.adapter.LogicResourcePathAdapter;
-import org.logicobjects.adapter.adaptingcontext.LObjectGenericDescription;
+import org.logicobjects.adapter.adaptingcontext.LogicObjectDescriptor;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LDelegationObject;
 import org.logicobjects.annotation.LTermAdapter;
@@ -93,7 +93,7 @@ public class LogicClass {
 		if(clazz == null)
 			return false;
 		
-		LObjectGenericDescription lMethodInvokerDescription = LObjectGenericDescription.create(clazz);  //look at the annotations of the class and return an object having information about how to load dependencies
+		LogicObjectDescriptor lMethodInvokerDescription = LogicObjectDescriptor.create(clazz);  //look at the annotations of the class and return an object having information about how to load dependencies
 
 		if(!lMethodInvokerDescription.automaticImport())
 			return false;
