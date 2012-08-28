@@ -6,7 +6,7 @@ import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.AnnotatedElementAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.ClassAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.LogicObjectDescriptor;
-import org.logicobjects.core.LogicClass;
+import org.logicobjects.core.LogicObjectClass;
 import org.logicobjects.core.LogicObject;
 import org.logicobjects.core.LogicObjectFactory;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
@@ -84,17 +84,16 @@ public class TermToAnnotatedObjectAdapter<To> extends Adapter<Term, Object> {
 	public static AnnotatedElementAdaptationContext getTermAnnotationContext(Term term, Type type) {
 		AnnotatedElementAdaptationContext annotatedContext = null;
 		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
-		Class logicObjectClass = LogicObjectFactory.getDefault().getContext().findLogicClass(term);  
+		Class logicClass = LogicObjectFactory.getDefault().getContext().findLogicClass(term);  
 		/*
 		 * find out if the term could be mapped to a logic object
 		 * the additional type compatibilities verifications are necessary since the fact that the term 'could' be converted to a logic object does not mean that it 'should'
 		 */
-		if ( logicObjectClass != null && (typeWrapper.isAssignableFrom(logicObjectClass) || logicObjectClass.isAssignableFrom(typeWrapper.asClass())) ) { 
-			annotatedContext = new ClassAdaptationContext(logicObjectClass);
+		if ( logicClass != null && (typeWrapper.isAssignableFrom(logicClass) || logicClass.isAssignableFrom(typeWrapper.asClass())) ) { 
+			annotatedContext = new ClassAdaptationContext(logicClass);
 		} else {
-			logicObjectClass = LogicClass.findLogicClass(typeWrapper.asClass()); //find out if the expected type is a logic object
-			if(logicObjectClass != null)
-				annotatedContext = new ClassAdaptationContext(logicObjectClass); 
+			if(LogicObjectClass.findLogicObjectClass(typeWrapper.asClass()) != null)
+				annotatedContext = new ClassAdaptationContext(typeWrapper.asClass()); 
 		}
 		return annotatedContext;
 	}

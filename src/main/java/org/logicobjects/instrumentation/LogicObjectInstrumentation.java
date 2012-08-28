@@ -9,7 +9,9 @@ import java.util.Map.Entry;
 import javassist.CannotCompileException;
 import javassist.ClassMap;
 import javassist.ClassPool;
+import javassist.CtBehavior;
 import javassist.CtClass;
+import javassist.CtConstructor;
 import javassist.CtMethod;
 import javassist.CtNewMethod;
 import javassist.CtPrimitiveType;
@@ -99,7 +101,6 @@ public class LogicObjectInstrumentation {
 	 * If the extending class is already in the classloader return it, otherwise create it dynamically
 	 */
 	public Class getExtendingClass() {
-		
 		try {
 			Class alreadyLoadedClass = loadedExtendingClass();
 			if(alreadyLoadedClass != null)	{
@@ -124,6 +125,7 @@ public class LogicObjectInstrumentation {
 		
 		try {
 			newCtClass.setSuperclass(parent);
+			createConstructors(newCtClass, parent);
 			createLogicMethods(newCtClass);
 			
 			JavassistUtil.makeNonAbstract(newCtClass); //Javassist makes a class abstract if an abstract method is added to the class. Then it has to be explicitly changed back to non-abstract
@@ -165,6 +167,60 @@ public class LogicObjectInstrumentation {
 			return newClass;
 		} catch (CannotCompileException e) {
 			throw new RuntimeException(e);
+		}
+	}
+	
+
+	/**
+	 * Adds a generic signature to a target CtBehavior object (e.g., a method or constructor) from a model CtBehavior
+	 * Generics data is not strictly part of the method byte code, but rather "extra-data"
+	 * this data concerning generic is copied from the original method to the new one
+	 * @param target the target CtBehavior to which the generic signature will be added
+	 * @param model the CtBehavior from which the generic signature will be copied
+	 */
+	private void copyGenericSignature(CtBehavior target, CtBehavior model) {
+		String constructorGenericSignature = model.getGenericSignature(); 
+		if(constructorGenericSignature != null) 
+			target.setGenericSignature(constructorGenericSignature);
+	}
+	
+	private void copyAnnotationsAttribute(CtBehavior target, CtBehavior model, ClassMap classMap) {
+		MethodInfo methodInfo = model.getMethodInfo();
+
+		AnnotationsAttribute methodAnnotationsAttribute = (AnnotationsAttribute)methodInfo.getAttribute(AnnotationsAttribute.visibleTag);
+		if(methodAnnotationsAttribute != null) {
+			methodAnnotationsAttribute = (AnnotationsAttribute)methodAnnotationsAttribute.copy(model.getDeclaringClass().getClassFile().getConstPool(), classMap);
+			target.getMethodInfo().addAttribute(methodAnnotationsAttribute);
+		}
+		
+		ParameterAnnotationsAttribute parameterAnnotationsAttribute = (ParameterAnnotationsAttribute)methodInfo.getAttribute(ParameterAnnotationsAttribute.visibleTag);
+		if(parameterAnnotationsAttribute != null) {
+			parameterAnnotationsAttribute = (ParameterAnnotationsAttribute)parameterAnnotationsAttribute.copy(model.getDeclaringClass().getClassFile().getConstPool(), classMap);
+			target.getMethodInfo().addAttribute(parameterAnnotationsAttribute);
+		}
+	}
+	
+	
+	private void createConstructors(CtClass son, CtClass parent) {
+		CtConstructor[] parentConstructors = parent.getConstructors();
+		ClassMap classMap = new ClassMap();
+		classMap.fix(parent);
+		for(CtConstructor parentCtConstructor : parentConstructors) {
+			try {
+				CtConstructor newCtConstructor = new CtConstructor(parentCtConstructor, son, classMap);
+				copyGenericSignature(newCtConstructor, parentCtConstructor);
+				copyAnnotationsAttribute(newCtConstructor, parentCtConstructor, classMap);
+				
+				
+				
+				newCtConstructor.setBody("{ super($$); }");
+				//JavassistUtil.makeNonAbstract(newCtConstructor);
+				
+				son.addConstructor(newCtConstructor);
+				
+			} catch (CannotCompileException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 	
@@ -246,130 +302,36 @@ public class LogicObjectInstrumentation {
 			 */
 			classMap.fix(JavassistUtil.asCtClass(this.classToExtend, classPool));
 			/**
-			 * In the case that this class map is included it will provoke the following problem:
+			 * In the case that this class map is not included the following problem will occur:
 			 * - Situation: The overriding method contains references (its return value for example) to the parent class where the extended method was originally located
 			 * - Consequence: All these references to the parent class will be substituted by the instrumented class
 			 * - Problem: For some reason, call to this method will throw at runtime an AbstractMethodError.
-			 * (this looks like a Bug in Javassist)
 			 */
 			CtMethod ctCopiedMethod = CtNewMethod.copy(ctMethod, targetClass, classMap);
-			
-			/*
-			 * generics data is not strictly part of the method byte code, but rather "extra-data"
-			 * this data concerning generic is copied from the original method to the new one
-			 */
-			String methodGenericSignature = ctMethod.getGenericSignature(); 
-			if(methodGenericSignature != null) {
-				ctCopiedMethod.setGenericSignature(methodGenericSignature);
-			}
-			
-			
-			try {
-				MethodInfo methodInfo = ctMethod.getMethodInfo();
+			copyGenericSignature(ctCopiedMethod, ctMethod);
+			copyAnnotationsAttribute(ctCopiedMethod, ctMethod, classMap);
 				
-				AnnotationsAttribute methodAnnotationsAttribute = (AnnotationsAttribute)methodInfo.getAttribute(AnnotationsAttribute.visibleTag);
-				if(methodAnnotationsAttribute != null) {
-					methodAnnotationsAttribute = (AnnotationsAttribute)methodAnnotationsAttribute.copy(targetClass.getClassFile().getConstPool(), classMap);
-					ctCopiedMethod.getMethodInfo().addAttribute(methodAnnotationsAttribute);
-				}
-				
-				ParameterAnnotationsAttribute parameterAnnotationsAttribute = (ParameterAnnotationsAttribute)methodInfo.getAttribute(ParameterAnnotationsAttribute.visibleTag);
-				if(parameterAnnotationsAttribute != null) {
-					parameterAnnotationsAttribute = (ParameterAnnotationsAttribute)parameterAnnotationsAttribute.copy(targetClass.getClassFile().getConstPool(), classMap);
-					ctCopiedMethod.getMethodInfo().addAttribute(parameterAnnotationsAttribute);
-				}
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-			/*
-			for(Annotation annotation : ctMethod.getAnnotations()) {
-				ctCopiedMethod.getMethodInfo().addAttribute(annotation);
-			}
-			*/
+			
+			//System.out.println("Overridding method: "+ctCopiedMethod.getLongName());
+			
+			
+			
+			instrumentAsLogicMethod(ctCopiedMethod);
+			
 			
 			targetClass.addMethod(ctCopiedMethod);
-			//System.out.println("Overridding method: "+ctCopiedMethod.getLongName());
-			instrumentAsLogicMethod(ctCopiedMethod);
-
 			
+			
+			
+
 		} catch (CannotCompileException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	/*
-	private void instrumentAsLogicObject(CtClass c) {
-		if(alreadyInstrumented(c))
-			return;
-		
-		CtMethod logicMethods[] = getLogicMethods(c);
-		for(CtMethod m : logicMethods) {
-			instrumentAsLogicMethod(m);
-		}
-		CtClass superClass;
-		try {
-			superClass = c.getSuperclass();
-			if(!superClass.getName().equals(Object.class.getCanonicalName())) {
-				instrumentAsLogicObject(superClass);
-			}
-		} catch(SecurityException e) {
-			//e.printStackTrace();  //assuming that security exceptions are cause only by classes that should not be instrumented
-		} catch (Exception e) {
-			if(e.getCause() == null || !(e.getCause() instanceof SecurityException) )  //same explanation than the SecurityException above, but applied to the cause of the exception
-				throw new RuntimeException(e);
-		}
-		
-	}
-	
-	
-	private boolean alreadyInstrumented(CtClass c) {
-		if( c.isModified() )
-			return true; //it has been already instrumented (assuming that this is the only instrumentation routine)
-		else {
-			for(CtMethod m : getLogicMethods(c) ) {
-				if(JavassistUtil.isAbstract(m))
-					return false;
-			}
-			try {
-				System.out.println("Super: "+c.getSuperclass());
-				System.out.println(c.getName());
-				if(!c.getSuperclass().getName().equals(Object.class.getName())) {
-					return alreadyInstrumented(c.getSuperclass());
-				}
-					
-				else
-					return true;
-			} catch (NotFoundException e) {
-				throw new RuntimeException(e);
-			}
-		}
-	}
-	
-	
-	//TODO this method is duplicated with methodsToOverride
-	private CtMethod[] getLogicMethods(CtClass c) {
-		List<CtMethod> logicMethods = new ArrayList<CtMethod>();
-		for(CtMethod m : c.getMethods()) {
-			try {
-				if(m.getAnnotation(LMethod.class) != null || m.getAnnotation(LQuery.class) != null)
-					logicMethods.add(m);
-			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		return logicMethods.toArray(new CtMethod[] {});
-	}
-	
-	private String newInstanceString(Class toInstantiate, Class cast) {
-		return "("+cast.getCanonicalName()+")"+newInstanceString(toInstantiate);
-	}
-	
-	*/
 	private String newInstanceString(Class toInstantiate) {
 		return toInstantiate.getCanonicalName()+".class.newInstance();";
 	}
-	
-
 	
 	public static String asNewClassArrayString(CtClass[] classes) {
 		if(classes.length == 0) {   //for some mysterious reason Javassist does not allow to create empty arrays like new Class[] {}

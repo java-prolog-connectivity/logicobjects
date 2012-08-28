@@ -13,7 +13,7 @@ import jpl.Variable;
 import org.logicobjects.adapter.Adapter;
 import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.annotation.IgnoreAdapter;
-import org.logicobjects.core.LogicClass;
+import org.logicobjects.core.LogicObjectClass;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.reflections.util.ClasspathHelper;
@@ -89,7 +89,7 @@ public abstract class AbstractLContext {
 	public Class findLogicClass(String logicName, int args) {
 		Set<Class<?>> set = getLogicClasses();
 		for(Class clazz : set) {
-			LogicClass logicClass = new LogicClass(clazz);
+			LogicObjectClass logicClass = new LogicObjectClass(clazz);
 			if(logicClass.getLObjectName().equals(logicName) && logicClass.getLObjectArgs().length == args)
 				return clazz;
 		}

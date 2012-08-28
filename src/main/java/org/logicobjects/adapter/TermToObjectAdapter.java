@@ -29,7 +29,7 @@ import org.logicobjects.adapter.objectadapters.TermToCollectionAdapter;
 import org.logicobjects.adapter.objectadapters.TermToMapAdapter;
 import org.logicobjects.adapter.objectadapters.TermToMapAdapter.TermToEntryAdapter;
 import org.logicobjects.adapter.objectadapters.TermToXMLGregorianCalendarAdapter;
-import org.logicobjects.core.LogicClass;
+import org.logicobjects.core.LogicObjectClass;
 import org.logicobjects.core.LogicEngine;
 import org.logicobjects.core.LogicObjectFactory;
 import org.logicobjects.util.LogicUtil;

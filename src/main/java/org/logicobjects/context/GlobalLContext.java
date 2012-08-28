@@ -9,7 +9,7 @@ import jpl.Term;
 import jpl.Variable;
 
 import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
-import org.logicobjects.core.LogicClass;
+import org.logicobjects.core.LogicObjectClass;
 import org.reflections.Reflections;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;

@@ -10,7 +10,7 @@ import org.logicobjects.annotation.LObjectAdapter;
 import org.logicobjects.annotation.LObjectAdapter.LObjectAdapterUtil;
 import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.annotation.LTermAdapter.LTermAdapterUtil;
-import org.logicobjects.core.LogicClass;
+import org.logicobjects.core.LogicObjectClass;
 
 public abstract class AnnotatedElementAdaptationContext extends AdaptationContext {
 
@@ -28,14 +28,14 @@ public abstract class AnnotatedElementAdaptationContext extends AdaptationContex
 
 	public Class getGuidingClass() {
 		if(!initializedGudingClass && guidingClass==null) {
-			guidingClass = LogicClass.findGuidingClass(getContextClass());
+			guidingClass = LogicObjectClass.findGuidingClass(getContextClass());
 			initializedGudingClass = true;
 		}
 		return guidingClass;
 	}
 	
 	public boolean shouldIgnoreHierarchyMappingAnnotations() {
-		return getGuidingClass() != null && LogicClass.isTermObjectClass(getGuidingClass());
+		return getGuidingClass() != null && LogicObjectClass.isTermObjectClass(getGuidingClass());
 	}
 	
 	public boolean hasObjectToTermAdapter() {

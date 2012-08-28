@@ -23,13 +23,16 @@ public abstract class LogicObjectDescriptor {
 	public abstract String[] modules();
 	public abstract boolean automaticImport();
 
+	
 	public static LogicObjectDescriptor create(Class clazz) {
 		LObject aLObject = (LObject) clazz.getAnnotation(LObject.class);
 		if(aLObject != null)
 			return create(aLObject);
+		
 		LDelegationObject aLDelegationObject = (LDelegationObject) clazz.getAnnotation(LDelegationObject.class);
 		if(aLDelegationObject != null)
 			return create(aLDelegationObject);
+		
 		throw new RuntimeException("Impossible to create Method invoker description from class: " + clazz.getSimpleName());
 	}
 	
@@ -43,9 +46,11 @@ public abstract class LogicObjectDescriptor {
 	
 	
 	static class LObjectAnnotationDescriptor extends LogicObjectDescriptor {
+		
 		LObject aLObject;
 
 		public LObjectAnnotationDescriptor(LObject aLObject) {
+			assert(aLObject != null);
 			this.aLObject = aLObject;
 		}
 		
@@ -84,6 +89,7 @@ public abstract class LogicObjectDescriptor {
 		LDelegationObject aLDelegationObject;
 
 		public LDelegationObjectAnnotationDescriptor(LDelegationObject aLDelegationObject) {
+			assert(aLDelegationObject != null);
 			this.aLDelegationObject = aLDelegationObject;
 		}
 		

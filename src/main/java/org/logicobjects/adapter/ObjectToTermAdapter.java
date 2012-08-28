@@ -28,7 +28,7 @@ import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.annotation.LTermAdapter.LTermAdapterUtil;
 import org.logicobjects.core.ITermObject;
-import org.logicobjects.core.LogicClass;
+import org.logicobjects.core.LogicObjectClass;
 
 import com.google.common.primitives.Primitives;
 
@@ -113,9 +113,9 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 			} else if(object instanceof Entry) {
 				return new EntryToTermAdapter().adapt((Entry) object, adaptingContext);
 			} 
-			Class guidingClass = LogicClass.findGuidingClass(object.getClass());
+			Class guidingClass = LogicObjectClass.findGuidingClass(object.getClass());
 			if(guidingClass != null) {
-				if(LogicClass.isTermObjectClass(guidingClass))
+				if(LogicObjectClass.isTermObjectClass(guidingClass))
 					return ((ITermObject)object).asTerm();
 				throw new ObjectToTermException(object);  //if we arrive here something went wrong
 			} else if(object instanceof Term) {

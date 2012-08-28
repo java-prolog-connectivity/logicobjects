@@ -8,10 +8,12 @@ import jpl.Atom;
 import jpl.Compound;
 import jpl.Query;
 import jpl.Term;
+import jpl.Variable;
 
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
+import org.logicobjects.adapter.objectadapters.TermToArrayAdapter;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.ReflectionUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
@@ -27,21 +29,25 @@ public class LogicObject implements ITermObject {
 	}
 	
 	private String name;
-	private Term[] termArguments;
-
-	public LogicObject(Term term) {
-		this(term.name(), term.args());
-	}
+	private Object[] arguments;
 	
 	public LogicObject(String name) {
-		this(name, new Term[]{});
+		this(name, new Object[]{});
 	}
 	
-	public LogicObject(String name, Term[] termArguments) {
+	public LogicObject(String name, Object[] arguments) {
 		setName(name);
-		setTermArguments(termArguments);
+		setArguments(arguments);
+	}
+	
+	public LogicObject(String name, int arity) {
+		this(name, LogicUtil.variables(arity));
 	}
 
+	public LogicObject(Term term) {
+		this(term.name(), TermToArrayAdapter.termsAsObjects(term.args()));
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -51,29 +57,29 @@ public class LogicObject implements ITermObject {
 	}
 
 
-	private Term[] getTermArguments() {
-		return termArguments;
+	private Object[] getArguments() {
+		return arguments;
 	}
 
-	private void setTermArguments(Term[] termArguments) {
-		this.termArguments = termArguments;
+	private void setArguments(Object[] arguments) {
+		this.arguments = arguments;
 	}
 
 	@Override
 	public Term asTerm() {
 		if( isParametrizedObject() )
-			return new Compound(getName(), getTermArguments());
+			return new Compound(getName(), ArrayToTermAdapter.objectsAsTerms(getArguments()));
 		else
 			return new Atom(getName());
 	}
 	
 	
 	public boolean isParametrizedObject() {
-		return arity() > 0;
+		return arity()>0;
 	}
 	
 	public int arity() {
-		return getTermArguments().length;
+		return getArguments().length;
 	}
 	
 	public Query asQuery(String methodName, Object[] messageArgs) {

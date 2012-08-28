@@ -1,9 +1,13 @@
 package org.logicobjects.util;
 
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.logicobjects.core.LogicEngine;
 
 import jpl.Atom;
 import jpl.Compound;
@@ -19,6 +23,18 @@ import jpl.Variable;
  */
 public class LogicUtil {
 
+	/**
+	 * Answers an array of anonymous logic variables
+	 * @param n the number of variables in the array
+	 * @return
+	 */
+	public static Variable[] variables(int n) {
+		List<Variable> variablesList = new ArrayList<>();
+		for(int i=0; i<n; i++)
+			variablesList.add(LogicEngine.ANONYMOUS_VAR);
+		return variablesList.toArray(new Variable[]{});
+	}
+	
 	public static Term asTerm(String predicate, Term[] parameters) {
 		Term term = parameters.length > 0 ? new Compound(predicate, parameters) : new Atom(predicate);
 		return term;

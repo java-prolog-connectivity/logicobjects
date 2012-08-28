@@ -2,7 +2,7 @@ package org.logicobjects.adapter.adaptingcontext;
 
 import org.logicobjects.annotation.LDelegationObject;
 import org.logicobjects.annotation.LTermAdapter;
-import org.logicobjects.core.LogicClass;
+import org.logicobjects.core.LogicObjectClass;
 
 /**
  * This class represents the context of a logic method invocation
@@ -27,7 +27,7 @@ public class MethodInvokerAdaptationContext extends ClassAdaptationContext {
 	
 	@Override
 	public LogicObjectDescriptor getLogicObjectDescription() {
-		Class invokerClass = LogicClass.findDelegationObjectClass(getContextClass());
+		Class invokerClass = LogicObjectClass.findDelegationObjectClass(getContextClass());
 		if(invokerClass != null) {
 			LDelegationObject aLDelegationObject = (LDelegationObject) invokerClass.getAnnotation(LDelegationObject.class);
 			return LogicObjectDescriptor.create(aLDelegationObject);

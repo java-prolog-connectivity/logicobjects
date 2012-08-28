@@ -1,6 +1,7 @@
 package org.logicobjects.core;
 
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 
@@ -69,7 +70,8 @@ public class LogicObjectFactory {
 	}
 	*/
 
-	public <T> T create(Class<T> clazz) {
+	public <T> T create(Class<T> clazz, Object... params) {
+		verifyClass(clazz);
 		Class instantiatingClass = null;
 		if(clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
 			LogicObjectInstrumentation instrumentation = new LogicObjectInstrumentation(clazz, getClassPool());
@@ -77,7 +79,7 @@ public class LogicObjectFactory {
 			boolean extendingClassLoaded = instrumentation.isExtendingClassLoaded();
 			if(!extendingClassLoaded) { //the extending class has not been generated yet
 				long startTime = System.nanoTime();
-				LogicClass.loadDependencies(clazz); //load the dependencies in the Prolog engine
+				LogicObjectClass.loadDependencies(clazz); //load the dependencies in the Prolog engine
 				long endTimeDependencies = System.nanoTime();
 				instantiatingClass = instrumentation.getExtendingClass(); //answers the extending class. Generates it if needed.
 				long endTimeInstrumentation = System.nanoTime();
@@ -92,17 +94,50 @@ public class LogicObjectFactory {
 		
 
 		try {
-			return (T)instantiatingClass.newInstance();
+			if(params.length == 0) {
+				return (T)instantiatingClass.newInstance();
+			} else {
+				
+				if(LogicObjectClass.hasNoArgsConstructor(clazz)) {
+					Object o = instantiatingClass.newInstance();
+				} else if(LogicObjectClass.hasConstructorWithArgsNumber(clazz, params.length)) {
+					Constructor constructor = clazz.getConstructor(objectsClasses(params));
+				} else if((LogicObjectClass.hasConstructorWithOneVarArgs(clazz))) {
+					
+				}
+				
+				Constructor constructor = instantiatingClass.getConstructor(objectsClasses(params));  //NoSuchMethodException
+				return (T)constructor.newInstance(params);
+			}
+			
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 		
 	}
 	
+	private Class[] objectsClasses(Object[] objects) {
+		Class[] classes = new Class[objects.length];
+		for(int i=0; i<objects.length; i++)
+			classes[i] = objects[i].getClass();
+		return classes;
+	}
+	
 	
 	public LogicMetaObject createLogicMetaObject(Class clazz) {
 		LogicMetaObject metaObject = null;
 		return metaObject;
+	}
+	
+	/**
+	 * Verifies that a class is well formed and its logic methods can be instrumented
+	 * @param clazz
+	 */
+	public void verifyClass(Class clazz) {
+		//TODO
+		/*
+		 * 1) It should have either the implicit no args constructor, an explicit non-args, or a constructor with the same number of arguments as the properties of the logic object
+		 */
 	}
 }
 

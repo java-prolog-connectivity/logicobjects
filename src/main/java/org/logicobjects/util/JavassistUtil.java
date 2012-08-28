@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import javassist.ClassPool;
+import javassist.CtBehavior;
 import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.LoaderClassPath;
@@ -97,11 +98,11 @@ public class JavassistUtil {
 		c.setModifiers(c.getModifiers() & ~Modifier.ABSTRACT);
 	}
 
-	public static void makeNonAbstract(CtMethod m) {
+	public static void makeNonAbstract(CtBehavior m) {
 		m.setModifiers(m.getModifiers() & ~Modifier.ABSTRACT);
 	}
 
-	public static boolean isAbstract(CtMethod m) {
+	public static boolean isAbstract(CtBehavior m) {
 		return Modifier.isAbstract(m.getModifiers());
 	}
 	

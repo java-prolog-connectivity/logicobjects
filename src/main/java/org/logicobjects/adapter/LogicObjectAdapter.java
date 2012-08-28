@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
 import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
-import org.logicobjects.core.LogicClass;
+import org.logicobjects.core.LogicObjectClass;
 import org.logicobjects.core.LogicEngine;
 import org.logicobjects.core.LogicObject;
 
@@ -31,9 +31,9 @@ public class LogicObjectAdapter extends Adapter<Object, LogicObject> {
 		if(object instanceof LogicObject) {
 			return (LogicObject)object;
 		} else if(object instanceof Class) {//create logic object with anonymous logic vars as parameters (useful for invoking only meta methods in the logic side)
-			LogicClass logicClass = new LogicClass((Class)object);
-			String name = logicClass.getLObjectName();
-			String[] declaredArgs = logicClass.getLObjectArgs();
+			LogicObjectClass logicObjectClass = new LogicObjectClass((Class)object);
+			String name = logicObjectClass.getLObjectName();
+			String[] declaredArgs = logicObjectClass.getLObjectArgs();
 			int arity = declaredArgs.length;
 			if(arity == 0) {
 				List<Integer> arities = LogicEngine.getDefault().numberParametersLogtalkObject(name); //assuming that the arities are returned from the lowest to the highest

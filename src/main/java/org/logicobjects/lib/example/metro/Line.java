@@ -9,6 +9,12 @@ import org.logicobjects.annotation.method.LMethod;
 @LObject(args = {"name"})
 public abstract class Line { 
 	
+	public Line() {}
+	
+	public Line(String name) {
+		this.name = name;
+	}
+	
 	private String name;
 
 	public String getName() {
