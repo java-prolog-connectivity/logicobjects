@@ -65,7 +65,7 @@ public class TermToAnnotatedObjectAdapter<To> extends Adapter<Term, Object> {
             } else {
             	lObject = LogicObjectFactory.getDefault().create(typeWrapper.asClass());
             }
-			String argsArray = logicObjectDescription.argsArray();
+			String argsArray = logicObjectDescription.argsList();
 			if(argsArray != null && !argsArray.isEmpty())
 				LogicObject.setPropertiesArray(lObject, argsArray, term);
 			else

@@ -169,7 +169,7 @@
 				
 				<configuration>
 							<includeScope>runtime</includeScope>
-							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>	
 				</configuration>
 						
 				<executions>
@@ -184,6 +184,20 @@
 					</execution>
 				</executions>
 			</plugin>
+
+      		<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>jar-test-classes</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
 		</plugins>
 
@@ -221,10 +235,5 @@
 
 	</build>
 
-
-
-
-  
-  
 </project>
 

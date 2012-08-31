@@ -3,20 +3,18 @@ package org.logicobjects.core.flags;
 
 
 public abstract class LogtalkFlag {
-	public static Unknown UNKNOWN = new Unknown();
+	public static UnknownEntities UNKNOWN = new UnknownEntities();
 	public static Portability PORTABILITY = new Portability();
 	public static Report REPORT = new Report();
 	public static Optimize OPTIMIZE = new Optimize();
-	public static StartupMessage STARTUP_MESSAGE = new StartupMessage();
 	
-	
-	static class Unknown extends LogtalkFlag {
+	static class UnknownEntities extends LogtalkFlag {
 		public static final String WARNING = "warning";
 		public static final String SILENT = "silent";
 		
 		@Override
 		public String toString() {
-			return "unknown";
+			return "unknown_entities";
 		}
 	} 
 	
@@ -52,17 +50,5 @@ public abstract class LogtalkFlag {
 			return "optimize";
 		}
 	} 
-	
-	static class StartupMessage extends LogtalkFlag {
-		public static final String FLAGS = "flags";
-		public static final String BANNER = "banner";
-		public static final String NONE = "none";
-		
-		@Override
-		public String toString() {
-			return "startup_message";
-		}
-	} 
-	
-	
+
 }

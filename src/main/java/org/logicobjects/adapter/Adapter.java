@@ -13,11 +13,10 @@ import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 public abstract class Adapter<From, To> {
 	public abstract To adapt(From source);
 	
-	public Collection<To> adapt(Collection<From> source, Collection<To> destiny) {
+	public void adapt(Collection<From> source, Collection<To> destiny) {
 		for(From o : source) {
 			destiny.add(adapt(o));
 		}
-		return destiny;
 	}
 	
 	public static <A extends Adapter> Type[] types(Class <A> descendantAdapter) {

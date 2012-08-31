@@ -1,4 +1,4 @@
-package org.logicobjects.lib.example.metro;
+package org.logicobjects.lib.examples.metro;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;

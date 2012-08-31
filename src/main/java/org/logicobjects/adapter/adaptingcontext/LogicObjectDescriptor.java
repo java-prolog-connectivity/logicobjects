@@ -18,7 +18,7 @@ public abstract class LogicObjectDescriptor {
 
 	public abstract String name(); 
 	public abstract String[] args();
-	public abstract String argsArray();
+	public abstract String argsList();
 	public abstract String[] imports();
 	public abstract String[] modules();
 	public abstract boolean automaticImport();
@@ -63,8 +63,8 @@ public abstract class LogicObjectDescriptor {
 		}
 
 		@Override
-		public String argsArray() {
-			return aLObject.argsArray();
+		public String argsList() {
+			return aLObject.argsList();
 		}
 		
 		public String[] imports() {
@@ -102,8 +102,8 @@ public abstract class LogicObjectDescriptor {
 		}
 
 		@Override
-		public String argsArray() {
-			return aLDelegationObject.argsArray();
+		public String argsList() {
+			return aLDelegationObject.argsList();
 		}
 		
 		public String[] imports() {

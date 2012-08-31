@@ -1,6 +1,7 @@
 package org.logicobjects.core;
 
 import java.lang.reflect.Constructor;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -86,7 +87,7 @@ public class LogicObjectClass {
 	}
 	
 	public String getLObjectArgsArray() {
-		return getLogicObjectDescriptor().argsArray();
+		return getLogicObjectDescriptor().argsList();
 	}
 	
 	public String[] getImports() {
@@ -217,6 +218,8 @@ public class LogicObjectClass {
 		allModules.addAll(Arrays.asList(bundleModules));
 		allModules.addAll(Arrays.asList(descriptorModules));
 		
+		allModules = normalizeFileNames(allModules);
+		
 		List<Term> moduleTerms = new ArrayList<Term>();
 		new LogicResourcePathAdapter().adapt(allModules, moduleTerms);
 		
@@ -236,6 +239,8 @@ public class LogicObjectClass {
 		allImports.addAll(Arrays.asList(descriptorImports));
 		allImports.addAll(Arrays.asList(defaultImports));
 		
+		allImports = normalizeFileNames(allImports);
+		
 		List<Term> importTerms = new ArrayList<Term>();
 		new LogicResourcePathAdapter().adapt(allImports, importTerms);
 		
@@ -245,6 +250,17 @@ public class LogicObjectClass {
 		return result;
 	}
 	
+	private Set<String> normalizeFileNames(Set<String> names) {
+		Set<String> fileNames = new LinkedHashSet<String>();
+		for(String s : names) {
+			fileNames.add(normalizeFileName(s));
+		}
+		return fileNames;
+	}
+	
+	public static String normalizeFileName(String name) {
+		return name.trim().replaceAll("\\.(lgt|pl)", "");
+	}
 
 	/**
 	 * Load the default dependencies of a class
@@ -253,10 +269,8 @@ public class LogicObjectClass {
 	 */
 	public static void loadDefaultDependencies(Class clazz) {
 		String[] defaultImports = getClassDefaultImports(clazz);
-		Set<String> allImports = new LinkedHashSet<String>(); //Set is used to avoid duplicates.
-		allImports.addAll(Arrays.asList(defaultImports)); //TODO refactor this, this verbose code is just a copy paste product of the loadDependencies() method
 		List<Term> importTerms = new ArrayList<Term>();
-		new LogicResourcePathAdapter().adapt(allImports, importTerms);
+		new LogicResourcePathAdapter().adapt(Arrays.asList(defaultImports), importTerms);
 		LogicEngine.getDefault().logtalkLoad(importTerms);
 	}
 	
@@ -303,12 +317,19 @@ public class LogicObjectClass {
 		if(fileName == null || fileName.equals(""))
 			return false;
 		String packageName = clazz.getPackage().getName();
+	
 		/**
 		 * the getResource method will append before the path of the class
 		 * note that for some reason this method is not case sensitive: fileName will match any file with the same name without taking into consideration its case
 		 */
-		if(clazz.getResource(fileName+".lgt") != null) { 
-			destiny.add(packageName+"."+fileName);
+		URL url = clazz.getResource(fileName+".lgt");
+		if(url != null) { 
+			String urlFileName = url.getFile();
+//			System.out.println("**************************************************************");
+//			System.out.println(urlFileName);
+//			System.out.println("**************************************************************");
+			//destiny.add(packageName+"."+fileName);
+			destiny.add(normalizeFileName(urlFileName));
 			return true;
 		}
 		return false;

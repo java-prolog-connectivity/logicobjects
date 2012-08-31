@@ -1,4 +1,4 @@
-package org.logicobjects.lib.example.metro;
+package org.logicobjects.lib.examples.metro;
 
 import java.util.List;
 

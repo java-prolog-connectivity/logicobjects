@@ -1,12 +1,12 @@
 package org.logicobjects.test;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Set;
 
 import org.junit.Test;
 import org.logicobjects.annotation.LObject;
+import org.logicobjects.core.LogicEngine;
 import org.logicobjects.core.LogicObjectFactory;
 import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
@@ -15,6 +15,8 @@ import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
+import org.reflections.vfs.Vfs;
+import org.reflections.vfs.Vfs.Dir;
 
 import com.google.common.base.Predicate;
 
@@ -124,29 +126,52 @@ public class TestReflections extends LocalLogicTest {
 	 * (Currently) does not work if the resources are in a jar.
 	 * it is commented out so maven will not complain in the automated unit tests execution in the 'installation' phase (where the project is zipped in a jar)
 	 */
-	/*
+	
 	@Test
 	public void testFindResources() {
+		URL urlLogicObjects = ClasspathHelper.forClass(LogicEngine.class);
 		Reflections reflections = new Reflections(new ConfigurationBuilder()
-        .setUrls(ClasspathHelper.forPackage("org.logicobjects"))
+        //.setUrls(ClasspathHelper.forPackage("org.logicobjects"))
+		.setUrls(urlLogicObjects)
         .setScanners(new ResourcesScanner()));
 		
 		
-		Predicate predicate = new Predicate<String>() {
+		Predicate<String> predicate = new Predicate<String>() {
 			  public boolean apply(String string) {
-			    return string.matches(".*\\.properties");
+				    //return string.matches(".*\\.properties");
+				  boolean matches = string.matches(".*\\.lgt");
+				  return matches;
+
 			  }
 		};
-		
+
+		/*
+		 * WARNING: the getResources method answers resources RELATIVE paths (relatives to the classpath from where they were found)
+		 * If a file is created with this path (like with: new File(relativePath)) the path of such File object will be the current execution path + the relative path
+		 * If the current execution path is not the base directory of the relative paths, this could lead to files having absolute paths pointing to non existing resources
+		 */
 		Set<String> propertiesFiles = reflections.getResources(predicate);  //in case a complex predicate is needed
 		//Set<String> propertiesFiles = reflections.getResources(Pattern.compile(".*\\.properties")); //in case the condition is just based on the name of the file
 		
-		System.out.println("Number of property files: " + propertiesFiles.size());
+		System.out.println("URL Logic Objects: " + urlLogicObjects);
+		System.out.println("Protocol: "+urlLogicObjects.getProtocol());
+		System.out.println("File: "+urlLogicObjects.getFile());
+		//System.out.println("Execution Path: "  + System.getProperty("user.dir"));
+		//System.out.println("Number of property files: " + propertiesFiles.size());
 		for(String propertyFile : propertiesFiles) {
-			File file = new File(propertyFile);
-			//assertTrue(file.exists());
+			System.out.println(propertyFile);
 		}
+		
+		//Dir dir = Vfs.fromURL(urlLogicObjects);
+		try {
+			URL url = new URL(urlLogicObjects, "logic_lib/examples/metro/line.lgt");
+			System.out.println("URL:" + url);
+			System.out.println(url.openStream().available());
+			
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		
 	}
-	*/
 	
 }

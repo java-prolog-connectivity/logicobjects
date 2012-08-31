@@ -18,6 +18,7 @@ public class LogicObjectsPreferences {
 	public final static String LOGTALKHOME = "LOGTALKHOME";  //needed by the framework to find the integration scripts
 	public final static String LOGTALKUSER = "LOGTALKUSER"; //logtalk environment variable TODO: remembering what this variable was for ...
 	//public final static String PROLOG_DIALECT = "PL";  //defines the prolog engine to use (DEPRECATED since this is decided by the JPLPATH environment variable
+	public final static String SYSTEM_TEMP_DIRECTORY = "tmp";
 
 	private Properties properties;
 	
@@ -25,6 +26,13 @@ public class LogicObjectsPreferences {
 		properties = new Properties();
 	}
 	
+	
+	public String getTmpDirectory() {
+		String tmp = getEnvironmentVar(LOGTALKUSER);
+		if(tmp == null)
+			tmp = getEnvironmentVar(SYSTEM_TEMP_DIRECTORY);
+		return tmp;
+	}
 	
 	public String logtalkIntegrationScript() {
 		String logtalkHome = getEnvironmentVarOrDie(LOGTALKHOME);

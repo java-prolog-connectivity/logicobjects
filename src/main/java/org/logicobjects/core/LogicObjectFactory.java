@@ -1,6 +1,7 @@
 package org.logicobjects.core;
 
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.net.URL;
@@ -10,6 +11,8 @@ import javassist.ClassPool;
 import org.logicobjects.context.AbstractLContext;
 import org.logicobjects.context.GlobalLContext;
 import org.logicobjects.instrumentation.LogicObjectInstrumentation;
+import org.logicobjects.util.ResourceManager;
+import org.reflections.util.ClasspathHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +21,8 @@ public class LogicObjectFactory {
 	private static Logger logger = LoggerFactory.getLogger(LogicObjectFactory.class);
 	
 	private static LogicObjectFactory factory;
+	
+	private ResourceManager resourceManager;
 	
 	public static LogicObjectFactory getDefault() {
 		if(factory == null)
@@ -33,6 +38,8 @@ public class LogicObjectFactory {
 	 * This class should not be directly instantiated
 	 */
 	private LogicObjectFactory() {
+		String tmpDir = LogicEngine.getDefault().getPreferences().getTmpDirectory();
+		resourceManager = new ResourceManager(tmpDir);
 	}
 
 	public ClassPool getClassPool() {
@@ -71,7 +78,6 @@ public class LogicObjectFactory {
 	*/
 
 	public <T> T create(Class<T> clazz, Object... params) {
-		verifyClass(clazz);
 		Class instantiatingClass = null;
 		if(clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
 			LogicObjectInstrumentation instrumentation = new LogicObjectInstrumentation(clazz, getClassPool());
@@ -79,6 +85,8 @@ public class LogicObjectFactory {
 			boolean extendingClassLoaded = instrumentation.isExtendingClassLoaded();
 			if(!extendingClassLoaded) { //the extending class has not been generated yet
 				long startTime = System.nanoTime();
+				verifyClass(clazz);
+				resourceManager.process(ClasspathHelper.forClass(clazz));
 				LogicObjectClass.loadDependencies(clazz); //load the dependencies in the Prolog engine
 				long endTimeDependencies = System.nanoTime();
 				instantiatingClass = instrumentation.getExtendingClass(); //answers the extending class. Generates it if needed.

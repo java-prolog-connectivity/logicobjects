@@ -16,13 +16,30 @@ public class LogicResourcePathAdapter extends LogicAdapter<String, Term> {
 
 	@Override
 	public Term adapt(String classPathFileName) {
-		String[] atoms = classPathFileName.split("\\."); //escaping the dot
-		if(atoms.length > 1)
-			return makeCompound(atoms);
-		else
+		//if(true)
+			//return LogicEngine.getDefault().textToTerm(classPathFileName);
+		
+		//String[] atoms = classPathFileName.split("\\."); //escaping the dot
+		String[] atoms = classPathFileName.split("/");
+		
+		if(atoms.length > 1) {
+			//return makeCompound(atoms);
+			return new Atom(classPathFileName);
+		}
+		else {
+			//URL url = getClass().getClassLoader().getResource(classPathFileName);
 			return LogicEngine.getDefault().textToTerm(atoms[0]);
+		}
+			
 	}
 
+	/**
+	 * TODO delete ?
+	 * Transforms an array of Strings in a Compound term.
+	 * Answers an Atom if there is only one element in the array
+	 * @param symbols
+	 * @return
+	 */
 	public static Term makeCompound(String[] symbols) {
 		return makeCompound(symbols, 0);
 	}

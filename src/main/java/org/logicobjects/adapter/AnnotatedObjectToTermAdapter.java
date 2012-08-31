@@ -53,7 +53,7 @@ public class AnnotatedObjectToTermAdapter<From> extends Adapter<From, Term> {
 			logicObjectName = infereLogicObjectName(annotatedContext);
 		
 		Term[] arguments;
-		String argsArray = logicObjectDescription.argsArray();
+		String argsArray = logicObjectDescription.argsList();
 		if(argsArray != null && !argsArray.isEmpty()) {
 			Object[] objects = (Object[]) ReflectionUtil.getFieldValue(object, argsArray);
 			Field field = ReflectionUtil.getField(object, argsArray);

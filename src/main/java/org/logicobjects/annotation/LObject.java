@@ -15,7 +15,7 @@ public @interface LObject {
 	 * if set, the properties are not given by different instance variables (one per property) but for an array keeping all of them.
 	 * Still properties names can be declared and used as macros, but they will refer (according to their declaration order) to positions on this array
 	 */
-	String argsArray() default "";
+	String argsList() default "";
 	String[] imports() default {};
 	String[] modules() default {};
 	boolean automaticImport() default true;
