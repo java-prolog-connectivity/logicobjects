@@ -1,10 +1,13 @@
 package org.logicobjects.adapter;
 
+import java.net.URL;
+
 import jpl.Atom;
 import jpl.Compound;
 import jpl.Term;
 
 import org.logicobjects.core.LogicEngine;
+import org.logicobjects.core.LogicObjectFactory;
 
 /*
  * Adapt a String path as a term representation
@@ -14,23 +17,34 @@ import org.logicobjects.core.LogicEngine;
 
 public class LogicResourcePathAdapter extends LogicAdapter<String, Term> {
 
+	private URL url;
+	
+	public LogicResourcePathAdapter(URL url) {
+		this.url = url;
+	}
+	
 	@Override
 	public Term adapt(String classPathFileName) {
 		//if(true)
 			//return LogicEngine.getDefault().textToTerm(classPathFileName);
 		
 		//String[] atoms = classPathFileName.split("\\."); //escaping the dot
-		String[] atoms = classPathFileName.split("/");
+		String[] tokens = classPathFileName.split("/");
 		
-		if(atoms.length > 1) {
+		if(tokens.length > 1) {
+			String resourcePath = LogicObjectFactory.getDefault().getResourceManager().getResourcePath(classPathFileName, url);
 			//return makeCompound(atoms);
-			return new Atom(classPathFileName);
+			return new Atom(resourcePath);
 		}
 		else {
 			//URL url = getClass().getClassLoader().getResource(classPathFileName);
-			return LogicEngine.getDefault().textToTerm(atoms[0]);
+			Term term = LogicEngine.getDefault().textToTerm(tokens[0]);
+			if(term.isAtom()) {
+				String resourcePath = LogicObjectFactory.getDefault().getResourceManager().getResourcePath(term.name(), url);
+				term = new Atom(resourcePath);
+			}
+			return term;
 		}
-			
 	}
 
 	/**

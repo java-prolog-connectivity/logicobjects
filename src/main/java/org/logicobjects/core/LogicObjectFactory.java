@@ -11,7 +11,6 @@ import javassist.ClassPool;
 import org.logicobjects.context.AbstractLContext;
 import org.logicobjects.context.GlobalLContext;
 import org.logicobjects.instrumentation.LogicObjectInstrumentation;
-import org.logicobjects.util.ResourceManager;
 import org.reflections.util.ClasspathHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +41,10 @@ public class LogicObjectFactory {
 		resourceManager = new ResourceManager(tmpDir);
 	}
 
+	public ResourceManager getResourceManager(){
+		return resourceManager;
+	}
+	
 	public ClassPool getClassPool() {
 		if(classPool == null)
 			classPool = ClassPool.getDefault();

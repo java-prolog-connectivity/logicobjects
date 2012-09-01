@@ -1,9 +1,8 @@
-package org.logicobjects.util;
+package org.logicobjects.core;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -13,6 +12,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.logicobjects.util.LogicObjectsPreferences;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.reflections.util.ConfigurationBuilder;
@@ -49,13 +49,13 @@ public class ResourceManager {
 			return false;
 		if(!isFileSystemDir(url)) {
 			try {
-				createTmpFiles(url);
+				createTmpLogicFiles(url);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
 		processedURLs.add(url);
-			return true;
+		return true;
 	}
 
 	
@@ -101,7 +101,7 @@ public class ResourceManager {
 	}
 	
 	
-	public void createTmpFiles(URL url) throws IOException {
+	public void createTmpLogicFiles(URL url) throws IOException {
 		File tmpDirForUrl = getTmpDir(url);
 		if(tmpDirForUrl.exists())
 			deleteRecursively(tmpDirForUrl.toPath());
@@ -115,9 +115,7 @@ public class ResourceManager {
 			
 		copyResources(url, predicate, tmpDirForUrl);
 	}
-	
 
-	
 	
 	public static void copyResources(URL url, Predicate<String> predicate, File destination) {// throws IOException {
 		if(predicate == null)
@@ -184,9 +182,15 @@ public class ResourceManager {
 		if(isFileSystemDir(url))
 			return url.getFile();
 		else
-			return tmpDirPath;
+			return getTmpDir(url).getAbsolutePath();
 	}
 
+	public String getResourcePath(String resource, URL url) {
+		File baseDirectory = new File(basePath(url));
+		File resourceFile = new File(baseDirectory, resource);
+		return resourceFile.getAbsolutePath();
+	}
+	
 	public boolean hasAlreadyBeenProcessed(URL url) {
 		return processedURLs.contains(url);
 	}

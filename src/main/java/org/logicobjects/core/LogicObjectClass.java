@@ -18,6 +18,7 @@ import org.logicobjects.annotation.LDelegationObject;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.util.LogicUtil;
+import org.reflections.util.ClasspathHelper;
 import org.reflectiveutils.visitor.FindFirstTypeVisitor;
 import org.reflectiveutils.visitor.TypeVisitor.InterfaceMode;
 
@@ -205,8 +206,8 @@ public class LogicObjectClass {
 	public boolean loadDependencies() {
 		if(!getLogicObjectDescriptor().automaticImport())
 			return false;
-		
 		boolean result = true; //we have succeed until we demonstrate the contrary :)
+		LogicResourcePathAdapter resourceAdapter = new LogicResourcePathAdapter(ClasspathHelper.forClass(logicClass));
 		
 		//LOADING PROLOG MODULES
 		String[] descriptorModules = getLogicObjectDescriptor().modules(); //modules defined in the descriptor (e.g., with the LObject annotation)
@@ -221,7 +222,7 @@ public class LogicObjectClass {
 		allModules = normalizeFileNames(allModules);
 		
 		List<Term> moduleTerms = new ArrayList<Term>();
-		new LogicResourcePathAdapter().adapt(allModules, moduleTerms);
+		resourceAdapter.adapt(allModules, moduleTerms);
 		
 		result = LogicEngine.getDefault().ensureLoaded(moduleTerms); //loading prolog modules
 		
@@ -242,7 +243,7 @@ public class LogicObjectClass {
 		allImports = normalizeFileNames(allImports);
 		
 		List<Term> importTerms = new ArrayList<Term>();
-		new LogicResourcePathAdapter().adapt(allImports, importTerms);
+		resourceAdapter.adapt(allImports, importTerms);
 		
 		result = LogicEngine.getDefault().logtalkLoad(importTerms) && result; //loading Logtalk objects
 
@@ -268,9 +269,10 @@ public class LogicObjectClass {
 	 * @param clazz
 	 */
 	public static void loadDefaultDependencies(Class clazz) {
+		LogicResourcePathAdapter resourceAdapter = new LogicResourcePathAdapter(ClasspathHelper.forClass(clazz));
 		String[] defaultImports = getClassDefaultImports(clazz);
 		List<Term> importTerms = new ArrayList<Term>();
-		new LogicResourcePathAdapter().adapt(Arrays.asList(defaultImports), importTerms);
+		resourceAdapter.adapt(Arrays.asList(defaultImports), importTerms);
 		LogicEngine.getDefault().logtalkLoad(importTerms);
 	}
 	
@@ -316,20 +318,25 @@ public class LogicObjectClass {
 	private static boolean addIfLgtFileExists(String fileName, Class clazz, List<String> destiny) {
 		if(fileName == null || fileName.equals(""))
 			return false;
-		String packageName = clazz.getPackage().getName();
-	
+		
+		
 		/**
-		 * the getResource method will append before the path of the class
-		 * note that for some reason this method is not case sensitive: fileName will match any file with the same name without taking into consideration its case
+		 * the getResource method will append before the resource name the path of the class
+		 * note that this method is not case sensitive: fileName will match any file with the same name without taking into consideration its case
 		 */
-		URL url = clazz.getResource(fileName+".lgt");
+		String fileWithExtension = fileName+".lgt";
+		URL url = clazz.getResource(fileWithExtension);
 		if(url != null) { 
-			String urlFileName = url.getFile();
+			String packageName = clazz.getPackage().getName();
+			String resourceName = packageName.replaceAll("\\.", "/");
+			resourceName += "/" + fileWithExtension;
+			destiny.add(normalizeFileName(resourceName));
+			//String urlFileName = url.getFile();
 //			System.out.println("**************************************************************");
 //			System.out.println(urlFileName);
 //			System.out.println("**************************************************************");
 			//destiny.add(packageName+"."+fileName);
-			destiny.add(normalizeFileName(urlFileName));
+			//destiny.add(normalizeFileName(urlFileName));
 			return true;
 		}
 		return false;
