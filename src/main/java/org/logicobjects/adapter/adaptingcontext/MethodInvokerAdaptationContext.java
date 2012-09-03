@@ -26,11 +26,11 @@ public class MethodInvokerAdaptationContext extends ClassAdaptationContext {
 	}
 	
 	@Override
-	public LogicObjectDescriptor getLogicObjectDescription() {
+	public AbstractLogicObjectDescriptor getLogicObjectDescription() {
 		Class invokerClass = LogicObjectClass.findDelegationObjectClass(getContextClass());
 		if(invokerClass != null) {
 			LDelegationObject aLDelegationObject = (LDelegationObject) invokerClass.getAnnotation(LDelegationObject.class);
-			return LogicObjectDescriptor.create(aLDelegationObject);
+			return AbstractLogicObjectDescriptor.create(aLDelegationObject);
 		} else {
 			return super.getLogicObjectDescription();
 		}

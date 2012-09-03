@@ -2,20 +2,19 @@ package org.logicobjects.core;
 
 import java.lang.reflect.Method;
 
-import jpl.Atom;
 import jpl.Query;
 
+import org.logicobjects.annotation.method.LExpression;
 import org.logicobjects.annotation.method.LQuery.LQueryUtil;
 import org.logicobjects.annotation.method.LSolution;
-import org.logicobjects.instrumentation.ParsedLogicMethod;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
-import org.logicobjects.util.AnnotationConstants;
+import org.logicobjects.instrumentation.ParsedLogicMethod;
 
 public class SimplePredicateQuery extends RawLogicQuery {
 
 	public SimplePredicateQuery(Method method) {
 		super(method);
-		if(aLQuery == null && getAnnotation(LSolution.class) == null)
+		if(aLQuery == null && !isAnnotationPresent(LSolution.class))
 			throw new RuntimeException("No query has been defined for method "+getWrappedMethod().getName());
 	}
 
@@ -24,7 +23,7 @@ public class SimplePredicateQuery extends RawLogicQuery {
 	 * @return a boolean representing if the method answers a logic expression or the result of a query
 	 */
 	public boolean isLogicExpression() {
-		return aLQuery == null && getAnnotation(LSolution.class) != null;
+		return aLQuery == null && (/*isAnnotationPresent(LSolution.class) ||*/ isAnnotationPresent(LExpression.class));
 	}
 	
 	/**

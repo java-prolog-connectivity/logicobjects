@@ -59,8 +59,12 @@ public abstract class AbstractLogicMethod {
 		this.method = method;
 	}
 	
-	protected <A extends Annotation> A getAnnotation(Class<A> clazz) {
-		return getWrappedMethod().getAnnotation(clazz);
+	protected <A extends Annotation> A getAnnotation(Class<A> annotation) {
+		return getWrappedMethod().getAnnotation(annotation);
+	}
+	
+	protected <A extends Annotation> boolean isAnnotationPresent(Class<A> annotation) {
+		return getAnnotation(annotation) != null;
 	}
 	
 	public static AbstractLogicMethod create(Method method) {

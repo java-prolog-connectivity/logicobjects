@@ -6,8 +6,9 @@ import jpl.Term;
 
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.AnnotatedElementAdaptationContext;
+import org.logicobjects.adapter.adaptingcontext.BeanPropertyAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.ClassAdaptationContext;
-import org.logicobjects.adapter.adaptingcontext.LogicObjectDescriptor;
+import org.logicobjects.adapter.adaptingcontext.AbstractLogicObjectDescriptor;
 import org.logicobjects.core.LogicObject;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.ReflectionUtil;
@@ -47,17 +48,18 @@ public class AnnotatedObjectToTermAdapter<From> extends Adapter<From, Term> {
 	}
 	
 	protected Term adaptToTermFromDescription(From object, AnnotatedElementAdaptationContext annotatedContext) {
-		LogicObjectDescriptor logicObjectDescription = annotatedContext.getLogicObjectDescription();
+		AbstractLogicObjectDescriptor logicObjectDescription = annotatedContext.getLogicObjectDescription();
 		String logicObjectName = logicObjectDescription.name();
 		if(logicObjectName.isEmpty())
 			logicObjectName = infereLogicObjectName(annotatedContext);
 		
 		Term[] arguments;
-		String argsArray = logicObjectDescription.argsList();
-		if(argsArray != null && !argsArray.isEmpty()) {
-			Object[] objects = (Object[]) ReflectionUtil.getFieldValue(object, argsArray);
-			Field field = ReflectionUtil.getField(object, argsArray);
-			arguments = new ObjectToTermAdapter().adaptField(objects, field);
+		String argsListPropertyName = logicObjectDescription.argsList();
+		if(argsListPropertyName != null && !argsListPropertyName.isEmpty()) {
+			BeanPropertyAdaptationContext adaptationContext = new BeanPropertyAdaptationContext(object.getClass(), argsListPropertyName);
+			Object[] objects = (Object[]) ReflectionUtil.getProperty(object, argsListPropertyName, adaptationContext.getGuidingClass());
+			//Field field = ReflectionUtil.getField(object, argsList);
+			arguments = new ObjectToTermAdapter().adaptObjects(objects, adaptationContext);
 		} else {
 			arguments = LogicObject.propertiesAsTerms(object, logicObjectDescription.args());
 		}

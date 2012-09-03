@@ -5,7 +5,7 @@ import java.lang.reflect.Field;
 
 import org.logicobjects.util.LogicUtil;
 
-public class FieldAdaptationContext extends AnnotatedElementAdaptationContext {
+public class FieldAdaptationContext extends AnnotatedSingleElementAdaptationContext {
 	private Field field;
 	
 	public FieldAdaptationContext(Field field) {

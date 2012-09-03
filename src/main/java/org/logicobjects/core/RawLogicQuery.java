@@ -2,6 +2,7 @@ package org.logicobjects.core;
 
 import java.lang.reflect.Method;
 
+import org.logicobjects.annotation.method.LExpression;
 import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.annotation.method.LSolution;
 
@@ -10,7 +11,7 @@ public abstract class RawLogicQuery extends AbstractLogicMethod {
 	protected LQuery aLQuery;
 	
 	public static boolean isRawQuery(Method method) {
-		return !LogicMethod.isLogicMethod(method) && (method.getAnnotation(LQuery.class) != null || method.getAnnotation(LSolution.class) != null);
+		return !LogicMethod.isLogicMethod(method) && (method.isAnnotationPresent(LQuery.class) || method.isAnnotationPresent(LSolution.class) || method.isAnnotationPresent(LExpression.class));
 	}
 	
 	public static RawLogicQuery create(Method method) {

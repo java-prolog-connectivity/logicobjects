@@ -13,8 +13,8 @@ import org.reflectiveutils.ReflectionUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
 /**
- * This class help to guide the transformation to or from a term, given the context of this transformation
- * For example, it this necessary because the term is going to be assigned to a field ? or the term is the result of a method invocation ?
+ * The base class of all adaptation contexts.
+ * Provides general information about the context in which an adaptation occurs (is it a logic term to a Java element, xml, etc...)
  * @author scastro
  *
  */

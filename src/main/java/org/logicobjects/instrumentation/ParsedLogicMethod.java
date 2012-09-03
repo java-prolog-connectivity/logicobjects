@@ -20,7 +20,7 @@ public class ParsedLogicMethod {
 	private LogicMethodParsingData parsedData; //the parsed string data
 	
 	private String computedQueryString; //the query
-	private String computedMethodName; //this is here just because in the future it can be interesting to parse the method name (now it is just a constant)
+	private String computedMethodName;
 	private Object[] computedMethodArguments; //the method arguments
 	
 	/**

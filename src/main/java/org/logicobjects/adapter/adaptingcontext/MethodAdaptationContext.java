@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 
 import org.logicobjects.util.LogicUtil;
 
-public class MethodAdaptationContext extends AnnotatedElementAdaptationContext {
+public class MethodAdaptationContext extends AnnotatedSingleElementAdaptationContext {
 	private Method method;
 	
 	public MethodAdaptationContext(Method method) {
@@ -19,6 +19,5 @@ public class MethodAdaptationContext extends AnnotatedElementAdaptationContext {
 	public Class getContextClass() {
 		return method.getReturnType();
 	}
-
 	
 }

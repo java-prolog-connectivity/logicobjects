@@ -1,7 +1,6 @@
 package org.logicobjects.adapter.adaptingcontext;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.TermToObjectAdapter;
@@ -12,54 +11,54 @@ import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.annotation.LTermAdapter.LTermAdapterUtil;
 import org.logicobjects.core.LogicObjectClass;
 
-public abstract class AnnotatedElementAdaptationContext extends AdaptationContext {
+public abstract class AnnotatedElementAdaptationContext extends JavaAdaptationContext {
 
-	private Class guidingClass; //a class that guides the mapping from objects to terms (if any)
-	private boolean initializedGudingClass; //a flag to implement caching. The guiding class will be attempted to be discovered only if this variable is false
-	
-	
-	//protected abstract TermToObjectAdapter getTermToObjectAdapter();
-
-	//public abstract ObjectToTermAdapter getObjectToTermAdapter();
-
-	//protected abstract LogicObjectDescriptor getLogicObjectDescription();
-	
 	public abstract Class getContextClass();
+	
+	public LObjectAdapter getTermToObjectAdapterAnnotation() {
+		return getMappingAnnotation(LObjectAdapter.class);
+	}
 
-	public Class getGuidingClass() {
-		if(!initializedGudingClass && guidingClass==null) {
-			guidingClass = LogicObjectClass.findGuidingClass(getContextClass());
-			initializedGudingClass = true;
-		}
-		return guidingClass;
+	public LTermAdapter getObjectToTermAdapterAnnotation() {
+		return getMappingAnnotation(LTermAdapter.class);
 	}
 	
+	public AbstractLogicObjectDescriptor getLogicObjectDescription() {
+		LObject aLObject = getMappingAnnotation(LObject.class);
+		if(aLObject != null)
+			return AbstractLogicObjectDescriptor.create(aLObject);
+		else
+			return null;
+	}
+	
+	protected <A extends Annotation> A getMappingAnnotationGuidingClass(Class<A> annotationClass) {
+		A annotation = null;
+		Class guidingClass = getGuidingClass();
+		if(guidingClass != null) {
+			annotation = (A) guidingClass.getAnnotation(annotationClass);
+		}
+		return annotation;
+	}
+	
+	protected <A extends Annotation> A getMappingAnnotation(Class<A> annotationClass) {
+		A annotation = getMappingAnnotationLocalContext(annotationClass);
+		if(annotation == null && !shouldIgnoreHierarchyMappingAnnotations()) {
+			annotation = (A) getMappingAnnotationGuidingClass(annotationClass);
+		}
+		return annotation;
+	}
+	
+	protected abstract <A extends Annotation> A getMappingAnnotationLocalContext(Class<A> annotationClass);
+
+	/**
+	 * 
+	 * @return a boolean indicating if there are mapping annotations that should be found in the hierarchy
+	 * by default, if the guiding class (the first class in the hierarchy identified as a logic class) implements ITermObject then any annotation present in classes in the hierarchy should be ignored 
+	 */
 	public boolean shouldIgnoreHierarchyMappingAnnotations() {
 		return getGuidingClass() != null && LogicObjectClass.isTermObjectClass(getGuidingClass());
 	}
-	
-	public boolean hasObjectToTermAdapter() {
-		return getObjectToTermAdapter() != null;
-	}
 
-	public boolean hasTermToObjectAdapter() {
-		return getTermToObjectAdapter() != null;
-	}
-
-	public boolean hasLogicObjectDescription() {
-		return getLogicObjectDescription() != null;
-	}
-	
-	
-	
-	
-
-	
-	
-	
-	//
-	public abstract AnnotatedElement getContext(); //an accessible object can be a method or field
-	
 	public TermToObjectAdapter getTermToObjectAdapter() {
 		LObjectAdapter aLObjectAdapter = getTermToObjectAdapterAnnotation();
 		if(aLObjectAdapter != null)
@@ -67,42 +66,14 @@ public abstract class AnnotatedElementAdaptationContext extends AdaptationContex
 		return null;
 	}
 
+
+
 	public ObjectToTermAdapter getObjectToTermAdapter() {
 		LTermAdapter aLTermAdapter = getObjectToTermAdapterAnnotation();
 		if(aLTermAdapter != null)
 			return LTermAdapterUtil.newAdapter(aLTermAdapter);
 		return null;
 	}
-	
-	
-	public LObjectAdapter getTermToObjectAdapterAnnotation() {
-		return getMappingAnnotation(LObjectAdapter.class);
-	}
 
-
-	public LTermAdapter getObjectToTermAdapterAnnotation() {
-		return getMappingAnnotation(LTermAdapter.class);
-	}
-	
-	public LogicObjectDescriptor getLogicObjectDescription() {
-		LObject aLObject = getMappingAnnotation(LObject.class);
-		if(aLObject != null)
-			return LogicObjectDescriptor.create(aLObject);
-		else
-			return null;
-	}
-	
-	private <A extends Annotation> A getMappingAnnotation(Class<A> annotationClass) {
-		A annotation = null;
-		if(!(getContext() instanceof Class)) { //then it is a field or method
-			annotation = getContext().getAnnotation(annotationClass);
-		}
-		if(annotation == null && !shouldIgnoreHierarchyMappingAnnotations()) {
-			Class guidingClass = getGuidingClass();
-			if(guidingClass != null)
-				annotation = (A) guidingClass.getAnnotation(annotationClass);
-		}
-		return annotation;
-	}
 
 }

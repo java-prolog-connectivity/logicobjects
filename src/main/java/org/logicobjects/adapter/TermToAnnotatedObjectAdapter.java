@@ -5,7 +5,7 @@ import java.lang.reflect.Type;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.AnnotatedElementAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.ClassAdaptationContext;
-import org.logicobjects.adapter.adaptingcontext.LogicObjectDescriptor;
+import org.logicobjects.adapter.adaptingcontext.AbstractLogicObjectDescriptor;
 import org.logicobjects.core.LogicObjectClass;
 import org.logicobjects.core.LogicObject;
 import org.logicobjects.core.LogicObjectFactory;
@@ -53,10 +53,10 @@ public class TermToAnnotatedObjectAdapter<To> extends Adapter<Term, Object> {
 	
 	
 	/*
-	 * This method transform a term in a logic object of a specified class using the information present in a LObjectGenericDescription object.
+	 * This method transform a term into a logic object of a specified class using the information present in a LObjectGenericDescription object.
 	 */
 	protected Object adaptToObjectFromDescription(Term term, Type type, AnnotatedElementAdaptationContext annotatedContext) {
-		LogicObjectDescriptor logicObjectDescription = annotatedContext.getLogicObjectDescription();
+		AbstractLogicObjectDescriptor logicObjectDescription = annotatedContext.getLogicObjectDescription();
 		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
 		try {
 			Object lObject = null;
@@ -65,11 +65,12 @@ public class TermToAnnotatedObjectAdapter<To> extends Adapter<Term, Object> {
             } else {
             	lObject = LogicObjectFactory.getDefault().create(typeWrapper.asClass());
             }
-			String argsArray = logicObjectDescription.argsList();
-			if(argsArray != null && !argsArray.isEmpty())
-				LogicObject.setPropertiesArray(lObject, argsArray, term);
-			else
-				LogicObject.setProperties(lObject, logicObjectDescription.args(), term);
+			String argsList = logicObjectDescription.argsList();
+			if(argsList != null && !argsList.isEmpty())
+				LogicObject.setPropertiesArray(lObject, argsList, term);
+			
+			LogicObject.setPropertiesFromTermArgs(lObject, logicObjectDescription.args(), term);
+			
 			return lObject;
 		} catch (Exception e) {
 			throw new RuntimeException(e);

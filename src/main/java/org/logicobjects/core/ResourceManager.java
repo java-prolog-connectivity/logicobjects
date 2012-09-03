@@ -16,12 +16,16 @@ import org.logicobjects.util.LogicObjectsPreferences;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.reflections.util.ConfigurationBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicate;
 import com.google.common.io.Resources;
 
 public class ResourceManager {
 
+	private static Logger logger = LoggerFactory.getLogger(ResourceManager.class);
+	
 	private final String tmpDirPath; // the root temporary directory 
 	public static final String LOGIC_OBJECTS_TMP_FOLDER = LogicObjectsPreferences.LOGIC_OBJECTS_NAME;
 	private final File logicObjectsTmpDir; //a File object representing a folder in the tmp directory where logic files or similar resources can be unzipped if required
@@ -103,8 +107,12 @@ public class ResourceManager {
 	
 	public void createTmpLogicFiles(URL url) throws IOException {
 		File tmpDirForUrl = getTmpDir(url);
-		if(tmpDirForUrl.exists())
+		if(tmpDirForUrl.exists()) {
+			logger.debug("Deleting previous tmp directory: " + tmpDirForUrl.getAbsolutePath());
 			deleteRecursively(tmpDirForUrl.toPath());
+		}
+		
+		logger.debug("Creating tmp directory: " + tmpDirForUrl.getAbsolutePath());
 		tmpDirForUrl.mkdir();
 		
 		Predicate<String> predicate = new Predicate<String>() {
@@ -137,7 +145,7 @@ public class ResourceManager {
 		Set<String> resourcePaths = reflections.getResources(predicate);  //in case a complex predicate is needed
 		
 		for(String resourcePath : resourcePaths) {
-			System.out.println(resourcePath);
+			logger.debug("Copying resource to tmp location: " + resourcePath);
 			File fileToCreate = new File(destination, resourcePath);
 			fileToCreate.getParentFile().mkdirs();
 			

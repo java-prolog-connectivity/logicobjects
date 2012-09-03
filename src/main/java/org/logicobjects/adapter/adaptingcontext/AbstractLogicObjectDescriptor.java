@@ -14,17 +14,22 @@ import org.logicobjects.annotation.LObject;
  * @author scastro
  *
  */
-public abstract class LogicObjectDescriptor {
+public abstract class AbstractLogicObjectDescriptor {
 
-	public abstract String name(); 
-	public abstract String[] args();
-	public abstract String argsList();
-	public abstract String[] imports();
-	public abstract String[] modules();
-	public abstract boolean automaticImport();
-
+	public abstract String name();
 	
-	public static LogicObjectDescriptor create(Class clazz) {
+	public abstract String[] args();
+	
+	public abstract String argsList();
+	
+	public abstract String[] imports();
+	
+	public abstract String[] modules();
+	
+	public abstract boolean automaticImport();
+	
+
+	public static AbstractLogicObjectDescriptor create(Class clazz) {
 		LObject aLObject = (LObject) clazz.getAnnotation(LObject.class);
 		if(aLObject != null)
 			return create(aLObject);
@@ -33,19 +38,49 @@ public abstract class LogicObjectDescriptor {
 		if(aLDelegationObject != null)
 			return create(aLDelegationObject);
 		
-		throw new RuntimeException("Impossible to create Method invoker description from class: " + clazz.getSimpleName());
+		return new DefaultLogicObjectDescriptor();
+		//throw new RuntimeException("Impossible to create Method invoker description from class: " + clazz.getSimpleName());
 	}
 	
-	public static LogicObjectDescriptor create(LObject aLObject) {
+	public static AbstractLogicObjectDescriptor create(LObject aLObject) {
 		return new LObjectAnnotationDescriptor(aLObject);
 	}
 	
-	public static LogicObjectDescriptor create(LDelegationObject aLDelegationObject) {
+	public static AbstractLogicObjectDescriptor create(LDelegationObject aLDelegationObject) {
 		return new LDelegationObjectAnnotationDescriptor(aLDelegationObject);
 	}
 	
 	
-	static class LObjectAnnotationDescriptor extends LogicObjectDescriptor {
+	public static class DefaultLogicObjectDescriptor extends AbstractLogicObjectDescriptor {
+		
+		public String name() {
+			return "";
+		}
+		
+		public String[] args() {
+			return new String[]{};
+		}
+		
+		public String argsList() {
+			return "";
+		}
+		
+		public String[] imports() {
+			return new String[]{};
+		}
+		
+		public String[] modules() {
+			return new String[]{};
+		}
+		
+		public boolean automaticImport() {
+			return true;
+		}
+		
+	}
+	
+	
+	static class LObjectAnnotationDescriptor extends AbstractLogicObjectDescriptor {
 		
 		LObject aLObject;
 
@@ -85,7 +120,7 @@ public abstract class LogicObjectDescriptor {
 	
 	
 	
-	static class LDelegationObjectAnnotationDescriptor extends LogicObjectDescriptor {
+	static class LDelegationObjectAnnotationDescriptor extends AbstractLogicObjectDescriptor {
 		LDelegationObject aLDelegationObject;
 
 		public LDelegationObjectAnnotationDescriptor(LDelegationObject aLDelegationObject) {

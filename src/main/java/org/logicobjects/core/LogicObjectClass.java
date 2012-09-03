@@ -13,17 +13,18 @@ import java.util.Set;
 import jpl.Term;
 
 import org.logicobjects.adapter.LogicResourcePathAdapter;
-import org.logicobjects.adapter.adaptingcontext.LogicObjectDescriptor;
+import org.logicobjects.adapter.adaptingcontext.AbstractLogicObjectDescriptor;
 import org.logicobjects.annotation.LDelegationObject;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.util.LogicUtil;
 import org.reflections.util.ClasspathHelper;
+import org.reflectiveutils.ReflectionUtil;
 import org.reflectiveutils.visitor.FindFirstTypeVisitor;
 import org.reflectiveutils.visitor.TypeVisitor.InterfaceMode;
 
 /**
- * A class providing a description for instantiating logic objects
+ * A class providing a description (i.e., mapping information) for instantiating logic objects
  * Part of the data is in the logic side 
  * @author scastro
  *
@@ -31,13 +32,13 @@ import org.reflectiveutils.visitor.TypeVisitor.InterfaceMode;
 public class LogicObjectClass {
 	
 	private Class logicClass;
-	private LogicObjectDescriptor logicObjectDescriptor;
+	private AbstractLogicObjectDescriptor logicObjectDescriptor;
 	
 	public LogicObjectClass(Class logicClass) {
-		this(logicClass, LogicObjectDescriptor.create(logicClass)); //default LogicObjectDescriptor
+		this(logicClass, AbstractLogicObjectDescriptor.create(logicClass)); //default LogicObjectDescriptor
 	}
 	
-	public LogicObjectClass(Class logicClass, LogicObjectDescriptor logicObjectDescriptor) {
+	public LogicObjectClass(Class logicClass, AbstractLogicObjectDescriptor logicObjectDescriptor) {
 		assert(logicClass != null);
 		assert(logicObjectDescriptor != null);
 		this.logicClass = logicClass;
@@ -46,10 +47,12 @@ public class LogicObjectClass {
 
 	public static LogicObjectClass findLogicObjectClass(Class descendant) {
 		Class guidingClass = findGuidingClass(descendant);
-		if(guidingClass != null)
+		if(guidingClass != null) {
 			return isLogicClass(guidingClass)?new LogicObjectClass(guidingClass):null;
-		else
-			return null;
+		}
+		else {
+			return new LogicObjectClass(ReflectionUtil.findFirstNonSyntheticClass(descendant));
+		}
 	}
 	
 
@@ -57,9 +60,9 @@ public class LogicObjectClass {
 		Class invokerClass = findMethodInvokerClass(descendant);
 		if(invokerClass != null) {
 			if(isDelegationObjectClass(invokerClass)) {
-				return new LogicObjectClass(invokerClass, LogicObjectDescriptor.create((LDelegationObject)invokerClass.getAnnotation(LDelegationObject.class)));
-			} else {
-				return new LogicObjectClass(invokerClass, LogicObjectDescriptor.create((LObject)invokerClass.getAnnotation(LObject.class)));
+				return new LogicObjectClass(invokerClass, AbstractLogicObjectDescriptor.create((LDelegationObject)invokerClass.getAnnotation(LDelegationObject.class)));
+			} else if(isLogicClass(invokerClass)){
+				return new LogicObjectClass(invokerClass, AbstractLogicObjectDescriptor.create((LObject)invokerClass.getAnnotation(LObject.class)));
 			}
 		}
 		return null;
@@ -71,7 +74,7 @@ public class LogicObjectClass {
 	}
 	
 	
-	public LogicObjectDescriptor getLogicObjectDescriptor() {
+	public AbstractLogicObjectDescriptor getLogicObjectDescriptor() {
 		return logicObjectDescriptor;
 	}
 	
@@ -87,7 +90,7 @@ public class LogicObjectClass {
 		return getLogicObjectDescriptor().args();
 	}
 	
-	public String getLObjectArgsArray() {
+	public String getLObjectArgsList() {
 		return getLogicObjectDescriptor().argsList();
 	}
 	
@@ -160,6 +163,20 @@ public class LogicObjectClass {
 			return candidateClass;
 		else
 			return findGuidingClass(candidateClass.getSuperclass());
+	}
+	
+	public static List<Class> findAllLogicClasses(Class clazz) {
+		List<Class> logicClasses = new ArrayList<Class>();
+		findAllLogicClasses(clazz, logicClasses);
+		return logicClasses;
+	}
+	
+	private static void findAllLogicClasses(Class clazz, List<Class> foundClasses) {
+		Class logicClass = findGuidingClass(clazz);
+		if(logicClass != null && isLogicClass(logicClass)) {
+			foundClasses.add(logicClass);
+			findAllLogicClasses(clazz.getSuperclass(), foundClasses);
+		}
 	}
 	
 	

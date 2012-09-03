@@ -71,7 +71,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 		return adapt(term, field.getGenericType(), new FieldAdaptationContext(field));
 	}
 	
-	public To[] adaptField(Term term[], Field field) {
+	public To[] adaptField(Term[] term, Field field) {
 		return adaptTerms(term, field.getGenericType(), new FieldAdaptationContext(field));
 	}
 	

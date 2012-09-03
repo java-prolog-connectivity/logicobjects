@@ -1,6 +1,7 @@
 package org.logicobjects.lib.examples.metro;
 
 import org.logicobjects.annotation.LObject;
+import org.logicobjects.annotation.method.LExpression;
 import org.logicobjects.annotation.method.LSolution;
 import org.logicobjects.core.LogicObjectFactory;
 
@@ -11,9 +12,11 @@ public abstract class MetroFactory {
 		return LogicObjectFactory.getDefault().create(MetroFactory.class);
 	}
 	
+	@LExpression
 	@LSolution
 	public abstract Station station(String name);
 	
+	@LExpression
 	@LSolution
 	public abstract Line line(String name);
 

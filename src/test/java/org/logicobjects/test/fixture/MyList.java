@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.logicobjects.annotation.LDelegationObject;
+import org.logicobjects.annotation.method.LExpression;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.annotation.method.LSolution;
@@ -25,6 +26,7 @@ public abstract class MyList extends LList<String> {
 	@LMethod(name = "member", args={"_", "$0"})
 	public abstract int membersLength();
 	
+	@LExpression
 	//@LSolution(".($1, $0)") //this will produce the same effect
 	@LSolution("[$1|$0]")
 	public abstract List<String> addFirst(String s);

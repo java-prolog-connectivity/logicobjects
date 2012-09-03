@@ -8,10 +8,11 @@ import jpl.Atom;
 import jpl.Compound;
 import jpl.Query;
 import jpl.Term;
-import jpl.Variable;
 
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.TermToObjectAdapter;
+import org.logicobjects.adapter.adaptingcontext.BeanPropertyAdaptationContext;
+import org.logicobjects.adapter.adaptingcontext.FieldAdaptationContext;
 import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
 import org.logicobjects.adapter.objectadapters.TermToArrayAdapter;
 import org.logicobjects.util.LogicUtil;
@@ -99,23 +100,27 @@ public class LogicObject implements ITermObject {
 	
 	
 	
-	
-	
-	public static void setPropertiesArray(Object lObject, String argsArray, Term term) {
-		Field field = ReflectionUtil.getField(lObject, argsArray);
-		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(field.getGenericType());
-		if(!(typeWrapper instanceof ArrayTypeWrapper))
-			throw new RuntimeException("The property " + argsArray + " is not an array instance variable in object " + lObject);
-		Term[] termArguments = term.args();
-		ReflectionUtil.setFieldValue(lObject, argsArray, new TermToObjectAdapter().adaptField(termArguments, field));
+	public static void setProperty(Object lObject, String propertyName, Term term) {
+		BeanPropertyAdaptationContext adaptationContext = new BeanPropertyAdaptationContext(lObject.getClass(), propertyName);
+		Object value = new TermToObjectAdapter().adapt(term, adaptationContext.getPropertyType(), adaptationContext);
+		ReflectionUtil.setProperty(lObject, propertyName, value, adaptationContext.getGuidingClass());
 	}
 	
-	public static void setProperties(Object lObject, String[] properties, Term term) {
+	public static void setPropertiesArray(Object lObject, String argsList, Term term) {
+		BeanPropertyAdaptationContext adaptationContext = new BeanPropertyAdaptationContext(lObject.getClass(), argsList);
+		Field field = adaptationContext.getPropertyField();
+		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(field.getGenericType());
+		if(!(typeWrapper instanceof ArrayTypeWrapper))
+			throw new RuntimeException("The property " + argsList + " is not an array instance variable in object " + lObject);
+		Term[] termArguments = term.args();
+		Object adaptedArgs = new TermToObjectAdapter().adaptTerms(termArguments, adaptationContext.getPropertyType(), adaptationContext);
+		ReflectionUtil.setProperty(lObject, argsList, adaptedArgs, adaptationContext.getGuidingClass());
+	}
+	
+	public static void setPropertiesFromTermArgs(Object lObject, String[] properties, Term term) {
 		for(int i=0; i<properties.length; i++) {
 			String propertyName = properties[i];
-			Field field = ReflectionUtil.getField(lObject, propertyName);
-			Object fieldValue = new TermToObjectAdapter().adaptField(term.arg(i+1), field);
-			ReflectionUtil.setFieldValue(lObject, propertyName, fieldValue);
+			setProperty(lObject, propertyName, term.arg(i+1));
 		}
 	}
 
@@ -132,13 +137,14 @@ public class LogicObject implements ITermObject {
 		return arguments.toArray(new Term[] {});
 	}
 	
-	public static Term propertyAsTerm(Object object, String propertyName) {
-		Object propertyValue = ReflectionUtil.getFieldValue(object, propertyName);
-		Field field = ReflectionUtil.getField(object, propertyName);
-		return new ObjectToTermAdapter().adaptField(propertyValue, field);
+	public static Term propertyAsTerm(Object lObject, String propertyName) {
+		BeanPropertyAdaptationContext adaptationContext = new BeanPropertyAdaptationContext(lObject.getClass(), propertyName);
+		Object propertyValue = ReflectionUtil.getProperty(lObject, propertyName, adaptationContext.getGuidingClass());
+		//Field field = ReflectionUtil.getProperty(lObject, propertyName);
+		return new ObjectToTermAdapter().adapt(propertyValue, adaptationContext);
 	}
 
 
-	
+
 }
 

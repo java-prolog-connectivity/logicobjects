@@ -1,5 +1,6 @@
 package org.logicobjects.instrumentation;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,11 +27,13 @@ import javassist.bytecode.SignatureAttribute.ObjectType;
 import javassist.bytecode.SignatureAttribute.TypeArgument;
 import javassist.bytecode.SignatureAttribute.TypeParameter;
 import javassist.bytecode.SignatureAttribute.TypeVariable;
+import javassist.bytecode.SyntheticAttribute;
 
 import org.logicobjects.adapter.BadExpressionException;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.annotation.method.LSolution;
+import org.logicobjects.core.LogicObjectClass;
 import org.logicobjects.core.NoLogicResultException;
 import org.logicobjects.util.JavassistUtil;
 import org.logicobjects.util.JavassistUtil.ObjectConverter;
@@ -52,17 +55,20 @@ public class LogicObjectInstrumentation {
 
 */
 
-	
+
 	private static final String TEST_DIRECTORY = "/test/";
 	
 	private Class classToExtend;
 	private ClassPool classPool;
+	private CtClass ctClassToExtend;
 	
 	public LogicObjectInstrumentation(Class classToExtend, ClassPool classPool) {
 		this.classToExtend = classToExtend;
 		this.classPool = classPool;
+		this.ctClassToExtend = JavassistUtil.asCtClass(classToExtend, classPool);
 	}
-	
+
+
 	//public static final String GENERATED_CLASS_SUFFIX = "_$LogicInstrumented";
 	//public static final String GENERATED_PARAMETER_PREFIX = "$logicObjectsParam";
 	public static final String GENERATED_CLASS_SUFFIX = "___LogicObjectsInstrumented";  //avoid the character "$" this could create problems since it has an special meaning in javassist
@@ -108,7 +114,7 @@ public class LogicObjectInstrumentation {
 			}
 			else {
 				String extendingClassName = instrumentedClassName(classToExtend);  //derive the name of the extending class using the name of the base class
-				Class extendingClass = createExtendingClass(extendingClassName, JavassistUtil.asCtClass(classToExtend, classPool));  //create it
+				Class extendingClass = createExtendingClass(extendingClassName);  //create it
 				return extendingClass;
 			}	
 		} catch(Exception e) {
@@ -120,18 +126,19 @@ public class LogicObjectInstrumentation {
 	 * @param extendingClassName the name of the class to be created
 	 * @param parent the base class of the new class
 	 */
-	private Class createExtendingClass(String extendingClassName, CtClass parent) {
+	private Class createExtendingClass(String extendingClassName) {
 		CtClass newCtClass = classPool.makeClass(extendingClassName);//creating the new class with the given name
 		
 		try {
-			newCtClass.setSuperclass(parent);
-			createConstructors(newCtClass, parent);
+			newCtClass.setSuperclass(ctClassToExtend);
+			createAccessorsAndMutators(newCtClass);
+			createConstructors(newCtClass);
 			createLogicMethods(newCtClass);
 			
 			JavassistUtil.makeNonAbstract(newCtClass); //Javassist makes a class abstract if an abstract method is added to the class. Then it has to be explicitly changed back to non-abstract
 			JavassistUtil.createClassFile(TEST_DIRECTORY, newCtClass);  //just to show how the new class looks like (TODO DO NOT FORGET TO DELETE THIS LINE IN THE RELEASED IMPLEMENTATION !!!)
 			
-			String genericSignature = parent.getGenericSignature(); //the generic signature contains information about the type parameters and the generic superclass and interfaces
+			String genericSignature = ctClassToExtend.getGenericSignature(); //the generic signature contains information about the type parameters and the generic superclass and interfaces
 			/**
 			 * In case that the parent class has generic signature data, part of this data should be present in the generated class
 			 * For example, if the generated class is:
@@ -150,7 +157,7 @@ public class LogicObjectInstrumentation {
 						typeArgumentsList.add(new TypeArgument(objectType));
 					}
 					
-					ClassType extendingGenericSuperClassType = new ClassType(parent.getName(), typeArgumentsList.toArray(new TypeArgument[]{}));
+					ClassType extendingGenericSuperClassType = new ClassType(ctClassToExtend.getName(), typeArgumentsList.toArray(new TypeArgument[]{}));
 					
 					ClassSignature extendingClassSignature = new ClassSignature(
 							extendedClassSignature.getParameters(), //same type parameters than the extending class
@@ -163,6 +170,8 @@ public class LogicObjectInstrumentation {
 					throw new RuntimeException(e);
 				}
 			}
+			SyntheticAttribute syntheticAttribute = new SyntheticAttribute(ctClassToExtend.getClassFile().getConstPool());
+			newCtClass.setAttribute(syntheticAttribute.getName(), syntheticAttribute.get()); //Marking the generated class as synthetic
 			Class newClass = classPool.toClass(newCtClass, classPool.getClass().getClassLoader(), null);
 			return newClass;
 		} catch (CannotCompileException e) {
@@ -171,6 +180,68 @@ public class LogicObjectInstrumentation {
 	}
 	
 
+	public static class A {
+		private int a;
+		protected int b;
+		int c;
+		public int d;
+	}
+	
+	public static class B extends A {
+		public int d;
+		
+		public static void main(String[] args) {
+			A o = new A();
+			Field f;
+			/*
+			try {
+				f = A.class.getField("a");
+			} catch (NoSuchFieldException e) {
+				throw new RuntimeException(e);
+			} catch (SecurityException e) {
+				throw new RuntimeException(e);
+			}
+			System.out.println(f);
+			*/
+			/*
+			try {
+				f = A.class.getField("b");
+			} catch (NoSuchFieldException e) {
+				throw new RuntimeException(e);
+			} catch (SecurityException e) {
+				throw new RuntimeException(e);
+			}
+			System.out.println(f);
+			*/
+			
+			try {
+				f = A.class.getField("c");
+			} catch (NoSuchFieldException e) {
+				throw new RuntimeException(e);
+			} catch (SecurityException e) {
+				throw new RuntimeException(e);
+			}
+			System.out.println(f);
+			
+			try {
+				f = A.class.getField("d");
+			} catch (NoSuchFieldException e) {
+				throw new RuntimeException(e);
+			} catch (SecurityException e) {
+				throw new RuntimeException(e);
+			}
+			try {
+				f.set(o, 11);
+			} catch (IllegalArgumentException e) {
+				throw new RuntimeException(e);
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
+			System.out.println(f);
+
+		}
+	}
+	
 	/**
 	 * Adds a generic signature to a target CtBehavior object (e.g., a method or constructor) from a model CtBehavior
 	 * Generics data is not strictly part of the method byte code, but rather "extra-data"
@@ -200,11 +271,29 @@ public class LogicObjectInstrumentation {
 		}
 	}
 	
+	private void createAccessorsAndMutators(CtClass son) {
+		LogicObjectClass parentLogicObjectClass = LogicObjectClass.findLogicObjectClass(classToExtend);
+		for(String arg : parentLogicObjectClass.getLObjectArgs()) {
+			Field field;
+			try {
+				field = classToExtend.getDeclaredField(arg);
+			} catch (NoSuchFieldException e) {
+				throw new RuntimeException(e);
+			} catch (SecurityException e) {
+				throw new RuntimeException(e);
+			}
+			if(field == null) {
+				
+			}
+		}
+		//if(parent.toClass())
+	}
 	
-	private void createConstructors(CtClass son, CtClass parent) {
-		CtConstructor[] parentConstructors = parent.getConstructors();
+	
+	private void createConstructors(CtClass son) {
+		CtConstructor[] parentConstructors = ctClassToExtend.getConstructors();
 		ClassMap classMap = new ClassMap();
-		classMap.fix(parent);
+		classMap.fix(ctClassToExtend);
 		for(CtConstructor parentCtConstructor : parentConstructors) {
 			try {
 				CtConstructor newCtConstructor = new CtConstructor(parentCtConstructor, son, classMap);

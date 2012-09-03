@@ -13,7 +13,7 @@ import org.logicobjects.core.LogicObjectFactory;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
-public class ClassAdaptationContext extends AnnotatedElementAdaptationContext {
+public class ClassAdaptationContext extends AnnotatedSingleElementAdaptationContext {
 
 	private Class clazz;
 	
