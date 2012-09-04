@@ -32,7 +32,7 @@ public class BeanPropertyAdaptationContext extends AnnotatedElementAdaptationCon
 		this.clazz = clazz;
 		this.propertyName = propertyName;
 
-		Class propertyDeclaringClass = LogicObjectClass.findGuidingClass(clazz); //this is wrong !!! this is the guiding class of the clazz, not of the property
+		Class propertyDeclaringClass = LogicObjectClass.findGuidingClass(clazz);
 		
 		if(propertyDeclaringClass != null) {
 			List<Class> guidingCLasses = LogicObjectClass.findAllLogicClasses(propertyDeclaringClass);

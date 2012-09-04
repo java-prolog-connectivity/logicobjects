@@ -13,11 +13,9 @@ public abstract class MetroFactory {
 	}
 	
 	@LExpression
-	@LSolution
 	public abstract Station station(String name);
 	
 	@LExpression
-	@LSolution
 	public abstract Line line(String name);
 
 }

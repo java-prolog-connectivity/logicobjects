@@ -5,14 +5,22 @@ import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 
+import javassist.ClassMap;
 import javassist.ClassPool;
 import javassist.CtBehavior;
 import javassist.CtClass;
+import javassist.CtMember;
 import javassist.CtMethod;
 import javassist.LoaderClassPath;
 import javassist.NotFoundException;
+import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ClassFile;
+import javassist.bytecode.MethodInfo;
+import javassist.bytecode.ParameterAnnotationsAttribute;
+
+import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
 public class JavassistUtil {
 /*
@@ -20,6 +28,14 @@ public class JavassistUtil {
 		return asCtClass(c, ClassPool.getDefault());
 	}
 */
+	
+	public static CtClass asCtClass(Type type, ClassPool pool) {
+		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
+		CtClass ctClass = asCtClass(typeWrapper.asClass(), pool);
+		
+		return ctClass;
+	}
+	
 	public static CtClass asCtClass(Class c, ClassPool pool) {
 		try {
 			return pool.get(c.getName());	
@@ -106,13 +122,85 @@ public class JavassistUtil {
 		return Modifier.isAbstract(m.getModifiers());
 	}
 	
+	
 	/**
-	 * Utility class to convert primitive types to objects
-	 * Since javassist works with the java 1.4 specification, this is useful in certain method generation routines, where the generated method returns an object from a given expression
+	 * Adds a generic signature to a target CtBehavior object (e.g., a method or constructor) from a model CtBehavior
+	 * Generics data is not strictly part of the method byte code, but rather "extra-data"
+	 * this data concerning generic is copied from the original method to the new one
+	 * @param target the target CtBehavior to which the generic signature will be added
+	 * @param model the CtBehavior from which the generic signature will be copied
+	 */
+	public static void copyGenericSignature(CtMember target, CtMember model) {
+		String genericSignature = model.getGenericSignature(); 
+		if(genericSignature != null) 
+			target.setGenericSignature(genericSignature);
+	}
+	
+	public static void copyAnnotationsAttribute(CtBehavior target, CtBehavior model, ClassMap classMap) {
+		MethodInfo methodInfo = model.getMethodInfo();
+
+		AnnotationsAttribute methodAnnotationsAttribute = (AnnotationsAttribute)methodInfo.getAttribute(AnnotationsAttribute.visibleTag);
+		if(methodAnnotationsAttribute != null) {
+			methodAnnotationsAttribute = (AnnotationsAttribute)methodAnnotationsAttribute.copy(model.getDeclaringClass().getClassFile().getConstPool(), classMap);
+			target.getMethodInfo().addAttribute(methodAnnotationsAttribute);
+		}
+		
+		ParameterAnnotationsAttribute parameterAnnotationsAttribute = (ParameterAnnotationsAttribute)methodInfo.getAttribute(ParameterAnnotationsAttribute.visibleTag);
+		if(parameterAnnotationsAttribute != null) {
+			parameterAnnotationsAttribute = (ParameterAnnotationsAttribute)parameterAnnotationsAttribute.copy(model.getDeclaringClass().getClassFile().getConstPool(), classMap);
+			target.getMethodInfo().addAttribute(parameterAnnotationsAttribute);
+		}
+	}
+	
+	
+	
+	/**
+	 * 
+	 * This class is a workaround to the issue that Javassist works often with the java 1.4 specification.
+	 * This is useful in certain method generation routines, where the generated method returns an object from a given expression
+	 * This class just converts primitive types to objects
+	 * TODO find an equivalent in Guava or something like that
 	 *
 	 */
 	public static class ObjectConverter {
 		
+		public static Object toObject(Object o) {
+			return o;
+		}
+		
+		public static Object toObject(boolean o) {
+			return o;
+		}
+		
+		public static Object toObject(byte o) {
+			return o;
+		}
+		
+		public static Object toObject(char o) {
+			return o;
+		}
+		
+		public static Object toObject(short o) {
+			return o;
+		}
+		
+		public static Object toObject(int o) {
+			return o;
+		}
+		
+		public static Object toObject(long o) {
+			return o;
+		}
+		
+		public static Object toObject(float o) {
+			return o;
+		}
+		
+		public static Object toObject(Double o) {
+			return o;
+		}
+		
+		/*
 		public static Object toObject(Object o) {
 			return o;
 		}
@@ -148,6 +236,7 @@ public class JavassistUtil {
 		public static Object toObject(Double o) {
 			return Double.valueOf(o);
 		}
+		*/
 	}
 	
 }

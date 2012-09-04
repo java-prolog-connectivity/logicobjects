@@ -5,13 +5,16 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.logicobjects.annotation.LDelegationObject;
 import org.reflectiveutils.visitor.FindFirstTypeVisitor;
+import org.reflectiveutils.visitor.TypeVisitor;
 import org.reflectiveutils.visitor.TypeVisitor.InterfaceMode;
 
 public class ReflectionUtil {
@@ -97,6 +100,47 @@ public class ReflectionUtil {
 	}
 */
 	
+	
+	public static Map<String, Field> visibleFields(Class clazz) {
+		Map<String, Field> visibleFields = new HashMap<String, Field>();
+		Field[] declaredFields = clazz.getDeclaredFields();
+		for(Field declaredField : declaredFields) {
+			visibleFields.put(declaredField.getName(), declaredField);
+		}
+		visibleSuperFields(clazz, visibleFields);
+		return visibleFields;
+	}
+	
+	public static void visibleSuperFields(final Class clazz, final Map<String, Field> visibleFields) {
+		Class superClass = clazz.getSuperclass();
+		if(superClass != null) {
+			TypeVisitor typeVisitor = new TypeVisitor(InterfaceMode.EXCLUDE_INTERFACES) {
+				@Override public boolean doVisit(Class clazzInHierarchy) {
+					Field[] declaredFields = clazzInHierarchy.getDeclaredFields();
+					for(Field declaredField : declaredFields) {
+						if(!visibleFields.containsKey(declaredField.getName())) //check if the field is already there
+							if(!Modifier.isPrivate(declaredField.getModifiers())) { //exclide private fields in super classes
+								if(!isPackageAccessModifier(declaredField) || clazzInHierarchy.getPackage().equals(clazz.getPackage())) //exclude 'package' fields in classes declared in different packages
+									visibleFields.put(declaredField.getName(), declaredField);
+							}
+					}
+					return true;
+				}
+			};
+			typeVisitor.visit(superClass);
+		}
+	}
+	
+	public static boolean isAbstract(Method method) {
+		return Modifier.isAbstract(method.getModifiers());
+	}
+	
+	public static boolean isPackageAccessModifier(Field field) {
+		int modifiers = field.getModifiers();
+		return !Modifier.isPrivate(modifiers) && !Modifier.isProtected(modifiers) && !Modifier.isPublic(modifiers);
+	}
+
+		
 	public static Object getPropertyWithGetter(Object target, String propertyName) {
 		try {
 			return PropertyUtils.getProperty(target, propertyName);
@@ -227,24 +271,45 @@ public class ReflectionUtil {
 	}
 
 	
-	/*
+	
 	public static class A {
 		protected String s = "x";
+		private String p;
+		String p1;
+		public String p2;
+		
 		
 		public String getS() {
 			return s;
 		}
 	}
 	
-	public static class B extends A {
+	public static abstract class B extends A {
 		protected String s = "y";
 		
 		public String getS() {
+			p1 = "";
 			return s;
 		}
+		
+		public abstract void setS(String s);
+	}
+	
+	public static abstract class C extends B {
+		
+		
+		public void setS1(String s){};
 	}
 	
 	public static void main(String[] args) {
+		Map<String, Field> visibleFields = visibleFields(B.class);
+		for(String key : visibleFields.keySet()) {
+			System.out.println(key);
+		}
+		
+		Method setter = setter(C.class, "s1x");
+		System.out.println(setter);
+		/*
 		A a = new B();
 		System.out.println(a.s);
 		System.out.println(((B)a).s);
@@ -256,8 +321,9 @@ public class ReflectionUtil {
 				| InvocationTargetException e) {
 			throw new RuntimeException(e);
 		}
+		*/
 	}
-	*/
+	
 	
 	
 	public static Class findFirstNonSyntheticClass(Class candidateClass) {

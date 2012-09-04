@@ -14,7 +14,7 @@ public class SimplePredicateQuery extends RawLogicQuery {
 
 	public SimplePredicateQuery(Method method) {
 		super(method);
-		if(aLQuery == null && !isAnnotationPresent(LSolution.class))
+		if(aLQuery == null && !isAnnotationPresent(LExpression.class))
 			throw new RuntimeException("No query has been defined for method "+getWrappedMethod().getName());
 	}
 

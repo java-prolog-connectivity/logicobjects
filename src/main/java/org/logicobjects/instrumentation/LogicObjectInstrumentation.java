@@ -1,7 +1,11 @@
 package org.logicobjects.instrumentation;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,19 +14,17 @@ import java.util.Map.Entry;
 import javassist.CannotCompileException;
 import javassist.ClassMap;
 import javassist.ClassPool;
-import javassist.CtBehavior;
 import javassist.CtClass;
 import javassist.CtConstructor;
+import javassist.CtField;
 import javassist.CtMethod;
 import javassist.CtNewMethod;
 import javassist.CtPrimitiveType;
-import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.BadBytecode;
-import javassist.bytecode.MethodInfo;
-import javassist.bytecode.ParameterAnnotationsAttribute;
 import javassist.bytecode.SignatureAttribute;
 import javassist.bytecode.SignatureAttribute.ClassSignature;
 import javassist.bytecode.SignatureAttribute.ClassType;
+import javassist.bytecode.SignatureAttribute.MethodSignature;
 import javassist.bytecode.SignatureAttribute.ObjectType;
 import javassist.bytecode.SignatureAttribute.TypeArgument;
 import javassist.bytecode.SignatureAttribute.TypeParameter;
@@ -30,6 +32,7 @@ import javassist.bytecode.SignatureAttribute.TypeVariable;
 import javassist.bytecode.SyntheticAttribute;
 
 import org.logicobjects.adapter.BadExpressionException;
+import org.logicobjects.adapter.adaptingcontext.BeanPropertyAdaptationContext;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.annotation.method.LSolution;
@@ -37,6 +40,8 @@ import org.logicobjects.core.LogicObjectClass;
 import org.logicobjects.core.NoLogicResultException;
 import org.logicobjects.util.JavassistUtil;
 import org.logicobjects.util.JavassistUtil.ObjectConverter;
+import org.reflectiveutils.ReflectionUtil;
+import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
 public class LogicObjectInstrumentation {
 	
@@ -131,7 +136,7 @@ public class LogicObjectInstrumentation {
 		
 		try {
 			newCtClass.setSuperclass(ctClassToExtend);
-			createAccessorsAndMutators(newCtClass);
+			createGettersAndSetters(newCtClass);
 			createConstructors(newCtClass);
 			createLogicMethods(newCtClass);
 			
@@ -148,7 +153,14 @@ public class LogicObjectInstrumentation {
 			 * public class B<X,Y> extends A<X,Y> {...}
 			 */
 			if(genericSignature != null) {  //there is generic signature data in the parent class, then we should copy this on the generated class
+
 				try {
+					/**
+					 * The Class Signature contains: 
+					 *  - the type parameters of the class
+					 *  - the generic super class
+					 *  - an array of generic interfaces
+					 */
 					ClassSignature extendedClassSignature = SignatureAttribute.toClassSignature(genericSignature); //reifies the string representation of the generic class signature to a more convenient object representation
 					
 					List<TypeArgument> typeArgumentsList = new ArrayList<TypeArgument>();
@@ -242,51 +254,82 @@ public class LogicObjectInstrumentation {
 		}
 	}
 	
-	/**
-	 * Adds a generic signature to a target CtBehavior object (e.g., a method or constructor) from a model CtBehavior
-	 * Generics data is not strictly part of the method byte code, but rather "extra-data"
-	 * this data concerning generic is copied from the original method to the new one
-	 * @param target the target CtBehavior to which the generic signature will be added
-	 * @param model the CtBehavior from which the generic signature will be copied
-	 */
-	private void copyGenericSignature(CtBehavior target, CtBehavior model) {
-		String constructorGenericSignature = model.getGenericSignature(); 
-		if(constructorGenericSignature != null) 
-			target.setGenericSignature(constructorGenericSignature);
+
+	
+	private boolean isAbstract(Method method) {
+		return Modifier.isAbstract(method.getModifiers());
 	}
 	
-	private void copyAnnotationsAttribute(CtBehavior target, CtBehavior model, ClassMap classMap) {
-		MethodInfo methodInfo = model.getMethodInfo();
+	private void createGettersAndSetters(CtClass son) {
+		LogicObjectClass parentLogicObjectClass = LogicObjectClass.findLogicObjectClass(classToExtend);
+		Map<String, Field> visibleFields = ReflectionUtil.visibleFields(classToExtend);
+		for(String arg : parentLogicObjectClass.getLObjectArgs()) {
+			
+			Field visiblePropertyField = visibleFields.get(arg);
+			
+			BeanPropertyAdaptationContext context = new BeanPropertyAdaptationContext(classToExtend, arg);
+			Method currentGetter = context.getPropertyGetter();
+			Method currentSetter = context.getPropertySetter();
+			
+			if(currentGetter != null && currentSetter != null && !(isAbstract(currentGetter) || isAbstract(currentSetter)))
+				continue;
+			
+			if( (currentGetter == null || isAbstract(currentGetter)) //there is not a valid getter
+				&& (currentSetter != null && !isAbstract(currentSetter)) //but there is a valid setter
+				&& visiblePropertyField == null) //and there is not a visible field for the property
+				throw new RuntimeException("Impossible to generate accessor for property " + arg + ". Mutator exists but field does not.");
+			
+			if( (currentSetter == null || isAbstract(currentSetter)) //there is not a valid getter
+					&& (currentGetter != null && !isAbstract(currentGetter)) //but there is a valid setter
+					&& visiblePropertyField == null) //and there is not a visible field for the property
+					throw new RuntimeException("Impossible to generate mutator for property " + arg + ". Accessor exists but field does not.");
+			
+			//at this point, either the setter, the getter or both methods should be generated
+			//if either a setter or getter are present, that implies that the field is visible
+			
+			
+			if(visiblePropertyField == null)
+				createField(context.getPropertyType(), arg, son);
 
-		AnnotationsAttribute methodAnnotationsAttribute = (AnnotationsAttribute)methodInfo.getAttribute(AnnotationsAttribute.visibleTag);
-		if(methodAnnotationsAttribute != null) {
-			methodAnnotationsAttribute = (AnnotationsAttribute)methodAnnotationsAttribute.copy(model.getDeclaringClass().getClassFile().getConstPool(), classMap);
-			target.getMethodInfo().addAttribute(methodAnnotationsAttribute);
+			if(currentGetter == null)
+				createGetter(context.getPropertyType(), arg, son);
+			else if(isAbstract(currentGetter))
+				createGetter(context.getPropertyType(), arg, son, JavassistUtil.asCtMethod(currentGetter, classPool));
 		}
 		
-		ParameterAnnotationsAttribute parameterAnnotationsAttribute = (ParameterAnnotationsAttribute)methodInfo.getAttribute(ParameterAnnotationsAttribute.visibleTag);
-		if(parameterAnnotationsAttribute != null) {
-			parameterAnnotationsAttribute = (ParameterAnnotationsAttribute)parameterAnnotationsAttribute.copy(model.getDeclaringClass().getClassFile().getConstPool(), classMap);
-			target.getMethodInfo().addAttribute(parameterAnnotationsAttribute);
-		}
 	}
 	
-	private void createAccessorsAndMutators(CtClass son) {
-		LogicObjectClass parentLogicObjectClass = LogicObjectClass.findLogicObjectClass(classToExtend);
-		for(String arg : parentLogicObjectClass.getLObjectArgs()) {
-			Field field;
-			try {
-				field = classToExtend.getDeclaredField(arg);
-			} catch (NoSuchFieldException e) {
-				throw new RuntimeException(e);
-			} catch (SecurityException e) {
-				throw new RuntimeException(e);
-			}
-			if(field == null) {
-				
-			}
+	public CtMethod createGetter(Type propertyType, String propertyName, CtClass ctDeclaringClass, CtMethod ctOverridenMethod) {
+		CtMethod ctOverridingMethod = createGetter(propertyType, propertyName, ctDeclaringClass);
+		//...
+		
+		return ctOverridingMethod;
+	}
+	
+	
+	public CtMethod createGetter(Type propertyType, String propertyName, CtClass ctDeclaringClass) {
+		CtMethod ctGetterMethod = null; //TODO
+		
+		if(propertyType instanceof ParameterizedType || propertyType instanceof GenericArrayType) {
+			String signature = "genericSignature(propertyType)"; //TODO
+			ctGetterMethod.setGenericSignature(signature);
 		}
-		//if(parent.toClass())
+		
+		return ctGetterMethod;
+	}
+	
+	
+	
+	public CtField createField(Type fieldType, String fieldName, CtClass ctDeclaringClass) {
+		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(fieldType);
+		CtClass ctFieldClass = JavassistUtil.asCtClass(typeWrapper.asClass(), classPool);
+		try {
+			CtField ctField = new CtField(ctFieldClass, fieldName, ctDeclaringClass);
+			ctDeclaringClass.addField(ctField);
+			return ctField;
+		} catch (CannotCompileException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	
@@ -297,8 +340,8 @@ public class LogicObjectInstrumentation {
 		for(CtConstructor parentCtConstructor : parentConstructors) {
 			try {
 				CtConstructor newCtConstructor = new CtConstructor(parentCtConstructor, son, classMap);
-				copyGenericSignature(newCtConstructor, parentCtConstructor);
-				copyAnnotationsAttribute(newCtConstructor, parentCtConstructor, classMap);
+				JavassistUtil.copyGenericSignature(newCtConstructor, parentCtConstructor);
+				JavassistUtil.copyAnnotationsAttribute(newCtConstructor, parentCtConstructor, classMap);
 				
 				
 				
@@ -362,17 +405,9 @@ public class LogicObjectInstrumentation {
 		List<Method> methods = new ArrayList<Method>();
 		for(Method m : c.getMethods()) {
 			//System.out.println("Method candidate: "+m.getName()+". Generic string: "+m.toGenericString());
-			if (m.getAnnotation(LMethod.class) != null || m.getAnnotation(LQuery.class) != null || m.getAnnotation(LSolution.class) != null) {
+			//if (m.getAnnotation(LMethod.class) != null || m.getAnnotation(LQuery.class) != null || m.getAnnotation(LSolution.class) != null) {
+			if(ReflectionUtil.isAbstract(m)) {
 				methods.add(m);
-				//System.out.println("(Logic method)");
-				/*
-				if(!alreadyFound.containsKey(m.toGenericString())) {
-					System.out.println("(Not found method)");
-					alreadyFound.put(m.toGenericString(), m);
-				} else {
-					System.out.println("(Already found method)");
-				}
-				*/
 			} 
 		}
 		return methods.toArray(new Method[] {});
@@ -397,8 +432,8 @@ public class LogicObjectInstrumentation {
 			 * - Problem: For some reason, call to this method will throw at runtime an AbstractMethodError.
 			 */
 			CtMethod ctCopiedMethod = CtNewMethod.copy(ctMethod, targetClass, classMap);
-			copyGenericSignature(ctCopiedMethod, ctMethod);
-			copyAnnotationsAttribute(ctCopiedMethod, ctMethod, classMap);
+			JavassistUtil.copyGenericSignature(ctCopiedMethod, ctMethod);
+			JavassistUtil.copyAnnotationsAttribute(ctCopiedMethod, ctMethod, classMap);
 				
 			
 			//System.out.println("Overridding method: "+ctCopiedMethod.getLongName());

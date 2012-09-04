@@ -1,7 +1,5 @@
 package org.logicobjects.adapter.adaptingcontext;
 
-import java.lang.annotation.Annotation;
-
 import org.logicobjects.annotation.LDelegationObject;
 import org.logicobjects.annotation.LObject;
 
