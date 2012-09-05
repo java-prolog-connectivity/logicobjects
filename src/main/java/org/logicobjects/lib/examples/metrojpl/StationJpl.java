@@ -8,9 +8,13 @@ import jpl.Atom;
 import jpl.Compound;
 import jpl.Query;
 import jpl.Term;
+import jpl.Util;
 import jpl.Variable;
 
-public class StationJpl {
+import org.logicobjects.lib.examples.metro.ILine;
+import org.logicobjects.lib.examples.metro.IStation;
+
+public class StationJpl implements IStation {
 
 	private String name;
 	
@@ -18,19 +22,27 @@ public class StationJpl {
 		this.name = name;
 	}
 
+	@Override
+	public String getName() {
+		return name;
+	}
+	
+	@Override
+	public String toString() {return name;}
+	
 	public Term asTerm() {
 		return new Compound("station", new Term[] {new Atom(name)});
 	}
 	
-	public static StationJpl create(Term term) {
+	public static IStation create(Term term) {
 		Compound stationTerm = (Compound)term;
 		String lineName = stationTerm.arg(1).name();
 		return new StationJpl(lineName);
 	}
 
 
-	public boolean connected(StationJpl station) {
-		Term message = new Compound("connected", new Term[]{station.asTerm()});
+	public boolean connected(IStation station) {
+		Term message = new Compound("connected", new Term[]{((StationJpl) station).asTerm()});
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		return query.hasSolution();
@@ -45,24 +57,27 @@ public class StationJpl {
 	}
 
 
-	public StationJpl connected(LineJpl line) {
+	public IStation connected(ILine line) {
 		String stationVarName = "Station";
-		Term message = new Compound("connected", new Term[]{new Variable(stationVarName), line.asTerm()});
+		Term message = new Compound("connected", new Term[]{new Variable(stationVarName), ((LineJpl) line).asTerm()});
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		Hashtable<String, Term> solution = query.oneSolution();
-		Term term = solution.get(stationVarName);
-		return create(term);
+		if(solution != null) {
+			Term term = solution.get(stationVarName);
+			return create(term);
+		} else
+			return null;
 	}
 
 
-	public List<StationJpl> connected() {
+	public List<IStation> connected() {
 		String stationVarName = "Station";
 		Term message = new Compound("connected", new Term[]{new Variable(stationVarName)});
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		Hashtable<String, Term> solutions[] = query.allSolutions();
-		List<StationJpl> stations = new ArrayList<StationJpl>();
+		List<IStation> stations = new ArrayList<IStation>();
 		for(Hashtable<String, Term> solution : solutions) {
 			Term term = solution.get(stationVarName);
 			stations.add(create(term));
@@ -71,38 +86,68 @@ public class StationJpl {
 	}
 
 
-	public boolean nearby(StationJpl station) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean nearby(IStation station) {
+		Term message = new Compound("nearby", new Term[]{((StationJpl) station).asTerm()});
+		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
+		Query query = new Query(objectMessage);
+		return query.hasSolution();
 	}
 
 
 	public int numberNearbyStations() {
-		// TODO Auto-generated method stub
-		return 0;
+		Term message = new Compound("nearby", new Term[]{new Variable("_")});
+		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
+		Query query = new Query(objectMessage);
+		return query.allSolutions().length;
 	}
 
 
-	public List<StationJpl> nearby() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<IStation> nearby() {
+		String stationVarName = "Station";
+		Term message = new Compound("nearby", new Term[]{new Variable(stationVarName)});
+		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
+		Query query = new Query(objectMessage);
+		Hashtable<String, Term> solutions[] = query.allSolutions();
+		List<IStation> stations = new ArrayList<IStation>();
+		for(Hashtable<String, Term> solution : solutions) {
+			Term term = solution.get(stationVarName);
+			stations.add(create(term));
+		}
+		return stations;
 	}
 
 
-	public boolean reachable(StationJpl station) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean reachable(IStation station) {
+		Term message = new Compound("reachable", new Term[]{((StationJpl) station).asTerm()});
+		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
+		Query query = new Query(objectMessage);
+		return query.hasSolution();
 	}
 
 
 	public int numberReachableStations() {
-		// TODO Auto-generated method stub
-		return 0;
+		Term message = new Compound("reachable", new Term[]{new Variable("_")});
+		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
+		Query query = new Query(objectMessage);
+		return query.allSolutions().length;
 	}
 
 
-	public List<StationJpl> intermediateStations(StationJpl station) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<IStation> intermediateStations(IStation station) {
+		String stationsVarName = "Stations";
+		Term message = new Compound("reachable", new Term[]{((StationJpl) station).asTerm(), new Variable(stationsVarName)});
+		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
+		Query query = new Query(objectMessage);
+		Hashtable<String, Term> solution = query.oneSolution();
+		if(solution != null) {
+			Term solutionTerm = solution.get(stationsVarName);
+			Term[] terms = Util.listToTermArray(solutionTerm);
+			List<IStation> stations = new ArrayList<IStation>();
+			for(Term term : terms) {
+				stations.add(create(term));
+			}
+			return stations;
+		} else
+			return null;
 	}
 }

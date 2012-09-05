@@ -8,6 +8,8 @@ import org.logicobjects.annotation.method.LWrapper;
 
 public interface IStation {
 
+	public String getName(); //not a logic method, just to facilitate testing
+	
 	@LMethod
 	public abstract boolean connected(IStation station);
 	

@@ -4,6 +4,8 @@ import org.logicobjects.annotation.method.LMethod;
 
 public interface ILine {
 
+	public String getName(); //not a logic method, just to facilitate testing
+	
 	@LMethod
 	public abstract boolean connects(IStation s1, IStation s2);
 	

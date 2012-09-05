@@ -1,4 +1,4 @@
-package org.logicobjects.lib.examples.metro.test;
+package org.logicobjects.test.lib.examples.metro;
 
 import java.util.List;
 
@@ -10,11 +10,12 @@ import org.logicobjects.lib.examples.metro.Metro;
 import org.logicobjects.test.LocalLogicTest;
 import static junit.framework.TestCase.*;
 
-public class TestMetro extends LocalLogicTest {
+public class TestMetro extends AbstractMetroTest {
+
 
 	@Test
 	public void testAllLines() {
-		IMetro metro = LogicObjectFactory.getDefault().create(Metro.class);
+		IMetro metro = createMetro();
 		List<ILine> lines = metro.lines();
 		assertNotNull(lines);
 		System.out.println("Number of lines: " + lines.size());
@@ -27,7 +28,7 @@ public class TestMetro extends LocalLogicTest {
 	
 	@Test
 	public void testIsLine() {
-		IMetro metro = LogicObjectFactory.getDefault().create(Metro.class);
+		IMetro metro = createMetro();
 		ILine line = metro.line("jubilee");
 		assertNotNull(line);
 		System.out.println("Line: " + line);

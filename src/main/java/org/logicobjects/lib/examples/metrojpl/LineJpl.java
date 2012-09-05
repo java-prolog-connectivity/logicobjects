@@ -6,7 +6,10 @@ import jpl.Query;
 import jpl.Term;
 import jpl.Variable;
 
-public class LineJpl {
+import org.logicobjects.lib.examples.metro.ILine;
+import org.logicobjects.lib.examples.metro.IStation;
+
+public class LineJpl implements ILine {
 
 	private String name;
 	
@@ -14,19 +17,27 @@ public class LineJpl {
 		this.name = name;
 	}
 	
+	@Override
+	public String getName() {
+		return name;
+	}
+	
+	@Override
+	public String toString() {return name;}
+	
 	public Term asTerm() {
 		return new Compound("line", new Term[] {new Atom(name)});
 	}
 	
-	public static LineJpl create(Term term) {
+	public static ILine create(Term term) {
 		Compound lineTerm = (Compound)term;
 		String lineName = lineTerm.arg(1).name();
 		return new LineJpl(lineName);
 	}
 
 
-	public boolean connects(StationJpl s1, StationJpl s2) {
-		Term message = new Compound("connects", new Term[]{s1.asTerm(), s2.asTerm()});
+	public boolean connects(IStation s1, IStation s2) {
+		Term message = new Compound("connects", new Term[]{((StationJpl) s1).asTerm(), ((StationJpl) s2).asTerm()});
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		return query.hasSolution();
@@ -39,5 +50,5 @@ public class LineJpl {
 		Query query = new Query(objectMessage);
 		return query.allSolutions().length;
 	}
-
+	
 }

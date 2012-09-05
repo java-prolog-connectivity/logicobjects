@@ -51,13 +51,18 @@ public class ResourceManager {
 	public boolean process(URL url) {
 		if(hasAlreadyBeenProcessed(url))
 			return false;
-		if(!isFileSystemDir(url)) {
+		//if(!isFileSystemDir(url)) { 
 			try {
-				createTmpLogicFiles(url);
+				/*
+				 * This sould be done if the logic files are in a jar or directly located in an exploded directory in the file system
+				 * Even if the files are directly in the file system it does not mean they are accessible from the current execution path
+				 * Referring always to the tmp directory 
+				 */
+				createTmpLogicFiles(url); 
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-		}
+		//}
 		processedURLs.add(url);
 		return true;
 	}
@@ -187,10 +192,11 @@ public class ResourceManager {
 	 * @return
 	 */
 	private String basePath(URL url) {
-		if(isFileSystemDir(url))
+		/*
+		if(isFileSystemDir(url)) 
 			return url.getFile();
-		else
-			return getTmpDir(url).getAbsolutePath();
+		else*/
+			return getTmpDir(url).getAbsolutePath(); //always consider the base path the temp directory given the url sent as parameter
 	}
 
 	public String getResourcePath(String resource, URL url) {

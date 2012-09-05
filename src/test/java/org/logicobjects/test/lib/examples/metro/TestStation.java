@@ -1,4 +1,4 @@
-package org.logicobjects.lib.examples.metro.test;
+package org.logicobjects.test.lib.examples.metro;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -16,27 +16,27 @@ import org.logicobjects.lib.examples.metro.Line;
 import org.logicobjects.lib.examples.metro.Station;
 import org.logicobjects.test.LocalLogicTest;
 
-public class TestStation extends LocalLogicTest {
+public class TestStation extends AbstractMetroTest {
 
-	
+
 	@Test
 	public void testAllConnections() {
-		IStation station1 = LogicObjectFactory.getDefault().create(Station.class, "bond_street");
+		IStation station1 = createStation("bond_street");
 		List<IStation> connectedStations = station1.connected();
 		System.out.println("Stations connected to " + station1 + ": " + connectedStations.size());
 		for(IStation connectedStation: connectedStations) {
 			System.out.println("- " + connectedStation);
 		}
 		
-		IStation station2 = LogicObjectFactory.getDefault().create(Station.class, "inexisting_station");
+		IStation station2 = createStation("inexisting_station");
 		assertEquals(station2.connected().size(), 0);
 	}
 	
 	@Test
 	public void testOneConnection() {
-		IStation station = LogicObjectFactory.getDefault().create(Station.class, "bond_street");
-		ILine line1 = LogicObjectFactory.getDefault().create(Line.class, "central");
-		ILine line2 = LogicObjectFactory.getDefault().create(Line.class, "northern");
+		IStation station = createStation("bond_street");
+		ILine line1 = createLine("central");
+		ILine line2 = createLine("northern");
 		IStation connectedStation = station.connected(line1);
 		assertNotNull(connectedStation);
 		System.out.println(connectedStation);
@@ -46,15 +46,15 @@ public class TestStation extends LocalLogicTest {
 	
 	@Test
 	public void testNumberConnections() {
-		IStation station = LogicObjectFactory.getDefault().create(Station.class, "bond_street");
+		IStation station = createStation("bond_street");
 		System.out.println("Number of connections of " + station + ": " + station.numberConnections());
 	}
 	
 	@Test
 	public void testIsConnected() {
-		IStation station1 = LogicObjectFactory.getDefault().create(Station.class, "bond_street");
-		IStation station2 = LogicObjectFactory.getDefault().create(Station.class, "oxford_circus");
-		IStation station3 = LogicObjectFactory.getDefault().create(Station.class, "charing_cross");
+		IStation station1 = createStation("bond_street");
+		IStation station2 = createStation("oxford_circus");
+		IStation station3 = createStation("charing_cross");
 		assertTrue(station1.connected(station2));
 		assertFalse(station1.connected(station3));
 	}
@@ -63,7 +63,7 @@ public class TestStation extends LocalLogicTest {
 	
 	@Test
 	public void testAllNearbyStations() {
-		IStation station = LogicObjectFactory.getDefault().create(Station.class, "bond_street");
+		IStation station = createStation("bond_street");
 		List<IStation> nearbyStations = station.nearby();
 		System.out.println("Stations nearby to " + station + ": " + nearbyStations.size());
 		for(IStation nearbyStation: nearbyStations) {
@@ -73,16 +73,16 @@ public class TestStation extends LocalLogicTest {
 	
 	@Test
 	public void testNumberNearbyStations() {
-		IStation station = LogicObjectFactory.getDefault().create(Station.class, "bond_street");
+		IStation station = createStation("bond_street");
 		System.out.println("Number of nearby stations of " + station + ": " + station.numberNearbyStations());
 	}
 	
 	@Test
 	public void testIsNearby() {
-		IStation station1 = LogicObjectFactory.getDefault().create(Station.class, "bond_street");
-		IStation station2 = LogicObjectFactory.getDefault().create(Station.class, "oxford_circus");
-		IStation station3 = LogicObjectFactory.getDefault().create(Station.class, "charing_cross");
-		IStation station4 = LogicObjectFactory.getDefault().create(Station.class, "piccadilly_circus");
+		IStation station1 = createStation("bond_street");
+		IStation station2 = createStation("oxford_circus");
+		IStation station3 = createStation("charing_cross");
+		IStation station4 = createStation("piccadilly_circus");
 		assertTrue(station1.nearby(station2));
 		assertTrue(station1.nearby(station3));
 		assertFalse(station1.nearby(station4));
@@ -92,10 +92,10 @@ public class TestStation extends LocalLogicTest {
 	
 	@Test
 	public void testIntermediateStations() {
-		IStation station1 = LogicObjectFactory.getDefault().create(Station.class, "bond_street");
-		IStation station2 = LogicObjectFactory.getDefault().create(Station.class, "oxford_circus");
-		IStation station3 = LogicObjectFactory.getDefault().create(Station.class, "piccadilly_circus");
-		IStation station4 = LogicObjectFactory.getDefault().create(Station.class, "inexisting_station");
+		IStation station1 = createStation("bond_street");
+		IStation station2 = createStation("oxford_circus");
+		IStation station3 = createStation("piccadilly_circus");
+		IStation station4 = createStation("inexisting_station");
 		
 		List<IStation> intermediateStations = station1.intermediateStations(station2);
 		assertEquals(intermediateStations.size(), 0);
@@ -111,17 +111,17 @@ public class TestStation extends LocalLogicTest {
 	
 	@Test
 	public void testNumberReachableStations() {
-		IStation station = LogicObjectFactory.getDefault().create(Station.class, "bond_street");
+		IStation station = createStation("bond_street");
 		System.out.println("Number of reachable stations from " + station + ": " + station.numberReachableStations());
 	}
 	
 	@Test
 	public void testIsReachable() {
-		IStation station1 = LogicObjectFactory.getDefault().create(Station.class, "bond_street");
-		IStation station2 = LogicObjectFactory.getDefault().create(Station.class, "oxford_circus");
-		IStation station3 = LogicObjectFactory.getDefault().create(Station.class, "charing_cross");
-		IStation station4 = LogicObjectFactory.getDefault().create(Station.class, "piccadilly_circus");
-		IStation station5 = LogicObjectFactory.getDefault().create(Station.class, "inexisting_station");
+		IStation station1 = createStation("bond_street");
+		IStation station2 = createStation("oxford_circus");
+		IStation station3 = createStation("charing_cross");
+		IStation station4 = createStation("piccadilly_circus");
+		IStation station5 = createStation("inexisting_station");
 		assertTrue(station1.reachable(station2));
 		assertTrue(station1.reachable(station3));
 		assertTrue(station1.reachable(station4));
