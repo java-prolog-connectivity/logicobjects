@@ -1,7 +1,10 @@
-package org.logicobjects.lib.examples.metro;
+package org.logicobjects.lib.examples.metro.test;
 
 import org.junit.Test;
 import org.logicobjects.core.LogicObjectFactory;
+import org.logicobjects.lib.examples.metro.Line;
+import org.logicobjects.lib.examples.metro.MetroFactory;
+import org.logicobjects.lib.examples.metro.Station;
 import org.logicobjects.test.LocalLogicTest;
 import static junit.framework.TestCase.*;
 

@@ -23,6 +23,24 @@ import javassist.bytecode.ParameterAnnotationsAttribute;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
 public class JavassistUtil {
+	
+	/**
+	 * From the Javassist documentation:
+	 * "By default, all the occurrences of the names of the class declaring m and the superclass are replaced with the name of the class and the superclass that the created method is added to. 
+	 * This is done whichever map is null or not. To prevent this replacement, call ClassMap.fix()."
+	 */
+	public static ClassMap fixedClassMap(Class clazz, ClassPool classPool) {
+		ClassMap classMap = new ClassMap();
+		classMap.fix(JavassistUtil.asCtClass(clazz, classPool));
+		Class superClass = clazz.getSuperclass();
+		if(superClass != null)
+			classMap.fix(JavassistUtil.asCtClass(superClass, classPool));
+		for(Class interfaze : clazz.getInterfaces())
+			classMap.fix(JavassistUtil.asCtClass(interfaze, classPool));
+		
+		return classMap;
+	}
+	
 /*
 	public static CtClass asCtClass(Class c) {
 		return asCtClass(c, ClassPool.getDefault());

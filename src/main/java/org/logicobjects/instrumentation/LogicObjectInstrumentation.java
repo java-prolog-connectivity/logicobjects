@@ -335,8 +335,8 @@ public class LogicObjectInstrumentation {
 	
 	private void createConstructors(CtClass son) {
 		CtConstructor[] parentConstructors = ctClassToExtend.getConstructors();
-		ClassMap classMap = new ClassMap();
-		classMap.fix(ctClassToExtend);
+		ClassMap classMap = JavassistUtil.fixedClassMap(classToExtend, classPool);
+
 		for(CtConstructor parentCtConstructor : parentConstructors) {
 			try {
 				CtConstructor newCtConstructor = new CtConstructor(parentCtConstructor, son, classMap);
@@ -415,16 +415,17 @@ public class LogicObjectInstrumentation {
 
 	
 	
+	
 	//TODO
 	private void overrideMethod(CtClass targetClass, CtMethod ctMethod) {
 		try {
-			ClassMap classMap = new ClassMap();
 			/**
 			 * From the Javassist documentation:
 			 * "By default, all the occurrences of the names of the class declaring m and the superclass are replaced with the name of the class and the superclass that the created method is added to. 
 			 * This is done whichever map is null or not. To prevent this replacement, call ClassMap.fix()."
 			 */
-			classMap.fix(JavassistUtil.asCtClass(this.classToExtend, classPool));
+			ClassMap classMap = JavassistUtil.fixedClassMap(classToExtend, classPool);
+			
 			/**
 			 * In the case that this class map is not included the following problem will occur:
 			 * - Situation: The overriding method contains references (its return value for example) to the parent class where the extended method was originally located

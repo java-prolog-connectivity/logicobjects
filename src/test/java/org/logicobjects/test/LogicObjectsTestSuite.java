@@ -2,7 +2,7 @@ package org.logicobjects.test;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import org.logicobjects.lib.examples.metro.MetroTestSuite;
+import org.logicobjects.lib.examples.metro.test.MetroTestSuite;
 import org.reflectiveutils.test.ReflectiveUtilsTestSuite;
 
 @RunWith(Suite.class)

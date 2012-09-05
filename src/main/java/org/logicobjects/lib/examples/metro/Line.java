@@ -7,7 +7,7 @@ import org.logicobjects.annotation.method.LMethod;
 
 
 @LObject(args = {"name"})
-public abstract class Line { 
+public abstract class Line implements ILine { 
 	
 	public Line() {}
 	
@@ -27,15 +27,5 @@ public abstract class Line {
 	
 	@Override
 	public String toString() {return name;}
-	
-	@LMethod
-	public abstract boolean connects(Station s1, Station s2);
-	
-	@LMethod(name = "connects", args = {"_", "_"})
-	public abstract int segments();
-	
-	
-	
-
 	
 }
