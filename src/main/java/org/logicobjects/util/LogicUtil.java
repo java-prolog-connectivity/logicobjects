@@ -2,18 +2,20 @@ package org.logicobjects.util;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.logicobjects.core.LogicEngine;
 
 import jpl.Atom;
 import jpl.Compound;
 import jpl.Term;
 import jpl.Util;
 import jpl.Variable;
+
+import org.logicobjects.core.LogicEngine;
+import org.logicobjects.util.termvisitor.CollectVariableNamesVisitor;
 
 
 /**
@@ -23,6 +25,22 @@ import jpl.Variable;
  */
 public class LogicUtil {
 
+	public static boolean containVariable(Term term, String variableName) {
+		return getVariablesNames(term).contains(variableName);
+	}
+	
+	/**
+	 * 
+	 * @param term
+	 * @return a list of variable names in the term sent as parameter. The order corresponds to the position of the variable in the term from left to right
+	 * 
+	 */
+	public static List<String> getVariablesNames(Term term) {
+		CollectVariableNamesVisitor visitor = new CollectVariableNamesVisitor();
+		visitor.visit(term);
+		return Arrays.asList(visitor.getVariableNames());
+	}
+	
 	/**
 	 * Answers an array of anonymous logic variables
 	 * @param n the number of variables in the array

@@ -16,16 +16,12 @@ public interface IStation {
 	@LMethod(name = "connected", args = {"_"})
 	public abstract int numberConnections();
 	
-	@LSolution("S")
-	@LMethod(args = {"S", "$1"})
+	@LMethod(args = {"LSolution", "$1"})
 	public abstract IStation connected(ILine line);
 
 	@LWrapper 
-	@LSolution("S")
-	@LMethod(args = {"S"})
+	@LMethod(args = {"LSolution"})
 	public abstract List<IStation> connected();
-	
-	
 	
 	@LMethod
 	public abstract boolean nearby(IStation station);
@@ -33,11 +29,9 @@ public interface IStation {
 	@LMethod(name = "nearby", args = {"_"})
 	public abstract int numberNearbyStations();
 
-	@LWrapper @LSolution("S")
-	@LMethod(args = {"S"})
+	@LWrapper
+	@LMethod(args = {"LSolution"})
 	public abstract List<IStation> nearby();
-
-
 
 	@LMethod
 	public abstract boolean reachable(IStation station);
@@ -45,7 +39,7 @@ public interface IStation {
 	@LMethod(name = "reachable", args = {"_"})
 	public abstract int numberReachableStations();
 
-	@LSolution("IntermediateStations")
-	@LMethod(name = "reachable", args = {"$1", "IntermediateStations"})
+	@LMethod(name = "reachable", args = {"$1", "LSolution"})
 	public abstract List<IStation> intermediateStations(IStation station);
+
 }

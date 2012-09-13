@@ -8,6 +8,7 @@ import java.util.Map;
 
 import jpl.Query;
 import jpl.Term;
+import jpl.Variable;
 
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.methodparameters.MethodArgumentsAdapter;
@@ -27,8 +28,9 @@ import org.logicobjects.annotation.method.LArgumentsAdapter.LArgsAdapterUtil;
 import org.logicobjects.annotation.method.LSolution;
 import org.logicobjects.annotation.method.LWrapper;
 import org.logicobjects.instrumentation.AbstractLogicMethodParser;
-import org.logicobjects.instrumentation.ParsedLogicMethod;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
+import org.logicobjects.instrumentation.ParsedLogicMethod;
+import org.logicobjects.util.LogicObjectsPreferences;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 import org.slf4j.Logger;
@@ -249,19 +251,26 @@ public abstract class AbstractLogicMethod {
 	}
 	
 	public Term getEachSolutionTerm(ParsedLogicMethod parsedLogicMethod) {
+		Term eachSolutionTerm = null;
 		LSolution aLSolution = getAnnotation(LSolution.class);
-		if(aLSolution == null)
-			return asTerm(parsedLogicMethod);
-		
-		String solutionString = parsedLogicMethod.getParsedData().getSolutionString();
-		if(solutionString == null || solutionString.isEmpty()) {
-			return asTerm(parsedLogicMethod);
-		} else {
-			LogicEngine engine = LogicEngine.getDefault();
-			return engine.textToTerm(solutionString);
+		if(aLSolution != null) {
+			String solutionString = parsedLogicMethod.getParsedData().getSolutionString();
+			if(solutionString != null && !solutionString.isEmpty()) {
+				LogicEngine engine = LogicEngine.getDefault();
+				eachSolutionTerm = engine.textToTerm(solutionString);
+			} 
 		}
+		if(eachSolutionTerm == null) {
+			Term goal = parsedLogicMethod.asQuery().goal();
+			if(LogicUtil.containVariable(goal, LogicObjectsPreferences.IMPLICIT_RETURN_VARIABLE))
+				eachSolutionTerm = new Variable(LogicObjectsPreferences.IMPLICIT_RETURN_VARIABLE);
+		}
+		if(eachSolutionTerm == null)
+			eachSolutionTerm = asTerm(parsedLogicMethod);
+		return eachSolutionTerm;
 	}
 	
+
 	/**
 	 * Answers the method and its arguments as a logic term
 	 * @param parsedLogicMethod

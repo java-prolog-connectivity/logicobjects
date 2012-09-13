@@ -6,9 +6,8 @@ public abstract class TermVisitor {
 	
 	
 	/**
-	 * given that Term is part of an external library, 
-	 * an accept method cannot be implemented there.
-	 * Then, this visitor could visit the children of Term without it explicitly accepting it
+	 * Term is part of an external library then an 'accept' method cannot be implemented there.
+	 * This visitor can visit the children of Term without it explicitly accepting it
 	 * @param term
 	 * @return
 	 */

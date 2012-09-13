@@ -19,6 +19,7 @@ public class LogicObjectsPreferences {
 	public final static String LOGTALKUSER = "LOGTALKUSER"; //logtalk environment variable TODO: remembering what this variable was for ...
 	//public final static String PROLOG_DIALECT = "PL";  //defines the prolog engine to use (DEPRECATED since this is decided by the JPLPATH environment variable
 	public final static String SYSTEM_TEMP_DIRECTORY = "tmp";
+	public final static String IMPLICIT_RETURN_VARIABLE = "LSolution";
 
 	private Properties properties;
 	
