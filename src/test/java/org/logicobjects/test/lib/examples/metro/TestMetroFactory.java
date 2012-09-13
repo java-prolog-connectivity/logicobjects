@@ -21,11 +21,11 @@ public class TestMetroFactory extends AbstractMetroTest {
 	public void testNewInstance() {
 		ILine line = createLine("line1");
 		assertNotNull(line);
-		assertEquals(line.getName(), "line1");
+		assertEquals(line.toString(), "line1");
 		
 		IStation station = createStation("station1");
 		assertNotNull(station);
-		assertEquals(station.getName(), "station1");
+		assertEquals(station.toString(), "station1");
 	}
 	
 }

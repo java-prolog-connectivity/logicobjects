@@ -33,7 +33,8 @@ public class MetroJpl implements IMetro {
 	@Override
 	public List<ILine> lines() {
 		String lineVarName = "Line";
-		Term message = new Compound("line", new Term[]{new Variable(lineVarName)});
+		Term[] arguments = new Term[]{new Variable(lineVarName)};
+		Term message = new Compound("line", arguments);
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		Hashtable<String, Term> solutions[] = query.allSolutions();
@@ -47,13 +48,14 @@ public class MetroJpl implements IMetro {
 
 	@Override
 	public ILine line(String name) {
-		Term message = new Compound("line", new Term[]{new Atom(name)});
+		ILine line = null;
+		Term[] arguments = new Term[]{new Atom(name)};
+		Term message = new Compound("line", arguments);
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		if(query.hasSolution())
-			return LineJpl.create(message);
-		else
-			return null;
+			line = LineJpl.create(message);
+		return line;
 	}
 	
 }

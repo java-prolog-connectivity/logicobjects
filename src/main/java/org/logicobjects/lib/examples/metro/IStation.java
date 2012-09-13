@@ -20,7 +20,8 @@ public interface IStation {
 	@LMethod(args = {"S", "$1"})
 	public abstract IStation connected(ILine line);
 
-	@LWrapper @LSolution("S")
+	@LWrapper 
+	@LSolution("S")
 	@LMethod(args = {"S"})
 	public abstract List<IStation> connected();
 	

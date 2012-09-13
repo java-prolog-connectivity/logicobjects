@@ -36,8 +36,9 @@ public abstract class AbstractLogicObjectDescriptor {
 		if(aLDelegationObject != null)
 			return create(aLDelegationObject);
 		
+		//if(true) throw new RuntimeException("Impossible to create Method invoker description from class: " + clazz.getSimpleName());
 		return new DefaultLogicObjectDescriptor();
-		//throw new RuntimeException("Impossible to create Method invoker description from class: " + clazz.getSimpleName());
+		
 	}
 	
 	public static AbstractLogicObjectDescriptor create(LObject aLObject) {
@@ -50,7 +51,13 @@ public abstract class AbstractLogicObjectDescriptor {
 	
 	
 	public static class DefaultLogicObjectDescriptor extends AbstractLogicObjectDescriptor {
+		/*
+		private Class clazz;
 		
+		public DefaultLogicObjectDescriptor(Class clazz) {
+			this.clazz = clazz;
+		}
+		*/
 		public String name() {
 			return "";
 		}

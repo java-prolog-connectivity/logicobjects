@@ -42,7 +42,8 @@ public class StationJpl implements IStation {
 
 
 	public boolean connected(IStation station) {
-		Term message = new Compound("connected", new Term[]{((StationJpl) station).asTerm()});
+		Term[] arguments = new Term[]{((StationJpl) station).asTerm()};
+		Term message = new Compound("connected", arguments);
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		return query.hasSolution();
@@ -50,7 +51,8 @@ public class StationJpl implements IStation {
 
 
 	public int numberConnections() {
-		Term message = new Compound("connected", new Term[]{new Variable("_")});
+		Term[] arguments = new Term[]{new Variable("_")};
+		Term message = new Compound("connected", arguments);
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		return query.allSolutions().length;
@@ -58,22 +60,25 @@ public class StationJpl implements IStation {
 
 
 	public IStation connected(ILine line) {
+		IStation connectedStation = null;
 		String stationVarName = "Station";
-		Term message = new Compound("connected", new Term[]{new Variable(stationVarName), ((LineJpl) line).asTerm()});
+		Term[] arguments = new Term[]{new Variable(stationVarName), ((LineJpl) line).asTerm()};
+		Term message = new Compound("connected", arguments);
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		Hashtable<String, Term> solution = query.oneSolution();
 		if(solution != null) {
 			Term term = solution.get(stationVarName);
-			return create(term);
-		} else
-			return null;
+			connectedStation = create(term);
+		}
+		return connectedStation;
 	}
 
 
 	public List<IStation> connected() {
 		String stationVarName = "Station";
-		Term message = new Compound("connected", new Term[]{new Variable(stationVarName)});
+		Term[] arguments = new Term[]{new Variable(stationVarName)};
+		Term message = new Compound("connected", arguments);
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		Hashtable<String, Term> solutions[] = query.allSolutions();
@@ -87,7 +92,8 @@ public class StationJpl implements IStation {
 
 
 	public boolean nearby(IStation station) {
-		Term message = new Compound("nearby", new Term[]{((StationJpl) station).asTerm()});
+		Term[] arguments = new Term[]{((StationJpl) station).asTerm()};
+		Term message = new Compound("nearby", arguments);
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		return query.hasSolution();
@@ -95,7 +101,8 @@ public class StationJpl implements IStation {
 
 
 	public int numberNearbyStations() {
-		Term message = new Compound("nearby", new Term[]{new Variable("_")});
+		Term[] arguments = new Term[]{new Variable("_")};
+		Term message = new Compound("nearby", arguments);
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		return query.allSolutions().length;
@@ -104,7 +111,8 @@ public class StationJpl implements IStation {
 
 	public List<IStation> nearby() {
 		String stationVarName = "Station";
-		Term message = new Compound("nearby", new Term[]{new Variable(stationVarName)});
+		Term[] arguments = new Term[]{new Variable(stationVarName)};
+		Term message = new Compound("nearby", arguments);
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		Hashtable<String, Term> solutions[] = query.allSolutions();
@@ -118,7 +126,8 @@ public class StationJpl implements IStation {
 
 
 	public boolean reachable(IStation station) {
-		Term message = new Compound("reachable", new Term[]{((StationJpl) station).asTerm()});
+		Term[] arguments = new Term[]{((StationJpl) station).asTerm()};
+		Term message = new Compound("reachable", arguments);
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		return query.hasSolution();
@@ -126,7 +135,8 @@ public class StationJpl implements IStation {
 
 
 	public int numberReachableStations() {
-		Term message = new Compound("reachable", new Term[]{new Variable("_")});
+		Term[] arguments = new Term[]{new Variable("_")};
+		Term message = new Compound("reachable", arguments);
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		return query.allSolutions().length;
@@ -134,8 +144,10 @@ public class StationJpl implements IStation {
 
 
 	public List<IStation> intermediateStations(IStation station) {
+		List<IStation> intermediateStations = null;
 		String stationsVarName = "Stations";
-		Term message = new Compound("reachable", new Term[]{((StationJpl) station).asTerm(), new Variable(stationsVarName)});
+		Term[] arguments = new Term[]{((StationJpl) station).asTerm(), new Variable(stationsVarName)};
+		Term message = new Compound("reachable", arguments);
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		Hashtable<String, Term> solution = query.oneSolution();
@@ -146,8 +158,8 @@ public class StationJpl implements IStation {
 			for(Term term : terms) {
 				stations.add(create(term));
 			}
-			return stations;
-		} else
-			return null;
+			intermediateStations = stations;
+		}
+		return intermediateStations;
 	}
 }

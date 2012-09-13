@@ -12,7 +12,7 @@ import jpl.Variable;
 
 import org.logicobjects.adapter.Adapter;
 import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
-import org.logicobjects.annotation.IgnoreAdapter;
+import org.logicobjects.annotation.IgnoreLAdapter;
 import org.logicobjects.core.LogicObjectClass;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
@@ -45,7 +45,7 @@ public abstract class AbstractLContext {
 	
 	protected void filterAdapters(Set<Class<? extends Adapter>> foundAdapters, Set<Class<? extends WrapperAdapter>> wrapperAdapters) {
 		for(Class<? extends Adapter> adapterClass : foundAdapters) {
-			if(adapterClass.getAnnotation(IgnoreAdapter.class) == null) {
+			if(adapterClass.getAnnotation(IgnoreLAdapter.class) == null) {
 				if(WrapperAdapter.class.isAssignableFrom(adapterClass) && !Modifier.isAbstract(adapterClass.getModifiers()))
 					wrapperAdapters.add((Class<? extends WrapperAdapter>) adapterClass);
 			}

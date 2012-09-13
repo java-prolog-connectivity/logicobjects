@@ -35,8 +35,8 @@ public class BeanPropertyAdaptationContext extends AnnotatedElementAdaptationCon
 		Class propertyDeclaringClass = LogicObjectClass.findGuidingClass(clazz);
 		
 		if(propertyDeclaringClass != null) {
-			List<Class> guidingCLasses = LogicObjectClass.findAllLogicClasses(propertyDeclaringClass);
-			for(Class aGuidingClass : guidingCLasses) {
+			List<LogicObjectClass> logicClasses = LogicObjectClass.findAllLogicObjectClasses(propertyDeclaringClass);
+			for(LogicObjectClass aGuidingClass : logicClasses) {
 				try {
 					propertyField = aGuidingClass.getDeclaredField(propertyName);
 					if(propertyField != null)

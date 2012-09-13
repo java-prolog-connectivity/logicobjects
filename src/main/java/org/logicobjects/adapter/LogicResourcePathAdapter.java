@@ -8,6 +8,7 @@ import jpl.Term;
 
 import org.logicobjects.core.LogicEngine;
 import org.logicobjects.core.LogicObjectFactory;
+import org.logicobjects.resource.LogicResource;
 
 /*
  * Adapt a String path as a term representation
@@ -15,7 +16,7 @@ import org.logicobjects.core.LogicObjectFactory;
  * or in Prolog style dir1(dir2(dir3))
  */
 
-public class LogicResourcePathAdapter extends LogicAdapter<String, Term> {
+public class LogicResourcePathAdapter extends LogicAdapter<LogicResource, Term> {
 
 	private URL url;
 	
@@ -24,15 +25,17 @@ public class LogicResourcePathAdapter extends LogicAdapter<String, Term> {
 	}
 	
 	@Override
-	public Term adapt(String classPathFileName) {
+	public Term adapt(LogicResource resource) {
 		//if(true)
 			//return LogicEngine.getDefault().textToTerm(classPathFileName);
 		
 		//String[] atoms = classPathFileName.split("\\."); //escaping the dot
-		String[] tokens = classPathFileName.split("/");
+		
+		String resourceName = resource.normalizedFileName();
+		String[] tokens = resourceName.split("/");
 		
 		if(tokens.length > 1) {
-			String resourcePath = LogicObjectFactory.getDefault().getResourceManager().getResourcePath(classPathFileName, url);
+			String resourcePath = LogicObjectFactory.getDefault().getResourceManager().getResourcePath(resourceName, url);
 			//return makeCompound(atoms);
 			return new Atom(resourcePath);
 		}

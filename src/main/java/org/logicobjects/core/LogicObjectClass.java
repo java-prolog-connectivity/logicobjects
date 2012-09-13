@@ -1,24 +1,18 @@
 package org.logicobjects.core;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import java.util.Set;
 
-import jpl.Term;
-
-import org.logicobjects.adapter.LogicResourcePathAdapter;
 import org.logicobjects.adapter.adaptingcontext.AbstractLogicObjectDescriptor;
 import org.logicobjects.annotation.LDelegationObject;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.util.LogicUtil;
-import org.reflections.util.ClasspathHelper;
 import org.reflectiveutils.ReflectionUtil;
 import org.reflectiveutils.visitor.FindFirstTypeVisitor;
 import org.reflectiveutils.visitor.TypeVisitor.InterfaceMode;
@@ -51,11 +45,14 @@ public class LogicObjectClass {
 			return isLogicClass(guidingClass)?new LogicObjectClass(guidingClass):null;
 		}
 		else {
-			return new LogicObjectClass(ReflectionUtil.findFirstNonSyntheticClass(descendant));
+			return createFromFirstNonSyntheticClass(descendant);
 		}
 	}
 	
-
+	private static LogicObjectClass createFromFirstNonSyntheticClass(Class descendant) {
+		return new LogicObjectClass(ReflectionUtil.findFirstNonSyntheticClass(descendant));
+	}
+	
 	public static LogicObjectClass findLogicMethodInvokerClass(Class descendant) {
 		Class invokerClass = findMethodInvokerClass(descendant);
 		if(invokerClass != null) {
@@ -68,10 +65,32 @@ public class LogicObjectClass {
 		return null;
 	}
 	
-	
 	public Class getWrappedClass() {
 		return logicClass;
 	}
+	
+	public String getSimpleName() {
+		return logicClass.getSimpleName();
+	}
+	
+	public Package getPackage() {
+		return logicClass.getPackage();
+	}
+	
+	public URL getResource(String name) {
+		return logicClass.getResource(name);
+	}
+	
+	public Field getDeclaredField(String name) throws NoSuchFieldException, SecurityException {
+		return logicClass.getDeclaredField(name);
+	}
+	
+	public Method getDeclaredMethod(String name) throws NoSuchMethodException, SecurityException {
+		return logicClass.getDeclaredMethod(name);
+	}
+	
+	
+	
 	
 	
 	public AbstractLogicObjectDescriptor getLogicObjectDescriptor() {
@@ -150,9 +169,12 @@ public class LogicObjectClass {
 		return finderVisitor.getFoundType();
 	}
 	
-
+	public static boolean hasGuidingClass(Class clazz) {
+		return findGuidingClass(clazz) != null;
+	}
+	
 	/**
-	 * The guiding class is the first class in the hierarchy that either implements TermObject, has a LogicObject annotation, or a LogicTerm annotation
+	 * The guiding class is the first class in the hierarchy that either implements ITermObject, has a LogicObject annotation, or a LogicTerm annotation
 	 * @param candidateClass
 	 * @return
 	 */
@@ -165,17 +187,45 @@ public class LogicObjectClass {
 			return findGuidingClass(candidateClass.getSuperclass());
 	}
 	
-	public static List<Class> findAllLogicClasses(Class clazz) {
+	private static List<LogicObjectClass> asLogicObjectClasses(List<Class> logicClasses) {
+		List<LogicObjectClass> logicObjectClasses = new ArrayList<>();
+		for(Class clazz : logicClasses)
+			logicObjectClasses.add(new LogicObjectClass(clazz));
+		return logicObjectClasses;
+	}
+	
+	
+	/**
+	 * Answers a list of logic object classes starting from the more specialized
+	 * If there is not a guiding class in the hierarchy, a default logic object class will be chosen according to the one arg constructor of LogicObjectClass
+	 * Otherwise, a list will all the logic object classes (classes annotated with LObject) is collected and transformed to a list of LogicObjectClass
+	 * This list can be empty since it is possible that the guiding class is a class implementing ITermObject or annotated with an explicit adapter
+	 * This method is useful from implementing the loading mechanism
+	 * In order to load a logic class, first its ancestor dependencies must be loaded
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	public static List<LogicObjectClass> findAllLogicObjectClasses(Class clazz) {
+		if(hasGuidingClass(clazz)) {
+			List<Class> logicObjectClasses = findAllAnnotatedLogicClasses(clazz);
+			return asLogicObjectClasses(logicObjectClasses);
+		} else {
+			return Arrays.asList(new LogicObjectClass[] {createFromFirstNonSyntheticClass(clazz)});
+		}	
+	} 
+	
+	public static List<Class> findAllAnnotatedLogicClasses(Class clazz) {
 		List<Class> logicClasses = new ArrayList<Class>();
-		findAllLogicClasses(clazz, logicClasses);
+		findAllAnnotatedLogicClasses(clazz, logicClasses);
 		return logicClasses;
 	}
 	
-	private static void findAllLogicClasses(Class clazz, List<Class> foundClasses) {
+	private static void findAllAnnotatedLogicClasses(Class clazz, List<Class> foundClasses) {
 		Class logicClass = findGuidingClass(clazz);
 		if(logicClass != null && isLogicClass(logicClass)) {
 			foundClasses.add(logicClass);
-			findAllLogicClasses(clazz.getSuperclass(), foundClasses);
+			findAllAnnotatedLogicClasses(clazz.getSuperclass(), foundClasses);
 		}
 	}
 	
@@ -207,190 +257,7 @@ public class LogicObjectClass {
 		
 		
 		
-		
-	public static boolean loadDependencies(Class clazz) {
-		boolean result = true;
-		LogicObjectClass logicObjectClass = findLogicObjectClass(clazz);
-		if(logicObjectClass != null) {
-			result = logicObjectClass.loadDependencies();
-		} else {
-			loadDefaultDependencies(clazz);
-		}
-		return result;
-	}
-		
-		
-	public boolean loadDependencies() {
-		if(!getLogicObjectDescriptor().automaticImport())
-			return false;
-		boolean result = true; //we have succeed until we demonstrate the contrary :)
-		LogicResourcePathAdapter resourceAdapter = new LogicResourcePathAdapter(ClasspathHelper.forClass(logicClass));
-		
-		//LOADING PROLOG MODULES
-		String[] descriptorModules = getLogicObjectDescriptor().modules(); //modules defined in the descriptor (e.g., with the LObject annotation)
-		String[] bundleModules = getBundleModules(); //modules defined in the property file
-		if(bundleModules == null) {
-			bundleModules = new String[] {};
-		}
-		Set<String> allModules = new LinkedHashSet<String>(); //Set is used to avoid duplicates. Using LinkedHashSet instead of HashSet (the faster), since the former will preserve the insertion order
-		allModules.addAll(Arrays.asList(bundleModules));
-		allModules.addAll(Arrays.asList(descriptorModules));
-		
-		allModules = normalizeFileNames(allModules);
-		
-		List<Term> moduleTerms = new ArrayList<Term>();
-		resourceAdapter.adapt(allModules, moduleTerms);
-		
-		result = LogicEngine.getDefault().ensureLoaded(moduleTerms); //loading prolog modules
-		
-		
-		//LOADING LOGTALK OBJECTS
-		String[] descriptorImports = logicObjectDescriptor.imports();
-		String[] bundleImports = getBundleImports();
-		if(bundleImports == null) {
-			bundleImports = new String[] {};
-		}
-		String[] defaultImports = getLogicObjectClassDefaultImports();
-		
-		Set<String> allImports = new LinkedHashSet<String>(); //Set is used to avoid duplicates.
-		allImports.addAll(Arrays.asList(bundleImports));
-		allImports.addAll(Arrays.asList(descriptorImports));
-		allImports.addAll(Arrays.asList(defaultImports));
-		
-		allImports = normalizeFileNames(allImports);
-		
-		List<Term> importTerms = new ArrayList<Term>();
-		resourceAdapter.adapt(allImports, importTerms);
-		
-		result = LogicEngine.getDefault().logtalkLoad(importTerms) && result; //loading Logtalk objects
 
-		loadDefaultDependencies(logicClass);
-		return result;
-	}
-	
-	private Set<String> normalizeFileNames(Set<String> names) {
-		Set<String> fileNames = new LinkedHashSet<String>();
-		for(String s : names) {
-			fileNames.add(normalizeFileName(s));
-		}
-		return fileNames;
-	}
-	
-	public static String normalizeFileName(String name) {
-		return name.trim().replaceAll("\\.(lgt|pl)", "");
-	}
-
-	/**
-	 * Load the default dependencies of a class
-	 * These dependencies are based on the class name only, it does not assume that the class is annotated with LObject or LDelegationObject (e.g., it just implements the ITermObject interface or it is annotated with the LTermAdapter adapter)
-	 * @param clazz
-	 */
-	public static void loadDefaultDependencies(Class clazz) {
-		LogicResourcePathAdapter resourceAdapter = new LogicResourcePathAdapter(ClasspathHelper.forClass(clazz));
-		String[] defaultImports = getClassDefaultImports(clazz);
-		List<Term> importTerms = new ArrayList<Term>();
-		resourceAdapter.adapt(Arrays.asList(defaultImports), importTerms);
-		LogicEngine.getDefault().logtalkLoad(importTerms);
-	}
-	
-	
-	
-	
-	
-	
-	private static final String IMPORTS = "imports"; //"objects" in logicobjects files will be loaded with logtalk_load
-	private static final String MODULES = "modules"; //"modules" in logicobjects files will be loaded with ensure_loaded
-	public static final String BUNDLE_NAME = "logicobjects";
-	
-	public ResourceBundle getBundle() {
-		try {
-			return ResourceBundle.getBundle(logicClass.getPackage().getName() + "."+BUNDLE_NAME);
-		} catch(MissingResourceException e) {
-			return null;
-		}
-	}
-	
-	public String[] getBundleImports() {
-		return getBundleProperty(IMPORTS);
-	}
-	
-	public String[] getBundleModules() {
-		return getBundleProperty(MODULES);
-	}
-	
-	public String[] getBundleProperty(String propertyName) {
-		ResourceBundle bundle = getBundle();
-		if(bundle == null)
-			return null;
-		if(bundle.containsKey(propertyName)) {
-			String stringProperties = bundle.getString(propertyName);
-			String[] properties = stringProperties.split(",");
-			return properties;
-		} else
-			return new String[] {};
-	}
-	
-
-	
-	private static boolean addIfLgtFileExists(String fileName, Class clazz, List<String> destiny) {
-		if(fileName == null || fileName.equals(""))
-			return false;
-		
-		
-		/**
-		 * the getResource method will append before the resource name the path of the class
-		 * note that this method is not case sensitive: fileName will match any file with the same name without taking into consideration its case
-		 */
-		String fileWithExtension = fileName+".lgt";
-		URL url = clazz.getResource(fileWithExtension);
-		if(url != null) { 
-			String packageName = clazz.getPackage().getName();
-			String resourceName = packageName.replaceAll("\\.", "/");
-			resourceName += "/" + fileWithExtension;
-			destiny.add(normalizeFileName(resourceName));
-			//String urlFileName = url.getFile();
-//			System.out.println("**************************************************************");
-//			System.out.println(urlFileName);
-//			System.out.println("**************************************************************");
-			//destiny.add(packageName+"."+fileName);
-			//destiny.add(normalizeFileName(urlFileName));
-			return true;
-		}
-		return false;
-	}
-	
-	
-	
-	public String[] getLogicObjectClassDefaultImports() {
-		List<String> defaultImports = new ArrayList<String>();
-		addIfLgtFileExists(getLogicObjectDescriptor().name(), logicClass, defaultImports);
-		return defaultImports.toArray(new String[] {});
-	}
-	
-	
-	public static String[] getClassDefaultImports(Class clazz) {
-		List<String> defaultImports = new ArrayList<String>();
-		/**
-		 * It is not a good idea to look for a .lgt class with exactly the same name than the class
-		 * 1) If it starts with a capital letter then it does not respect the Prolog conventions
-		 * 2) If the only variation in the java name and the prolog name (obtained with 'javaClassNameToProlog') the resource will be loaded twice
-		 */
-		addIfLgtFileExists(clazz.getSimpleName(), clazz, defaultImports);
-		addIfLgtFileExists(LogicUtil.javaClassNameToProlog(clazz.getSimpleName()), clazz, defaultImports);
-		return defaultImports.toArray(new String[] {});
-	}
-	
-	
-	
-	
-
-	
-	
-	
-	
-
-	
-	
 	
 	
 	
@@ -429,6 +296,8 @@ public class LogicObjectClass {
 		}	
 		return false;
 	}
+
+
 	
 
 

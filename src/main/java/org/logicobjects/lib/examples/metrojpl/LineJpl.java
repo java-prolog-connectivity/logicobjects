@@ -17,7 +17,7 @@ public class LineJpl implements ILine {
 		this.name = name;
 	}
 	
-	@Override
+	//@Override
 	public String getName() {
 		return name;
 	}
@@ -37,7 +37,8 @@ public class LineJpl implements ILine {
 
 
 	public boolean connects(IStation s1, IStation s2) {
-		Term message = new Compound("connects", new Term[]{((StationJpl) s1).asTerm(), ((StationJpl) s2).asTerm()});
+		Term[] arguments = new Term[]{((StationJpl) s1).asTerm(), ((StationJpl) s2).asTerm()};
+		Term message = new Compound("connects", arguments);
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		return query.hasSolution();
@@ -45,7 +46,8 @@ public class LineJpl implements ILine {
 
 
 	public int segments() {
-		Term message = new Compound("connects", new Term[]{new Variable("_"), new Variable("_")});
+		Term[] arguments = new Term[]{new Variable("_"), new Variable("_")};
+		Term message = new Compound("connects", arguments);
 		Term objectMessage = new Compound("::", new Term[] {asTerm(), message});
 		Query query = new Query(objectMessage);
 		return query.allSolutions().length;

@@ -1,7 +1,6 @@
 package org.logicobjects.core;
 
 
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.net.URL;
@@ -22,6 +21,7 @@ public class LogicObjectFactory {
 	private static LogicObjectFactory factory;
 	
 	private ResourceManager resourceManager;
+	private LogicDependenciesLoader logicDependenciesLoader;
 	
 	public static LogicObjectFactory getDefault() {
 		if(factory == null)
@@ -39,6 +39,7 @@ public class LogicObjectFactory {
 	private LogicObjectFactory() {
 		String tmpDir = LogicEngine.getDefault().getPreferences().getTmpDirectory();
 		resourceManager = new ResourceManager(tmpDir);
+		logicDependenciesLoader = new LogicDependenciesLoader();
 	}
 
 	public ResourceManager getResourceManager(){
@@ -90,7 +91,7 @@ public class LogicObjectFactory {
 				long startTime = System.nanoTime();
 				verifyClass(clazz);
 				resourceManager.process(ClasspathHelper.forClass(clazz));
-				LogicObjectClass.loadDependencies(clazz); //load the dependencies in the Prolog engine
+				logicDependenciesLoader.loadDependencies(clazz); //load the dependencies in the Prolog engine
 				long endTimeDependencies = System.nanoTime();
 				instantiatingClass = instrumentation.getExtendingClass(); //answers the extending class. Generates it if needed.
 				long endTimeInstrumentation = System.nanoTime();
