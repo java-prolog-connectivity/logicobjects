@@ -24,7 +24,8 @@ public class TestLine extends AbstractMetroTest  {
 	@Test
 	public void testNumberSegments() {
 		ILine line1 = createLine("central");
-		System.out.println("Number of segments of line " + line1 + ": " + line1.segments());
+		assertEquals(line1.segments(), 2);
+		//System.out.println("Number of segments of line " + line1 + ": " + line1.segments());
 		
 		ILine line2 = createLine("unexisting_line");
 		assertEquals(line2.segments(), 0);

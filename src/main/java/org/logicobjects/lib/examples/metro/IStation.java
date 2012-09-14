@@ -16,9 +16,11 @@ public interface IStation {
 	@LMethod(name = "connected", args = {"_"})
 	public abstract int numberConnections();
 	
+	@LSolution("LSolution")
 	@LMethod(args = {"LSolution", "$1"})
 	public abstract IStation connected(ILine line);
 
+	@LSolution("LSolution")
 	@LWrapper 
 	@LMethod(args = {"LSolution"})
 	public abstract List<IStation> connected();
@@ -29,6 +31,7 @@ public interface IStation {
 	@LMethod(name = "nearby", args = {"_"})
 	public abstract int numberNearbyStations();
 
+	@LSolution("LSolution")
 	@LWrapper
 	@LMethod(args = {"LSolution"})
 	public abstract List<IStation> nearby();
@@ -39,6 +42,7 @@ public interface IStation {
 	@LMethod(name = "reachable", args = {"_"})
 	public abstract int numberReachableStations();
 
+	@LSolution("LSolution")
 	@LMethod(name = "reachable", args = {"$1", "LSolution"})
 	public abstract List<IStation> intermediateStations(IStation station);
 

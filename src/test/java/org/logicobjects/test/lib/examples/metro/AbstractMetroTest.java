@@ -1,18 +1,15 @@
 package org.logicobjects.test.lib.examples.metro;
 
-import java.util.Arrays;
-import java.util.Collection;
-
-import org.junit.runners.Parameterized.Parameters;
 import org.logicobjects.lib.examples.metro.ILine;
 import org.logicobjects.lib.examples.metro.IMetro;
 import org.logicobjects.lib.examples.metro.IMetroFactory;
 import org.logicobjects.lib.examples.metro.IStation;
 import org.logicobjects.test.LocalLogicTest;
-import org.logicobjects.test.lib.examples.metrojpl.MetroJplObjectProvider;
 
 public class AbstractMetroTest extends LocalLogicTest implements IMetroObjectProvider {
+	
 
+	
 	private IMetroObjectProvider metroObjectProvider;
 	
 	

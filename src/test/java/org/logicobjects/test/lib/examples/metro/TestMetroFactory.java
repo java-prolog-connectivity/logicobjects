@@ -19,13 +19,13 @@ public class TestMetroFactory extends AbstractMetroTest {
 	
 	@Test
 	public void testNewInstance() {
-		ILine line = createLine("line1");
-		assertNotNull(line);
-		assertEquals(line.toString(), "line1");
-		
-		IStation station = createStation("station1");
-		assertNotNull(station);
-		assertEquals(station.toString(), "station1");
+			ILine line = createLine("line1");
+			assertNotNull(line);
+			assertEquals(line.toString(), "line1");
+			
+			IStation station = createStation("station1");
+			assertNotNull(station);
+			assertEquals(station.toString(), "station1");
 	}
 	
 }
