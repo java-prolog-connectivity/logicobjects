@@ -18,14 +18,14 @@ public class TestMetro extends AbstractMetroTest {
 		IMetro metro = createMetro();
 		List<ILine> lines = metro.lines();
 		assertNotNull(lines);
-		/*
+		
 		System.out.println("Number of lines: " + lines.size());
 		System.out.print("Lines: ");
 		for(ILine line : lines) {
 			System.out.print(line + " ");
 		}
 		System.out.println();
-		*/
+		
 	}
 	
 	@Test

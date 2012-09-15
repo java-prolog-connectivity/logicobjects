@@ -32,10 +32,10 @@ public class AnnotatedObjectToTermAdapter<From> extends Adapter<From, Term> {
 			annotatedContext = new ClassAdaptationContext(object.getClass()); //the current context is null, then create default context
 		}
 		if(annotatedContext!=null) {
-			if(annotatedContext.hasObjectToTermAdapter()) { //first check if there is an explicit adapter
+			if(annotatedContext.hasObjectToTermAdapter()) { //first check if there is an explicit adapter, in the current implementation, an Adapter annotation overrides any method invoker description
 				return adaptToTermWithAdapter(object, annotatedContext);
 			}
-			else if(annotatedContext.hasLogicObjectDescription()) { //in the current implementation, an Adapter annotation overrides any method invoker description
+			else if(annotatedContext.hasLogicObjectDescription()) { 
 				return adaptToTermFromDescription(object, annotatedContext);
 			}
 		}
@@ -65,6 +65,8 @@ public class AnnotatedObjectToTermAdapter<From> extends Adapter<From, Term> {
 		}
 		return new LogicObject(logicObjectName, arguments).asTerm();
 	}
+	
+	
 	
 
 	/**

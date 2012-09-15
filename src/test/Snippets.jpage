@@ -1,0 +1,9 @@
+
+com.google.common.primitives.Primitives.wrap(int.class);
+com.google.common.primitives.Primitives.wrap(Byte.class);
+com.google.common.primitives.Primitives.wrap(java.math.BigInteger.class);
+
+com.google.common.primitives.Primitives.wrap(Object.class);
+
+com.google.common.primitives.Primitives.isWrapperType(java.math.BigInteger.class);
+com.google.common.primitives.Primitives.isWrapperType(Short.class);

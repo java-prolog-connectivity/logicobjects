@@ -6,10 +6,10 @@ public interface ILine {
 
 	//public String getName(); //not a logic method, just to facilitate testing
 	
-	@LMethod
-	public abstract boolean connects(IStation s1, IStation s2);
+	//@LMethod
+	public boolean connects(IStation s1, IStation s2);
 	
 	@LMethod(name = "connects", args = {"_", "_"})
-	public abstract int segments();
+	public int segments();
 	
 }

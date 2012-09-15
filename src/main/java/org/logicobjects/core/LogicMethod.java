@@ -2,35 +2,30 @@ package org.logicobjects.core;
 
 import java.lang.reflect.Method;
 
-import jpl.Atom;
-import jpl.Compound;
 import jpl.Query;
-import jpl.Term;
 
 import org.logicobjects.adapter.LogicObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.MethodInvokerAdaptationContext;
-import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
+import org.logicobjects.annotation.method.LExpression;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LMethod.LMethodUtil;
-import org.logicobjects.annotation.method.LSolution;
-import org.logicobjects.instrumentation.ParsedLogicMethod;
+import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
-import org.logicobjects.util.AnnotationConstants;
-import org.logicobjects.util.LogicUtil;
+import org.logicobjects.instrumentation.ParsedLogicMethod;
 
 public class LogicMethod extends AbstractLogicMethod {
 
 	private LMethod aLMethod;
 	
 	public static boolean isLogicMethod(Method method) {
-		return method.getAnnotation(LMethod.class) != null;
+		return method.getAnnotation(LMethod.class) != null || (!method.isAnnotationPresent(LQuery.class) && !method.isAnnotationPresent(LExpression.class));
 	}
 	
 	public LogicMethod(Method method) {
 		super(method);
 		aLMethod = (LMethod)getAnnotation(LMethod.class);
-		if(aLMethod == null)
-			throw new RuntimeException("The method "+getWrappedMethod().getName() + " is not a logic method");
+		//if(aLMethod == null)
+			//throw new RuntimeException("The method "+getWrappedMethod().getName() + " is not a logic method");
 	}
 
 	
@@ -68,7 +63,9 @@ public class LogicMethod extends AbstractLogicMethod {
 
 	@Override
 	public String customMethodName() {
-		return aLMethod.name();
+		if(aLMethod != null)
+			return aLMethod.name();
+		return null;
 	}
 
 	

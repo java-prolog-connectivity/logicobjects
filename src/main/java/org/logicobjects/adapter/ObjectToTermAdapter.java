@@ -15,7 +15,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import jpl.Atom;
 import jpl.Term;
 
+import org.logicobjects.adapter.adaptingcontext.AbstractLogicObjectDescriptor;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
+import org.logicobjects.adapter.adaptingcontext.AnnotatedElementAdaptationContext;
+import org.logicobjects.adapter.adaptingcontext.BeanPropertyAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.ClassAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.FieldAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.MethodAdaptationContext;
@@ -28,7 +31,10 @@ import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.annotation.LTermAdapter.LTermAdapterUtil;
 import org.logicobjects.core.ITermObject;
+import org.logicobjects.core.LogicObject;
 import org.logicobjects.core.LogicObjectClass;
+import org.logicobjects.util.LogicUtil;
+import org.reflectiveutils.ReflectionUtil;
 
 import com.google.common.primitives.Primitives;
 
@@ -128,11 +134,17 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 		if(ImplementationMap.isCollectionObject(object)) 
 			return new AnyCollectionToTermAdapter().adapt(object, adaptingContext);
 		
-		throw new ObjectToTermException(object); //no idea how to adapt the object
+		return adaptToTermFromClass(ReflectionUtil.findFirstNonSyntheticClass(object.getClass()));
+		//throw new ObjectToTermException(object); //no idea how to adapt the object
 	}
 
 	public static Term asTerm(Object object) {
 		return new ObjectToTermAdapter().adapt(object);
 	}
 	
+	protected Term adaptToTermFromClass(Class clazz) {
+		String logicObjectName = LogicUtil.javaClassNameToProlog(clazz.getSimpleName());
+		return new LogicObject(logicObjectName, new Term[]{}).asTerm();
+	}
+
 }

@@ -402,6 +402,8 @@ public class LogicObjectInstrumentation {
 	
 	
 	private static Method[] methodsToOverride(Class c) {
+		return ReflectionUtil.getAllAbstractMethods(c).toArray(new Method[]{});
+		/*
 		List<Method> methods = new ArrayList<Method>();
 		for(Method m : c.getMethods()) {
 			//System.out.println("Method candidate: "+m.getName()+". Generic string: "+m.toGenericString());
@@ -411,6 +413,7 @@ public class LogicObjectInstrumentation {
 			} 
 		}
 		return methods.toArray(new Method[] {});
+		*/
 	}
 
 	

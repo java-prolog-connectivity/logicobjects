@@ -11,7 +11,7 @@ public abstract class RawLogicQuery extends AbstractLogicMethod {
 	protected LQuery aLQuery;
 	
 	public static boolean isRawQuery(Method method) {
-		return !LogicMethod.isLogicMethod(method) && (method.isAnnotationPresent(LQuery.class) || method.isAnnotationPresent(LSolution.class) || method.isAnnotationPresent(LExpression.class));
+		return !LogicMethod.isLogicMethod(method);//&& (method.isAnnotationPresent(LQuery.class) || method.isAnnotationPresent(LExpression.class));
 	}
 	
 	public static RawLogicQuery create(Method method) {

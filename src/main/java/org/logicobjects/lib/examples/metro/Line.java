@@ -1,14 +1,11 @@
 package org.logicobjects.lib.examples.metro;
 
 import org.logicobjects.annotation.LObject;
-import org.logicobjects.annotation.method.LMethod;
-
-
 
 
 @LObject(args = {"name"})
 public abstract class Line implements ILine { 
-	
+
 	public Line() {}
 	
 	public Line(String name) {
@@ -27,5 +24,5 @@ public abstract class Line implements ILine {
 	
 	@Override
 	public String toString() {return name;}
-	
+
 }

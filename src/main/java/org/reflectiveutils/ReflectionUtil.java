@@ -8,17 +8,101 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.logicobjects.lib.examples.metro.Line;
 import org.reflectiveutils.visitor.FindFirstTypeVisitor;
 import org.reflectiveutils.visitor.TypeVisitor;
 import org.reflectiveutils.visitor.TypeVisitor.InterfaceMode;
 
 public class ReflectionUtil {
 
+	
+	/**
+	 * Answers if the two methods can handle the same message
+	 * This is true if they have the same name and same number and type of parameters
+	 * (the return type is not relevant)
+	 * @param m1
+	 * @param m2
+	 * @return
+	 */
+	public static boolean handleSameMessage(Method m1, Method m2) {
+		/*
+		if(!m1.getReturnType().equals(m2.getReturnType()))
+			return false;
+		*/
+		if(!m1.getName().equals(m2.getName()))
+			return false;
+		
+		Class[] params1 = m1.getParameterTypes();
+		Class[] params2 = m2.getParameterTypes();
+		if(params1.length != params2.length)
+			return false;
+		
+		for(int i = 0; i<params1.length; i++) {
+			if(!params1[i].equals(params2[i]))
+				return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * 
+	 * @param method
+	 * @param methods
+	 * @return true if the first parameter method handle the same message than one method in the second parameter list, false otherwise
+	 */
+	private static boolean isHandled(Method method, List<Method> methods) {
+		for(Method m : methods) {
+			if(handleSameMessage(method, m))
+				return true;
+		}
+		return false;
+	}
+	
+	public static List<Method> getAllAbstractMethods(Class clazz) {
+		List<Method> publicAbstractMethods = new ArrayList<>();
+		getAllPublicAbstractMethods(clazz, publicAbstractMethods);
+		List<Method> nonPublicAbstractMethods = new ArrayList<>();
+		getAllNonPublicAbstractMethods(clazz, nonPublicAbstractMethods);
+		List<Method> allAbstractMethods = publicAbstractMethods;
+		allAbstractMethods.addAll(nonPublicAbstractMethods);
+		return allAbstractMethods;
+	}
+	
+	private static void getAllPublicAbstractMethods(Class clazz, List<Method> abstractMethods) {
+		if(clazz == null)
+			return;
+		for(Method method : clazz.getMethods()) //only answers public methods (both declared and inherited). It includes any method declared in the class interfaces (methods in interfaces must be public)
+			if(isAbstract(method) && !isHandled(method, abstractMethods))
+				abstractMethods.add(method);
+		getAllNonPublicAbstractMethods(clazz.getSuperclass(), abstractMethods);
+	}
+	
+	private static void getAllNonPublicAbstractMethods(Class clazz, List<Method> abstractMethods) {
+		if(clazz == null)
+			return;
+		for(Method method : clazz.getDeclaredMethods()) //answers ALL the methods declared by the class. Methods in the class interfaces are ignored.
+			if(!isPublic(method) && isAbstract(method) && !isHandled(method, abstractMethods))
+				abstractMethods.add(method);
+		getAllNonPublicAbstractMethods(clazz.getSuperclass(), abstractMethods);
+	}
+	
+	
+	public static void main(String[] args) {
+		List<Method> methods = null;
+		methods = Arrays.asList(Line.class.getDeclaredMethods());
+		System.out.println(methods);
+		methods = Arrays.asList(Line.class.getMethods());
+		System.out.println(methods);
+		methods = getAllAbstractMethods(Line.class);
+		System.out.println(methods);
+	}
+	
 	/**
 	 * 
 	 * @param clazz
@@ -100,7 +184,14 @@ public class ReflectionUtil {
 	}
 */
 	
-	
+	/**
+	 * Returns a map with all the visible fields in a class:
+	 * - all the fields declared in the class, 
+	 * - the public and protected fields of the ancestor classes, and 
+	 * - the "package" fields of superclasses located in the same package
+	 * @param clazz
+	 * @return
+	 */
 	public static Map<String, Field> visibleFields(Class clazz) {
 		Map<String, Field> visibleFields = new HashMap<String, Field>();
 		Field[] declaredFields = clazz.getDeclaredFields();
@@ -119,7 +210,7 @@ public class ReflectionUtil {
 					Field[] declaredFields = clazzInHierarchy.getDeclaredFields();
 					for(Field declaredField : declaredFields) {
 						if(!visibleFields.containsKey(declaredField.getName())) //check if the field is already there
-							if(!Modifier.isPrivate(declaredField.getModifiers())) { //exclide private fields in super classes
+							if(!Modifier.isPrivate(declaredField.getModifiers())) { //exclude private fields in super classes
 								if(!isPackageAccessModifier(declaredField) || clazzInHierarchy.getPackage().equals(clazz.getPackage())) //exclude 'package' fields in classes declared in different packages
 									visibleFields.put(declaredField.getName(), declaredField);
 							}
@@ -129,6 +220,10 @@ public class ReflectionUtil {
 			};
 			typeVisitor.visit(superClass);
 		}
+	}
+	
+	public static boolean isPublic(Method method) {
+		return Modifier.isPublic(method.getModifiers());
 	}
 	
 	public static boolean isAbstract(Method method) {
@@ -301,28 +396,7 @@ public class ReflectionUtil {
 		public void setS1(String s){};
 	}
 	
-	public static void main(String[] args) {
-		Map<String, Field> visibleFields = visibleFields(B.class);
-		for(String key : visibleFields.keySet()) {
-			System.out.println(key);
-		}
-		
-		Method setter = setter(C.class, "s1x");
-		System.out.println(setter);
-		/*
-		A a = new B();
-		System.out.println(a.s);
-		System.out.println(((B)a).s);
-		Method getter = getter(A.class, "s");
-		try {
-			System.out.println(getter.invoke(a));
-			
-		} catch (IllegalAccessException | IllegalArgumentException
-				| InvocationTargetException e) {
-			throw new RuntimeException(e);
-		}
-		*/
-	}
+	
 	
 	
 	
