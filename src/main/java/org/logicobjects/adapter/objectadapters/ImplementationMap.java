@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.reflectiveutils.ReflectionUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 import org.reflectiveutils.wrappertype.SingleTypeWrapper;
 
@@ -21,8 +22,8 @@ import org.reflectiveutils.wrappertype.SingleTypeWrapper;
  * These default implementation classes will be used when interfaces or abstract classes should be instantiated
  */
 public class ImplementationMap {
-	Map<Class, Class> dict;
-	
+	private Map<Class, Class> dict;
+	private Map<Class, Class> cache;
 	
 	
 	private static ImplementationMap implementationMap = new ImplementationMap();
@@ -40,7 +41,8 @@ public class ImplementationMap {
 	}
 	
 	private ImplementationMap() {
-		dict = new LinkedHashMap<Class, Class>(); //preserving insertion order
+		cache = new HashMap<>();
+		dict = new LinkedHashMap<>(); //preserving insertion order
 		fillIn();
 	}
 	
@@ -69,23 +71,39 @@ public class ImplementationMap {
 	}
 	
 	
-	public Object instantiateObject(Type type) {
+	public Object instantiateObject(final Type type) {
 		SingleTypeWrapper typeWrapper = (SingleTypeWrapper) AbstractTypeWrapper.wrap(type);
+		Class targetClass = typeWrapper.asClass();
+		Class instantiationClass = null;
 		Object object = null;
-		try {
-			object = typeWrapper.asClass().newInstance();
-		} catch (InstantiationException e) { //it is an interface or abstract class
+		
+		if(cache.containsKey(targetClass))
+			instantiationClass = cache.get(targetClass);
+		else {
+			if(!ReflectionUtil.isAbstract(targetClass))
+				instantiationClass = targetClass;
+			
+			if(instantiationClass == null) {
+				instantiationClass = implementationFor(targetClass);
+			}
+			
+			cache.put(targetClass, instantiationClass); //will do this even if the instantiation class is null, to avoid searching in vain in a future request
+			
+			if(instantiationClass == null) {
+				throw new RuntimeException(new InstantiationException() {
+					@Override public String getMessage() {
+						return "Impossible to instantiate type " + type;
+					}
+				});
+			}
+		}
+
+		if(instantiationClass != null) {
 			try {
-				Class defaultInstantiationClass = implementationFor(typeWrapper.asClass());
-				if(defaultInstantiationClass != null)
-					return defaultInstantiationClass.newInstance();
-				else
-					throw new RuntimeException(e);
-			} catch (Exception e1) {
-				throw new RuntimeException(e1);
-			} 
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
+				object = instantiationClass.newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
 		}
 		return object;
 	}

@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LSolution;
-import org.logicobjects.annotation.method.LWrapper;
+import org.logicobjects.annotation.method.LComposition;
 
 public interface IStation {
 
@@ -21,7 +21,7 @@ public interface IStation {
 	public abstract IStation connected(ILine line);
 
 	//@LSolution("LSolution")
-	@LWrapper 
+	@LComposition 
 	@LMethod(args = {"LSolution"})
 	public abstract List<IStation> connected();
 	
@@ -32,7 +32,7 @@ public interface IStation {
 	public abstract int numberNearbyStations();
 
 	//@LSolution("LSolution")
-	@LWrapper
+	@LComposition
 	@LMethod(args = {"LSolution"})
 	public abstract List<IStation> nearby();
 

@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.logicobjects.adapter.methodresult.eachsolution.SolutionToLObjectAdapter;
+import org.logicobjects.util.AnnotationConstants.NULL;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -14,4 +15,5 @@ public @interface LSolution {
 	Class adapter() default SolutionToLObjectAdapter.class; //the adapter interpreting the solution
 	//String wrap(); //yes, no, infer (default)
 	//String type(); //variable, signature, infer (default)
+	Class preferedClass() default NULL.class; //TODO this needs to be finished
 }

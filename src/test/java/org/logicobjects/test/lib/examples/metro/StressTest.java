@@ -8,7 +8,8 @@ import org.logicobjects.lib.examples.metro.IStation;
 
 public class StressTest extends AbstractMetroTest {
 
-	public static int TIMES = 30000;
+	public static int TIMES = 50000;
+	//public static int TIMES = 1;
 	public static long milliSeconds(long start, long end) {return (end - start)/1000000;}
 	
 	@Test
@@ -22,7 +23,7 @@ public class StressTest extends AbstractMetroTest {
 			line1.connects(station1, station2);
 		}
 		long endTime = System.nanoTime();
-		System.out.println("*** testLineConnects_Station_Station: "+ milliSeconds(startTime, endTime));
+		System.out.println("(PAPER)*** testLineConnects_Station_Station: "+ milliSeconds(startTime, endTime));
 	}
 	
 	@Test
@@ -34,7 +35,7 @@ public class StressTest extends AbstractMetroTest {
 			line1.segments();
 		}
 		long endTime = System.nanoTime();
-		System.out.println("*** testLineSegments: "+ milliSeconds(startTime, endTime));
+		System.out.println("(PAPER)*** testLineSegments: "+ milliSeconds(startTime, endTime));
 	}
 	
 	@Test
@@ -44,7 +45,13 @@ public class StressTest extends AbstractMetroTest {
 		
 		long startTime = System.nanoTime();
 		for(int i=0; i<TIMES;i++) {
+			//System.out.println(station1.connected(station2));
 			station1.connected(station2);
+//			try {
+//				Thread.sleep(10);
+//			} catch (InterruptedException e) {
+//				throw new RuntimeException(e);
+//			}
 		}
 		long endTime = System.nanoTime();
 		System.out.println("*** testStationConnected_Station: "+ milliSeconds(startTime, endTime));
@@ -72,7 +79,7 @@ public class StressTest extends AbstractMetroTest {
 			station1.connected(line1);
 		}
 		long endTime = System.nanoTime();
-		System.out.println("*** testStationConnected_Line: "+ milliSeconds(startTime, endTime));
+		System.out.println("(PAPER)*** testStationConnected_Line: "+ milliSeconds(startTime, endTime));
 	}
 	
 	@Test
@@ -121,7 +128,7 @@ public class StressTest extends AbstractMetroTest {
 			station1.nearby();
 		}
 		long endTime = System.nanoTime();
-		System.out.println("*** testStationNearby: "+ milliSeconds(startTime, endTime));
+		System.out.println("(PAPER)*** testStationNearby: "+ milliSeconds(startTime, endTime));
 	}
 	
 	@Test
@@ -156,10 +163,11 @@ public class StressTest extends AbstractMetroTest {
 		
 		long startTime = System.nanoTime();
 		for(int i=0; i<TIMES;i++) {
+//			System.out.println(station1.intermediateStations(station2));
 			station1.intermediateStations(station2);
 		}
 		long endTime = System.nanoTime();
-		System.out.println("*** testStationIntermediateStations_Station: "+ milliSeconds(startTime, endTime));
+		System.out.println("(PAPER)*** testStationIntermediateStations_Station: "+ milliSeconds(startTime, endTime));
 	}
 	
 	@Test
@@ -171,7 +179,7 @@ public class StressTest extends AbstractMetroTest {
 			metro.lines();
 		}
 		long endTime = System.nanoTime();
-		System.out.println("*** testMetroLines: "+ milliSeconds(startTime, endTime));
+		System.out.println("(PAPER)*** testMetroLines: "+ milliSeconds(startTime, endTime));
 	}
 	
 	@Test
@@ -183,7 +191,7 @@ public class StressTest extends AbstractMetroTest {
 			metro.line("central");
 		}
 		long endTime = System.nanoTime();
-		System.out.println("*** testMetroLine_String: "+ milliSeconds(startTime, endTime));
+		System.out.println("(PAPER)*** testMetroLine_String: "+ milliSeconds(startTime, endTime));
 	}
 	
 	@Test

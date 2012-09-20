@@ -222,6 +222,10 @@ public class ReflectionUtil {
 		}
 	}
 	
+	public static boolean isAbstract(Class clazz) {
+		return Modifier.isAbstract(clazz.getModifiers());
+	}
+	
 	public static boolean isPublic(Method method) {
 		return Modifier.isPublic(method.getModifiers());
 	}

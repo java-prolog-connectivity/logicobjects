@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LSolution;
-import org.logicobjects.annotation.method.LWrapper;
+import org.logicobjects.annotation.method.LComposition;
 
 public interface IMetro {
 	//@LSolution("line(L)")
-	@LWrapper 
+	@LComposition 
 	@LMethod(name="line", args={"L"})
 	public abstract List<ILine> lines();
 	

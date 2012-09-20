@@ -19,7 +19,7 @@ import org.logicobjects.adapter.ObjectToTermException;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LSolution;
-import org.logicobjects.annotation.method.LWrapper;
+import org.logicobjects.annotation.method.LComposition;
 import org.logicobjects.core.flags.LogtalkFlag;
 import org.logicobjects.util.LogicObjectsPreferences;
 import org.slf4j.Logger;
@@ -481,7 +481,7 @@ public abstract class LogicEngine {
 	@LMethod(args={"$1", "FlagValue"})
 	public abstract String currentPrologFlag(String flagName);
 
-	@LWrapper
+	@LComposition
 	@LSolution("LogtalkObject")
 	@LMethod(name="current_object", args = {"LogtalkObject"})
 	public abstract List<Term> currentObjects();

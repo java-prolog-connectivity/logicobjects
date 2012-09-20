@@ -18,20 +18,21 @@ public class TestMetro extends AbstractMetroTest {
 		IMetro metro = createMetro();
 		List<ILine> lines = metro.lines();
 		assertNotNull(lines);
+		assertEquals(lines.size(), 6);
 		
-		System.out.println("Number of lines: " + lines.size());
-		System.out.print("Lines: ");
-		for(ILine line : lines) {
-			System.out.print(line + " ");
-		}
-		System.out.println();
+//		System.out.println("Number of lines: " + lines.size());
+//		System.out.print("Lines: ");
+//		for(ILine line : lines) {
+//			System.out.print(line + " ");
+//		}
+//		System.out.println();
 		
 	}
 	
 	@Test
 	public void testIsLine() {
 		IMetro metro = createMetro();
-		ILine line = metro.line("jubilee");
+		ILine line = metro.line("central");
 		assertNotNull(line);
 		//System.out.println("Line: " + line);
 		

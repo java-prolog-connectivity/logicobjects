@@ -26,7 +26,7 @@ import org.logicobjects.annotation.LTermAdapter.LTermAdapterUtil;
 import org.logicobjects.annotation.method.LArgumentsAdapter;
 import org.logicobjects.annotation.method.LArgumentsAdapter.LArgsAdapterUtil;
 import org.logicobjects.annotation.method.LSolution;
-import org.logicobjects.annotation.method.LWrapper;
+import org.logicobjects.annotation.method.LComposition;
 import org.logicobjects.instrumentation.AbstractLogicMethodParser;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
@@ -82,7 +82,7 @@ public abstract class AbstractLogicMethod {
 	
 
 	public MethodResultAdapter getMethodAdapter(ParsedLogicMethod parsedLogicMethod) {
-		LWrapper aLWrapper = getAnnotation(LWrapper.class);
+		LComposition aLWrapper = getAnnotation(LComposition.class);
 		LSolution aLSolution = getAnnotation(LSolution.class);
 		/**
 		 * if this is true, the user has not specified the solution of the method
@@ -105,7 +105,7 @@ public abstract class AbstractLogicMethod {
 	
 	public SolutionCompositionAdapter getCompositionAdapter(ParsedLogicMethod parsedLogicMethod) {
 		SolutionCompositionAdapter compositionAdapter = null;
-		LWrapper aLWrapper = (LWrapper)getAnnotation(LWrapper.class);
+		LComposition aLWrapper = (LComposition)getAnnotation(LComposition.class);
 		try {
 			if(aLWrapper == null) {
 				compositionAdapter = new OneSolutionAdapter();

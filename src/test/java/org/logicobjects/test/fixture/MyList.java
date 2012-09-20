@@ -9,7 +9,7 @@ import org.logicobjects.annotation.method.LExpression;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.annotation.method.LSolution;
-import org.logicobjects.annotation.method.LWrapper;
+import org.logicobjects.annotation.method.LComposition;
 import org.logicobjects.lib.LList;
 
 
@@ -38,7 +38,7 @@ public abstract class MyList extends LList<String> {
 	@LMethod(name = "append", args={"$0", "$1", "L"})
 	public abstract List<String> appendList(List<String> list);
 	
-	@LWrapper
+	@LComposition
 	@LSolution("[A, B]")
 	@LMethod(name = "append", args={"A", "B", "$0"})
 	public abstract List<List<List<String>>> appendCombinations();

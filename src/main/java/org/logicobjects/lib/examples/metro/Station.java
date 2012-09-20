@@ -5,7 +5,7 @@ import java.util.List;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LSolution;
-import org.logicobjects.annotation.method.LWrapper;
+import org.logicobjects.annotation.method.LComposition;
 
 @LObject(args = {"name"})
 public abstract class Station implements IStation {
