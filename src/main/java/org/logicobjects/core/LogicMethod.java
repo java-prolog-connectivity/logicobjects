@@ -13,7 +13,7 @@ import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
 
-public class LogicMethod extends AbstractLogicMethod {
+public class LogicMethod extends LogicRoutine {
 
 	private LMethod aLMethod;
 	

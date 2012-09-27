@@ -5,13 +5,13 @@ import java.lang.reflect.Method;
 import jpl.Query;
 
 import org.logicobjects.adapter.methodresult.MethodResultAdapter;
-import org.logicobjects.core.AbstractLogicMethod;
+import org.logicobjects.core.LogicRoutine;
 import org.logicobjects.core.LogicEngine;
 
 public class LogicMethodInvoker {
 
 	public static Object invoke(Object targetObject, Method method, Object[] arguments) {
-		AbstractLogicMethod logicMethod = AbstractLogicMethod.create((method));
+		LogicRoutine logicMethod = LogicRoutine.create((method));
 		ParsedLogicMethod parsedLogicMethod = logicMethod.parse(targetObject, arguments);
 		Query query = parsedLogicMethod.asQuery();
 		MethodResultAdapter resultAdapter = logicMethod.getMethodAdapter(parsedLogicMethod);

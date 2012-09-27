@@ -4,6 +4,9 @@ package org.logicobjects.core;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javassist.ClassPool;
 
@@ -82,8 +85,14 @@ public class LogicObjectFactory {
 	*/
 
 	public <T> T create(Class<T> clazz, Object... params) {
+		return create(null, clazz, params);
+	}
+	
+	public <T> T create(Object declaringObject, Class<T> clazz, Object... params) {
+		if(declaringObject != null && declaringObject instanceof Class)
+			throw new RuntimeException("The context object cannot be an instance of " + Class.class.getName());
 		Class instantiatingClass = null;
-		if(clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
+		//if(clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
 			LogicObjectInstrumentation instrumentation = new LogicObjectInstrumentation(clazz, getClassPool());
 			//instrumentation.run(); //instrument class and its ancestors
 			boolean extendingClassLoaded = instrumentation.isExtendingClassLoaded();
@@ -101,25 +110,32 @@ public class LogicObjectFactory {
 				logger.info("Loading dependencies time: " + timeLoadingDependencies + " ms. Instrumentation time: " + timeInstrumentingClass + " ms.");
 			} else //the extending class has already been generated
 				instantiatingClass = instrumentation.getExtendingClass(); 
-		} else
-			instantiatingClass = clazz;
+		//} else
+			//instantiatingClass = clazz;
 		
 
 		try {
-			if(params.length == 0) {
+			if(params.length == 0 && declaringObject == null) {
 				return (T)instantiatingClass.newInstance();
 			} else {
+				List<Object> paramsConstructor = new ArrayList(Arrays.asList(params)); //the surrounding new ArrayList is to make the original list mutable
+				List<Class> paramsClasses = new ArrayList(objectsClasses(Arrays.asList(params)));
 				
+				if(declaringObject != null) {
+					paramsConstructor.add(0, declaringObject);
+					paramsClasses.add(0, declaringObject.getClass());
+				}
+				/*
 				if(LogicObjectClass.hasNoArgsConstructor(clazz)) {
 					Object o = instantiatingClass.newInstance();
-				} else if(LogicObjectClass.hasConstructorWithArgsNumber(clazz, params.length)) {
-					Constructor constructor = clazz.getConstructor(objectsClasses(params));
+				} else if(LogicObjectClass.hasConstructorWithArgsNumber(clazz, paramsConstructor.size())) {
+					Constructor constructor = clazz.getConstructor(paramsClasses.toArray(new Class[]{}));
 				} else if((LogicObjectClass.hasConstructorWithOneVarArgs(clazz))) {
-					
+					//TODO
 				}
-				
-				Constructor constructor = instantiatingClass.getConstructor(objectsClasses(params));  //NoSuchMethodException
-				return (T)constructor.newInstance(params);
+				*/
+				Constructor constructor = instantiatingClass.getConstructor(paramsClasses.toArray(new Class[]{}));  //NoSuchMethodException ???
+				return (T)constructor.newInstance(paramsConstructor.toArray());
 			}
 			
 		} catch (Exception e) {
@@ -128,12 +144,19 @@ public class LogicObjectFactory {
 		
 	}
 	
+	private List<Class> objectsClasses(List objects) {
+		List<Class> classes = new ArrayList<Class>();
+		for(Object o: objects)
+			classes.add(o.getClass());
+		return classes;
+	}
+	/*
 	private Class[] objectsClasses(Object[] objects) {
 		Class[] classes = new Class[objects.length];
 		for(int i=0; i<objects.length; i++)
 			classes[i] = objects[i].getClass();
 		return classes;
-	}
+	}*/
 	
 	
 	public LogicMetaObject createLogicMetaObject(Class clazz) {

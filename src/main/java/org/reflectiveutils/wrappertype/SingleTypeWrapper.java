@@ -38,6 +38,11 @@ public class SingleTypeWrapper extends AbstractTypeWrapper {
 	}
 
 	@Override
+	public boolean isGenericType() {
+		return hasActualTypeArguments();
+	}
+	
+	@Override
 	public boolean hasTypeParameters() {
 		return getTypeParameters().length>0;
 	}

@@ -1,4 +1,4 @@
-package org.logicobjects.util;
+package org.logicobjects.util.javassist;
 
 
 import java.io.DataOutputStream;
@@ -19,10 +19,13 @@ import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.MethodInfo;
 import javassist.bytecode.ParameterAnnotationsAttribute;
+import javassist.bytecode.SignatureAttribute.BaseType;
 
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
+import org.reflectiveutils.wrappertype.SingleTypeWrapper;
 
 public class JavassistUtil {
+	
 	
 	/**
 	 * From the Javassist documentation:

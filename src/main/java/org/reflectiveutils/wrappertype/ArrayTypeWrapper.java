@@ -22,6 +22,11 @@ public class ArrayTypeWrapper extends AbstractTypeWrapper {
 	}
 	
 	@Override
+	public boolean isGenericType() {
+		return hasActualTypeArguments();
+	}
+	
+	@Override
 	public boolean hasTypeParameters() {
 		return AbstractTypeWrapper.wrap(getBaseType()).hasTypeParameters();
 	}
@@ -73,10 +78,10 @@ public class ArrayTypeWrapper extends AbstractTypeWrapper {
 	}
 */
 	
-	public int dimensions() {
+	public int getDimension() {
 		int componentDimension = 0;
 		if(isArray(getComponentType())) {
-			componentDimension = new ArrayTypeWrapper(getComponentType()).dimensions();
+			componentDimension = new ArrayTypeWrapper(getComponentType()).getDimension();
 		}
 		return 1 + componentDimension;
 	}
@@ -95,7 +100,7 @@ public class ArrayTypeWrapper extends AbstractTypeWrapper {
 			return true;
 		if( !(type instanceof ArrayTypeWrapper) )
 			return false;
-		if(!(dimensions() == ArrayTypeWrapper.class.cast(type).dimensions()) )
+		if(!(getDimension() == ArrayTypeWrapper.class.cast(type).getDimension()) )
 			return false;
 		return AbstractTypeWrapper.wrap(getBaseType()).isAssignableFrom(ArrayTypeWrapper.class.cast(type).getBaseType());
 	}
@@ -114,7 +119,7 @@ public class ArrayTypeWrapper extends AbstractTypeWrapper {
 	public void print() {
 		super.print();
 		System.out.println("Class: "+asClass().getName());
-		System.out.println("Dimensions: "+dimensions());
+		System.out.println("Dimensions: "+getDimension());
 		if(hasActualTypeArguments())
 			System.out.println("Parameterized array");
 		System.out.println("Base type: "+getBaseType().toString());

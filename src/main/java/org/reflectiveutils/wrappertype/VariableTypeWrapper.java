@@ -14,6 +14,11 @@ public class VariableTypeWrapper extends AbstractTypeWrapper {
 	}
 
 	@Override
+	public boolean isGenericType() {
+		return true;
+	}
+	
+	@Override
 	public boolean hasTypeParameters() {
 		//if(true) throw new UnsupportedOperationException();
 		return false;
@@ -81,7 +86,13 @@ public class VariableTypeWrapper extends AbstractTypeWrapper {
 			return ((TypeVariable)wrappedType).getName();
 	}
 
-
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof VariableTypeWrapper))
+			return false;
+		VariableTypeWrapper that = (VariableTypeWrapper) obj;
+		return this.getName().equals(that.getName());
+	}
 
 	@Override
 	public void print() {

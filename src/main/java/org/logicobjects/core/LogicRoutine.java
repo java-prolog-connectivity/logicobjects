@@ -25,8 +25,11 @@ import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.annotation.LTermAdapter.LTermAdapterUtil;
 import org.logicobjects.annotation.method.LArgumentsAdapter;
 import org.logicobjects.annotation.method.LArgumentsAdapter.LArgsAdapterUtil;
-import org.logicobjects.annotation.method.LSolution;
 import org.logicobjects.annotation.method.LComposition;
+import org.logicobjects.annotation.method.LExpression;
+import org.logicobjects.annotation.method.LMethod;
+import org.logicobjects.annotation.method.LQuery;
+import org.logicobjects.annotation.method.LSolution;
 import org.logicobjects.instrumentation.AbstractLogicMethodParser;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
@@ -45,8 +48,8 @@ import com.google.common.primitives.Primitives;
  * @author scastro
  *
  */
-public abstract class AbstractLogicMethod {
-	private Logger logger = LoggerFactory.getLogger(AbstractLogicMethod.class);
+public abstract class LogicRoutine {
+	private Logger logger = LoggerFactory.getLogger(LogicRoutine.class);
 	private Method method;
 	
 	//private String queryString;
@@ -57,8 +60,12 @@ public abstract class AbstractLogicMethod {
 	 */
 	//protected boolean unparsedQueryString; 
 	
-	public AbstractLogicMethod(Method method) {
+	public LogicRoutine(Method method) {
 		this.method = method;
+	}
+	
+	public static boolean isAnnotatedAsLogicRoutine(Method method) {
+		return method.isAnnotationPresent(LMethod.class) || method.isAnnotationPresent(LQuery.class) || method.isAnnotationPresent(LExpression.class);
 	}
 	
 	protected <A extends Annotation> A getAnnotation(Class<A> annotation) {
@@ -69,7 +76,7 @@ public abstract class AbstractLogicMethod {
 		return getAnnotation(annotation) != null;
 	}
 	
-	public static AbstractLogicMethod create(Method method) {
+	public static LogicRoutine create(Method method) {
 		if(LogicMethod.isLogicMethod(method))
 			return new LogicMethod(method);
 		else

@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 import jpl.Term;
 
 import org.logicobjects.adapter.ObjectToTermAdapter;
-import org.logicobjects.core.AbstractLogicMethod;
+import org.logicobjects.core.LogicRoutine;
 import org.logicobjects.core.LogicEngine;
 import org.logicobjects.core.LogicObject;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * @author scastro
  *
  */
-public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> {
+public abstract class AbstractLogicMethodParser<LM extends LogicRoutine> {
 	private static Logger logger = LoggerFactory.getLogger(AbstractLogicMethodParser.class);
 
 	public static final String GENERATED_METHOD_PREFIX = "$logicobjects_";
@@ -106,12 +106,12 @@ public abstract class AbstractLogicMethodParser<LM extends AbstractLogicMethod> 
 		return new AbstractLogicMethodParser(method) {};
 	}
 	
-	public static AbstractLogicMethodParser create(AbstractLogicMethod logicMethod) {
+	public static AbstractLogicMethodParser create(LogicRoutine logicMethod) {
 		return new AbstractLogicMethodParser(logicMethod) {};
 	}
 	
 	AbstractLogicMethodParser(Method method) {
-		this((LM) AbstractLogicMethod.create(method));
+		this((LM) LogicRoutine.create(method));
 	}
 	
 	AbstractLogicMethodParser(LM logicMethod) {

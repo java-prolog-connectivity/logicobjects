@@ -3,7 +3,7 @@ package org.logicobjects.instrumentation;
 import jpl.Query;
 import jpl.Term;
 
-import org.logicobjects.core.AbstractLogicMethod;
+import org.logicobjects.core.LogicRoutine;
 
 /**
  * This class represents a fully parsed logic method
@@ -13,7 +13,7 @@ import org.logicobjects.core.AbstractLogicMethod;
  */
 public class ParsedLogicMethod {
 
-	private AbstractLogicMethod logicMethod; //the logic method to be parsed
+	private LogicRoutine logicMethod; //the logic method to be parsed
 	private Object targetObject; //the instance of the class providing context for the parsing
 	private Object[] originalMethodArguments; //the original method arguments sent to the method providing context to the parsing (after being adapted by the individual adapters and method arguments array adapter if any)
 	
@@ -30,7 +30,7 @@ public class ParsedLogicMethod {
 	 * @param originalMethodArguments the arguments of the logic method
 	 * @param parsedData contains the parsed method data
 	 */
-	public ParsedLogicMethod(AbstractLogicMethod logicMethod, Object targetObject, Object[] originalMethodArguments, LogicMethodParsingData parsedData) {
+	public ParsedLogicMethod(LogicRoutine logicMethod, Object targetObject, Object[] originalMethodArguments, LogicMethodParsingData parsedData) {
 		this.logicMethod = logicMethod;
 		this.targetObject = targetObject;
 		this.originalMethodArguments = originalMethodArguments;
@@ -38,7 +38,7 @@ public class ParsedLogicMethod {
 		logicMethod.configureParsedLogicMethod(this);
 	}
 	
-	public AbstractLogicMethod getLogicMethod() {
+	public LogicRoutine getLogicMethod() {
 		return logicMethod;
 	}
 	

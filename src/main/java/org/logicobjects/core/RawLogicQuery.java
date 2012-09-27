@@ -6,7 +6,7 @@ import org.logicobjects.annotation.method.LExpression;
 import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.annotation.method.LSolution;
 
-public abstract class RawLogicQuery extends AbstractLogicMethod {
+public abstract class RawLogicQuery extends LogicRoutine {
 
 	protected LQuery aLQuery;
 	

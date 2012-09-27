@@ -315,7 +315,37 @@ public class ReflectionUtil {
 		} 
 	}
 
+	private static final String GETTER_PREFIX_NON_BOOLEAN = "get";
+	private static final String GETTER_PREFIX_BOOLEAN = "is";
+	private static final String SETTER_PREFIX_NON_BOOLEAN = "set";
+	
+	public static boolean looksLikeGetter(Method method) {
+		String name = method.getName();
+		return ( (name.startsWith(GETTER_PREFIX_NON_BOOLEAN) || name.startsWith(GETTER_PREFIX_BOOLEAN)) && method.getParameterTypes().length == 0 );
+	}
+	
+	public static boolean looksLikeSetter(Method method) {
+		String name = method.getName();
+		return (name.startsWith(SETTER_PREFIX_NON_BOOLEAN) && method.getParameterTypes().length == 1 );
+	}
+	
+	public static boolean looksLikeBeanMethod(Method method) {
+		return looksLikeGetter(method) || looksLikeSetter(method);
+	}
 
+	public static String getterName(String propertyName, Class clazz) {
+		String prefix;
+		if(clazz.equals(Boolean.class) || clazz.equals(boolean.class))
+			prefix = GETTER_PREFIX_BOOLEAN;
+		else
+			prefix = GETTER_PREFIX_NON_BOOLEAN;
+		return prefix + propertyName.substring(0,1).toUpperCase() + propertyName.substring(1);
+	}
+	
+	public static String setterName(String propertyName) {
+		return SETTER_PREFIX_NON_BOOLEAN + propertyName.substring(0,1).toUpperCase() + propertyName.substring(1);
+	}
+	
 	public static Method getter(Class clazz, String propertyName) {
 		PropertyDescriptor propertyDescriptor = getPropertyDescriptor(clazz, propertyName);
 		if(propertyDescriptor != null)

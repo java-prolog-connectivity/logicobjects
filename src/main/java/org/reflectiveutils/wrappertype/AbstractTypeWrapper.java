@@ -37,6 +37,7 @@ public abstract class AbstractTypeWrapper {
 	}
 	
 	public abstract Class asClass();
+	public abstract boolean isGenericType();
 	public abstract boolean hasTypeParameters();
 	public abstract TypeVariable[] getTypeParameters();
 	public abstract Type[] getActualTypeArguments();
@@ -44,6 +45,11 @@ public abstract class AbstractTypeWrapper {
 	public abstract boolean isAssignableFrom(AbstractTypeWrapper type);
 	//public abstract boolean canBindTypeVariables(Map<TypeVariable, Type> typeVariableMap);
 	
+	public boolean isPrimitive() {return asClass().isPrimitive();}
+	
+	public boolean isMemberClass() {return asClass().isMemberClass(); }
+	
+	public Class getEnclosingClass() {return asClass().getEnclosingClass(); }
 	/**
 	 * 
 	 * @param length
@@ -118,6 +124,13 @@ public abstract class AbstractTypeWrapper {
 	
 	public void print() {
 		System.out.println(toString());
+	}
+	
+	public boolean equals(Object obj) {
+		if(!(obj instanceof AbstractTypeWrapper))
+			return false;
+		AbstractTypeWrapper that = (AbstractTypeWrapper) obj;
+		return this.getWrappedType().equals(that.getWrappedType());
 	}
 	
 	public static AbstractTypeWrapper wrap(Type type) {

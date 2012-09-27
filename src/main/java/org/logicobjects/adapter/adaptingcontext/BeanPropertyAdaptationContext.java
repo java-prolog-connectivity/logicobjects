@@ -10,101 +10,47 @@ import java.util.List;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LObjectAdapter;
 import org.logicobjects.annotation.LTermAdapter;
+import org.logicobjects.core.LogicBeanProperty;
 import org.logicobjects.core.LogicObjectClass;
 import org.reflectiveutils.ReflectionUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
 public class BeanPropertyAdaptationContext extends AnnotatedElementAdaptationContext {
 
-	private Class clazz;
-	private String propertyName;
-	
-	private Field propertyField;
-	private Method propertyGetter;
-	private Method propertySetter;
-	private Type propertyType;
+	private LogicBeanProperty beanProperty;
 	private Class guidingClass;
 	
 	private final static Class[] VALID_GETTER_ANNOTATIONS = new Class[] {LObject.class, LTermAdapter.class};
 	private final static Class[] VALID_SETTER_PARAMETER_ANNOTATIONS = new Class[] {LObject.class, LObjectAdapter.class};
 	
 	public BeanPropertyAdaptationContext(Class clazz, String propertyName) {
-		this.clazz = clazz;
-		this.propertyName = propertyName;
-
-		Class propertyDeclaringClass = LogicObjectClass.findGuidingClass(clazz);
-		
-		if(propertyDeclaringClass != null) {
-			List<LogicObjectClass> logicClasses = LogicObjectClass.findAllLogicObjectClasses(propertyDeclaringClass);
-			for(LogicObjectClass aGuidingClass : logicClasses) {
-				try {
-					propertyField = aGuidingClass.getDeclaredField(propertyName);
-					if(propertyField != null)
-						break;
-				} catch (NoSuchFieldException e) { //do nothing if the field does not exist
-				} catch (SecurityException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
-		
-		propertyGetter = ReflectionUtil.getter(clazz,  propertyName);
-		propertySetter = ReflectionUtil.setter(clazz,  propertyName);
-		propertyType = findPropertyType(); //this requires the property field, the getter and the setter being initialized
-		
-		Class propertyClass = AbstractTypeWrapper.wrap(propertyType).asClass();
-		guidingClass = LogicObjectClass.findGuidingClass(propertyClass);
+		beanProperty = new LogicBeanProperty(clazz, propertyName);
+		guidingClass = LogicObjectClass.findGuidingClass(beanProperty.getPropertyClass());
 	}
 	
 	public Class getGuidingClass() {
 		return guidingClass;
 	}
 	
-	public String getPropertyName() {
-		return propertyName;
-	}
+	
 
-	public Type getPropertyType() {
-		return propertyType;
-	}
 
-	public Field getPropertyField() {
-		return propertyField;
-	}
-
-	public Method getPropertyGetter() {
-		return propertyGetter;
-	}
-
-	public Method getPropertySetter() {
-		return propertySetter;
-	}
-
-	private Type findPropertyType() {
-		if(propertyField != null)
-			return propertyField.getGenericType();
-		if(propertyGetter != null)
-			return propertyGetter.getGenericReturnType();
-		if(propertySetter != null)
-			return propertySetter.getGenericParameterTypes()[0];
-		return Object.class;
-	}
 
 	private <A extends Annotation> A getAnnotationField(Class<A> annotationClass) {
-		if(propertyField != null)
-			return propertyField.getAnnotation(annotationClass);
+		if(beanProperty.getPropertyField() != null)
+			return beanProperty.getPropertyField().getAnnotation(annotationClass);
 		return null;
 	}
 	
 	private <A extends Annotation> A getAnnotationGetter(Class<A> annotationClass) {
-		if(propertyGetter != null && isValidGetterAnnotation(annotationClass))
-			return (A)propertyGetter.getAnnotation(annotationClass);
+		if(beanProperty.getPropertyGetter() != null && isValidGetterAnnotation(annotationClass))
+			return (A)beanProperty.getPropertyGetter().getAnnotation(annotationClass);
 		return null;
 	}
 	
 	private <A extends Annotation> A getAnnotationSetterParameter(Class<A> annotationClass) {
-		if(propertySetter != null && isValidSetterParameterAnnotation(annotationClass))
-			return (A)ReflectionUtil.getAnnotationParameter(propertySetter, 0, annotationClass);
+		if(beanProperty.getPropertySetter() != null && isValidSetterParameterAnnotation(annotationClass))
+			return (A)ReflectionUtil.getAnnotationParameter(beanProperty.getPropertySetter(), 0, annotationClass);
 		return null;
 	}
 	
@@ -128,9 +74,18 @@ public class BeanPropertyAdaptationContext extends AnnotatedElementAdaptationCon
 		return annotation;
 	}
 
+	public Type getPropertyType() {
+		return beanProperty.getPropertyType();
+	}
+	
 	@Override
 	public Class getContextClass() {
-		return AbstractTypeWrapper.wrap(getPropertyType()).asClass();
+		return beanProperty.getPropertyClass();
+	}
+	
+	//TODO delete ???
+	public Field getPropertyField() {
+		return beanProperty.getPropertyField();
 	}
 	
 }

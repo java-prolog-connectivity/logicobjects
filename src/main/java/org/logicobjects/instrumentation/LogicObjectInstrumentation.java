@@ -1,10 +1,9 @@
 package org.logicobjects.instrumentation;
 
+import static org.reflectiveutils.ReflectionUtil.isAbstract;
+
 import java.lang.reflect.Field;
-import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,6 @@ import javassist.bytecode.BadBytecode;
 import javassist.bytecode.SignatureAttribute;
 import javassist.bytecode.SignatureAttribute.ClassSignature;
 import javassist.bytecode.SignatureAttribute.ClassType;
-import javassist.bytecode.SignatureAttribute.MethodSignature;
 import javassist.bytecode.SignatureAttribute.ObjectType;
 import javassist.bytecode.SignatureAttribute.TypeArgument;
 import javassist.bytecode.SignatureAttribute.TypeParameter;
@@ -32,14 +30,13 @@ import javassist.bytecode.SignatureAttribute.TypeVariable;
 import javassist.bytecode.SyntheticAttribute;
 
 import org.logicobjects.adapter.BadExpressionException;
-import org.logicobjects.adapter.adaptingcontext.BeanPropertyAdaptationContext;
-import org.logicobjects.annotation.method.LMethod;
-import org.logicobjects.annotation.method.LQuery;
-import org.logicobjects.annotation.method.LSolution;
+import org.logicobjects.core.LogicBeanProperty;
 import org.logicobjects.core.LogicObjectClass;
+import org.logicobjects.core.LogicRoutine;
 import org.logicobjects.core.NoLogicResultException;
-import org.logicobjects.util.JavassistUtil;
-import org.logicobjects.util.JavassistUtil.ObjectConverter;
+import org.logicobjects.util.javassist.CodeGenerationUtil;
+import org.logicobjects.util.javassist.JavassistUtil;
+import org.logicobjects.util.javassist.JavassistUtil.ObjectConverter;
 import org.reflectiveutils.ReflectionUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
@@ -163,12 +160,16 @@ public class LogicObjectInstrumentation {
 					 */
 					ClassSignature extendedClassSignature = SignatureAttribute.toClassSignature(genericSignature); //reifies the string representation of the generic class signature to a more convenient object representation
 					
+					/**
+					 * this block collects a list of type arguments having the same names than the type parameters of the super type
+					 */
 					List<TypeArgument> typeArgumentsList = new ArrayList<TypeArgument>();
 					for(TypeParameter typeParameter : extendedClassSignature.getParameters()) {
 						ObjectType objectType = new TypeVariable(typeParameter.getName());
 						typeArgumentsList.add(new TypeArgument(objectType));
 					}
 					
+					//the generic signature of the super class declared by the generated class
 					ClassType extendingGenericSuperClassType = new ClassType(ctClassToExtend.getName(), typeArgumentsList.toArray(new TypeArgument[]{}));
 					
 					ClassSignature extendingClassSignature = new ClassSignature(
@@ -190,86 +191,22 @@ public class LogicObjectInstrumentation {
 			throw new RuntimeException(e);
 		}
 	}
-	
 
-	public static class A {
-		private int a;
-		protected int b;
-		int c;
-		public int d;
-	}
-	
-	public static class B extends A {
-		public int d;
-		
-		public static void main(String[] args) {
-			A o = new A();
-			Field f;
-			/*
-			try {
-				f = A.class.getField("a");
-			} catch (NoSuchFieldException e) {
-				throw new RuntimeException(e);
-			} catch (SecurityException e) {
-				throw new RuntimeException(e);
-			}
-			System.out.println(f);
-			*/
-			/*
-			try {
-				f = A.class.getField("b");
-			} catch (NoSuchFieldException e) {
-				throw new RuntimeException(e);
-			} catch (SecurityException e) {
-				throw new RuntimeException(e);
-			}
-			System.out.println(f);
-			*/
-			
-			try {
-				f = A.class.getField("c");
-			} catch (NoSuchFieldException e) {
-				throw new RuntimeException(e);
-			} catch (SecurityException e) {
-				throw new RuntimeException(e);
-			}
-			System.out.println(f);
-			
-			try {
-				f = A.class.getField("d");
-			} catch (NoSuchFieldException e) {
-				throw new RuntimeException(e);
-			} catch (SecurityException e) {
-				throw new RuntimeException(e);
-			}
-			try {
-				f.set(o, 11);
-			} catch (IllegalArgumentException e) {
-				throw new RuntimeException(e);
-			} catch (IllegalAccessException e) {
-				throw new RuntimeException(e);
-			}
-			System.out.println(f);
 
-		}
-	}
-	
-
-	
-	private boolean isAbstract(Method method) {
-		return Modifier.isAbstract(method.getModifiers());
-	}
 	
 	private void createGettersAndSetters(CtClass son) {
+		ClassMap classMap = JavassistUtil.fixedClassMap(classToExtend, classPool);
+		
+		
 		LogicObjectClass parentLogicObjectClass = LogicObjectClass.findLogicObjectClass(classToExtend);
 		Map<String, Field> visibleFields = ReflectionUtil.visibleFields(classToExtend);
 		for(String arg : parentLogicObjectClass.getLObjectArgs()) {
 			
 			Field visiblePropertyField = visibleFields.get(arg);
 			
-			BeanPropertyAdaptationContext context = new BeanPropertyAdaptationContext(classToExtend, arg);
-			Method currentGetter = context.getPropertyGetter();
-			Method currentSetter = context.getPropertySetter();
+			LogicBeanProperty beanProperty = new LogicBeanProperty(classToExtend, arg);
+			Method currentGetter = beanProperty.getPropertyGetter();
+			Method currentSetter = beanProperty.getPropertySetter();
 			
 			if(currentGetter != null && currentSetter != null && !(isAbstract(currentGetter) || isAbstract(currentSetter)))
 				continue;
@@ -288,49 +225,51 @@ public class LogicObjectInstrumentation {
 			//if either a setter or getter are present, that implies that the field is visible
 			
 			
-			if(visiblePropertyField == null)
-				createField(context.getPropertyType(), arg, son);
+			if(visiblePropertyField == null) {
+				Type beanPropertyType = beanProperty.getPropertyType();
+				Type beanPropertyClass = AbstractTypeWrapper.wrap(beanPropertyType).asClass();
+				CtClass ctFieldClass = JavassistUtil.asCtClass(beanPropertyClass, classPool);
+				CodeGenerationUtil.createField(ctFieldClass, beanPropertyType, arg, son);
+			}
+				
 
-			if(currentGetter == null)
-				createGetter(context.getPropertyType(), arg, son);
-			else if(isAbstract(currentGetter))
-				createGetter(context.getPropertyType(), arg, son, JavassistUtil.asCtMethod(currentGetter, classPool));
+			if(currentGetter == null || isAbstract(currentGetter)) {
+				CtMethod ctGeneratedGetter = CodeGenerationUtil.createGetter(beanProperty.getPropertyType(), arg, son);
+				if(currentGetter != null) { //then it is abstract
+					CtMethod ctCurrentGetter = JavassistUtil.asCtMethod(currentGetter, classPool);
+					JavassistUtil.copyAnnotationsAttribute(ctGeneratedGetter, ctCurrentGetter, classMap);
+				}
+			}
+			
+			if(currentSetter == null || isAbstract(currentSetter)) {
+				CtMethod ctGeneratedSetter = CodeGenerationUtil.createSetter(beanProperty.getPropertyType(), arg, son);
+				if(currentSetter != null) { //then it is abstract
+					CtMethod ctCurrentSetter = JavassistUtil.asCtMethod(currentSetter, classPool);
+					JavassistUtil.copyAnnotationsAttribute(ctGeneratedSetter, ctCurrentSetter, classMap);
+				}
+			}
+			
 		}
 		
 	}
-	
-	public CtMethod createGetter(Type propertyType, String propertyName, CtClass ctDeclaringClass, CtMethod ctOverridenMethod) {
-		CtMethod ctOverridingMethod = createGetter(propertyType, propertyName, ctDeclaringClass);
-		//...
-		
-		return ctOverridingMethod;
+
+
+	/*
+	public void addGenericSignature(CtMethod ctMethod, String[] typeParameters,Type[] paramsTypes, Type returnType, Type[] exceptionsTypes) {
+		MethodSignature methodSignature = new MethodSignature(
+				extendedClassSignature.getParameters(), //same type parameters than the extending class
+				extendingGenericSuperClassType, //setting the generic super class to be the parent class with arguments with same names than the parameter types in the parent class declaration
+				new ClassType[]{} //no additional interfaces
+		);
+
+		ctMethod.setGenericSignature(methodSignature.encode());
 	}
-	
-	
-	public CtMethod createGetter(Type propertyType, String propertyName, CtClass ctDeclaringClass) {
-		CtMethod ctGetterMethod = null; //TODO
-		
-		if(propertyType instanceof ParameterizedType || propertyType instanceof GenericArrayType) {
-			String signature = "genericSignature(propertyType)"; //TODO
-			ctGetterMethod.setGenericSignature(signature);
-		}
-		
-		return ctGetterMethod;
-	}
+*/
 	
 	
 	
-	public CtField createField(Type fieldType, String fieldName, CtClass ctDeclaringClass) {
-		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(fieldType);
-		CtClass ctFieldClass = JavassistUtil.asCtClass(typeWrapper.asClass(), classPool);
-		try {
-			CtField ctField = new CtField(ctFieldClass, fieldName, ctDeclaringClass);
-			ctDeclaringClass.addField(ctField);
-			return ctField;
-		} catch (CannotCompileException e) {
-			throw new RuntimeException(e);
-		}
-	}
+	
+
 	
 	
 	private void createConstructors(CtClass son) {
@@ -402,7 +341,15 @@ public class LogicObjectInstrumentation {
 	
 	
 	private static Method[] methodsToOverride(Class c) {
-		return ReflectionUtil.getAllAbstractMethods(c).toArray(new Method[]{});
+		List<Method> abstractMethods = ReflectionUtil.getAllAbstractMethods(c);
+		List<Method> methodsToOverride = new ArrayList<Method>();
+		for(Method abstractMethod: abstractMethods) {
+			if(!ReflectionUtil.looksLikeBeanMethod(abstractMethod) || LogicRoutine.isAnnotatedAsLogicRoutine(abstractMethod))
+				methodsToOverride.add(abstractMethod);
+		}
+		return methodsToOverride.toArray(new Method[]{});
+		
+		//isAnnotatedAsLogicRoutine
 		/*
 		List<Method> methods = new ArrayList<Method>();
 		for(Method m : c.getMethods()) {
