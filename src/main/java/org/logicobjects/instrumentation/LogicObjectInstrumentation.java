@@ -204,6 +204,17 @@ public class LogicObjectInstrumentation {
 			//Field visiblePropertyField = visibleFields.get(arg);
 			
 			LogicBeanProperty beanProperty = new LogicBeanProperty(classToExtend, arg);
+			
+			Type beanPropertyType = beanProperty.getPropertyType();
+			Class beanPropertyClass;
+			if(beanPropertyType != null)
+				beanPropertyClass = AbstractTypeWrapper.wrap(beanPropertyType).asClass();
+			else {//there is no property (no field, getter, or setter) with the given name in the bean, assuming the desired type of the field is Object.class
+				beanPropertyType = Object.class;
+				beanPropertyClass = Object.class;
+			}
+			
+			
 			Field propertyField = beanProperty.getPropertyField();
 			Method currentGetter = beanProperty.getPropertyGetter();
 			Method currentSetter = beanProperty.getPropertySetter();
@@ -223,8 +234,6 @@ public class LogicObjectInstrumentation {
 			
 			if(propertyField == null) { //a field should be generated
 				if( (currentGetter == null || isAbstract(currentGetter)) && (currentSetter == null || isAbstract(currentSetter))) { //no implementation for getter and setter
-					Type beanPropertyType = beanProperty.getPropertyType();
-					Type beanPropertyClass = AbstractTypeWrapper.wrap(beanPropertyType).asClass();
 					CtClass ctFieldClass = JavassistUtil.asCtClass(beanPropertyClass, classPool);
 					ctPropertyField = CodeGenerationUtil.createField(ctFieldClass, beanPropertyType, arg, son);
 				}
@@ -244,14 +253,14 @@ public class LogicObjectInstrumentation {
 			
 			
 			if(currentGetter == null || isAbstract(currentGetter)) {
-				CtMethod ctGeneratedGetter = CodeGenerationUtil.createGetter(beanProperty.getPropertyType(), arg, ctPropertyField.getDeclaringClass(), son);
+				CtMethod ctGeneratedGetter = CodeGenerationUtil.createGetter(beanPropertyType, arg, ctPropertyField.getDeclaringClass(), son);
 				if(currentGetter != null) { //then it is abstract
 					CtMethod ctCurrentGetter = JavassistUtil.asCtMethod(currentGetter, classPool);
 					JavassistUtil.copyAnnotationsAttribute(ctGeneratedGetter, ctCurrentGetter, classMap);
 				}
 			} else {
 				if(!ReflectionUtil.isPublic(currentGetter)) {
-					CtMethod ctGeneratedGetter = CodeGenerationUtil.createOverriddingGetter(beanProperty.getPropertyType(), arg, son);
+					CtMethod ctGeneratedGetter = CodeGenerationUtil.createOverriddingGetter(beanPropertyType, arg, son);
 					CtMethod ctCurrentGetter = JavassistUtil.asCtMethod(currentGetter, classPool);
 					JavassistUtil.copyAnnotationsAttribute(ctGeneratedGetter, ctCurrentGetter, classMap);
 					//JavassistUtil.makePublic(ctCurrentGetter);  //this does not work since the extended class is already loaded and cannot be modified anymore
@@ -260,14 +269,14 @@ public class LogicObjectInstrumentation {
 			}
 			
 			if(currentSetter == null || isAbstract(currentSetter)) {
-				CtMethod ctGeneratedSetter = CodeGenerationUtil.createSetter(beanProperty.getPropertyType(), arg, ctPropertyField.getDeclaringClass(), son);
+				CtMethod ctGeneratedSetter = CodeGenerationUtil.createSetter(beanPropertyType, arg, ctPropertyField.getDeclaringClass(), son);
 				if(currentSetter != null) { //then it is abstract
 					CtMethod ctCurrentSetter = JavassistUtil.asCtMethod(currentSetter, classPool);
 					JavassistUtil.copyAnnotationsAttribute(ctGeneratedSetter, ctCurrentSetter, classMap);
 				}
 			} else {
 				if(!ReflectionUtil.isPublic(currentSetter)) {
-					CtMethod ctGeneratedSetter = CodeGenerationUtil.createOverriddingSetter(beanProperty.getPropertyType(), arg, son);
+					CtMethod ctGeneratedSetter = CodeGenerationUtil.createOverriddingSetter(beanPropertyType, arg, son);
 					CtMethod ctCurrentSetter = JavassistUtil.asCtMethod(currentSetter, classPool);
 					JavassistUtil.copyAnnotationsAttribute(ctGeneratedSetter, ctCurrentSetter, classMap);
 					//JavassistUtil.makePublic(ctCurrentSetter);  //this does not work since the extended class is already loaded and cannot be modified anymore

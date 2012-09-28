@@ -12,16 +12,8 @@ public abstract class Line implements ILine {
 		this.name = name;
 	}
 	
-	private String name;
+	String name;
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-	
 	@Override
 	public String toString() {return name;}
 

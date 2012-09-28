@@ -63,7 +63,9 @@ public class TestMutatorsAndAccessorsGeneration2 {
 	    void setP(List<String> p) {}
 	}
 	
-
+	@LObject(args = {"p"})
+	public static abstract class ShouldGenerateEverything {
+	}
 	
 	private static final String TESTED_FIELD = "p";
 	
@@ -198,6 +200,36 @@ public class TestMutatorsAndAccessorsGeneration2 {
 			assertEquals(overriddingGetterTypeWrapper, setterParameterTypeWrapper);
 			
 		} catch (SecurityException | NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	
+	@Test
+	public void testShouldGenerateEverything() {
+		Class testingClass = ShouldGenerateEverything.class;
+		Object lo = LogicObjectFactory.getDefault().create(testingClass);
+		assertEquals(lo.getClass().getSuperclass(), testingClass);
+		Field field;
+		try{
+			field = lo.getClass().getDeclaredField(TESTED_FIELD);
+			assertNotNull(field);
+			Type fieldType = field.getGenericType();
+			AbstractTypeWrapper fieldTypeWrapper = AbstractTypeWrapper.wrap(fieldType);
+			
+			Method getterMethod = lo.getClass().getDeclaredMethod(BeansUtil.getterName(TESTED_FIELD, fieldTypeWrapper.asClass()));
+			assertNotNull(getterMethod);
+			Type getterType = getterMethod.getGenericReturnType();
+			AbstractTypeWrapper getterTypeWrapper = AbstractTypeWrapper.wrap(getterType);
+			assertEquals(fieldTypeWrapper, getterTypeWrapper);
+			
+			Method setterMethod = lo.getClass().getDeclaredMethod(BeansUtil.setterName(TESTED_FIELD), fieldTypeWrapper.asClass());
+			assertNotNull(setterMethod);
+			Type setterParameterType = setterMethod.getGenericParameterTypes()[0];
+			AbstractTypeWrapper setterParameterTypeWrapper = AbstractTypeWrapper.wrap(setterParameterType);
+			assertEquals(fieldTypeWrapper, setterParameterTypeWrapper);
+			
+		} catch (SecurityException | NoSuchMethodException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 	}
