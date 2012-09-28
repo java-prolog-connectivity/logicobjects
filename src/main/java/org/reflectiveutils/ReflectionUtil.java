@@ -1,19 +1,15 @@
 package org.reflectiveutils;
 
-import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.logicobjects.lib.examples.metro.Line;
 import org.reflectiveutils.visitor.FindFirstTypeVisitor;
 import org.reflectiveutils.visitor.TypeVisitor;
@@ -184,6 +180,16 @@ public class ReflectionUtil {
 	}
 */
 	
+	
+	public static boolean isVisible(Class clazz, Field field) {
+		Field visibleField = getVisibleField(clazz, field.getName());
+		return visibleField != null && visibleField.equals(field);
+	}
+	
+	public static Field getVisibleField(Class clazz, String fieldName) {
+		return visibleFields(clazz).get(fieldName);
+	}
+	
 	/**
 	 * Returns a map with all the visible fields in a class:
 	 * - all the fields declared in the class, 
@@ -211,7 +217,7 @@ public class ReflectionUtil {
 					for(Field declaredField : declaredFields) {
 						if(!visibleFields.containsKey(declaredField.getName())) //check if the field is already there
 							if(!Modifier.isPrivate(declaredField.getModifiers())) { //exclude private fields in super classes
-								if(!isPackageAccessModifier(declaredField) || clazzInHierarchy.getPackage().equals(clazz.getPackage())) //exclude 'package' fields in classes declared in different packages
+								if(!hasPackageAccessModifier(declaredField) || clazzInHierarchy.getPackage().equals(clazz.getPackage())) //exclude 'package' fields in classes declared in different packages
 									visibleFields.put(declaredField.getName(), declaredField);
 							}
 					}
@@ -222,174 +228,51 @@ public class ReflectionUtil {
 		}
 	}
 	
-	public static boolean isAbstract(Class clazz) {
-		return Modifier.isAbstract(clazz.getModifiers());
+	public static boolean hasPackageAccessModifier(int modifiers) {
+		return !Modifier.isPrivate(modifiers) && !Modifier.isProtected(modifiers) && !Modifier.isPublic(modifiers);
 	}
 	
-	public static boolean isPublic(Method method) {
-		return Modifier.isPublic(method.getModifiers());
+	public static boolean isAbstract(Class clazz) {
+		return Modifier.isAbstract(clazz.getModifiers());
 	}
 	
 	public static boolean isAbstract(Method method) {
 		return Modifier.isAbstract(method.getModifiers());
 	}
 	
-	public static boolean isPackageAccessModifier(Field field) {
-		int modifiers = field.getModifiers();
-		return !Modifier.isPrivate(modifiers) && !Modifier.isProtected(modifiers) && !Modifier.isPublic(modifiers);
+	public static boolean isPublic(Method method) {
+		return Modifier.isPublic(method.getModifiers());
+	}
+	
+	public static boolean isProtected(Method method) {
+		return Modifier.isProtected(method.getModifiers());
+	}
+	
+	public static boolean isPrivate(Method method) {
+		return Modifier.isPrivate(method.getModifiers());
+	}
+	
+	public static boolean hasPackageAccessModifier(Method method) {
+		return hasPackageAccessModifier(method.getModifiers());
+	}
+	
+	public static boolean isPublic(Field field) {
+		return Modifier.isPublic(field.getModifiers());
+	}
+	
+	public static boolean isProtected(Field field) {
+		return Modifier.isProtected(field.getModifiers());
+	}
+	
+	public static boolean isPrivate(Field field) {
+		return Modifier.isPrivate(field.getModifiers());
+	}
+	
+	public static boolean hasPackageAccessModifier(Field field) {
+		return hasPackageAccessModifier(field.getModifiers());
 	}
 
-		
-	public static Object getPropertyWithGetter(Object target, String propertyName) {
-		try {
-			return PropertyUtils.getProperty(target, propertyName);
-		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	public static void setPropertyWithSetter(Object target, String propertyName, Object value) {
-		try {
-			PropertyUtils.setProperty(target, propertyName, value);
-		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	private static Field getAccessibleField(String fieldName, Class definingClass) {
-		Field field;
-		try {
-			field = definingClass.getDeclaredField(fieldName);
-		} catch (NoSuchFieldException | SecurityException e) {
-			throw new RuntimeException(e);
-		}
-		field.setAccessible(true); //this is necessary to make accessible non-public fields, otherwise an illegal access exception will be thrown
-		return field;
-	}
-	
-	public static Object getFieldWithReflection(Object target, String propertyName, Class definingClass) {
-		try {
-			Field field = getAccessibleField(propertyName, definingClass);
-			return field.get(target);
-		} catch (SecurityException | IllegalArgumentException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		} 
-	}
-	
-	public static void setFieldWithReflection(Object target, String propertyName, Class definingClass, Object value) {
-		try {
-			Field field = getAccessibleField(propertyName, definingClass);
-			field.set(target, value);
-		} catch (SecurityException | IllegalArgumentException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		} 
-	}
-	
-	public static Object getProperty(Object target, String propertyName, Class definingClass) {
-		Object value = null;
-		try {
-			value = getPropertyWithGetter(target, propertyName); //try with an accessor if possible
-		} catch(Exception e) { //getter no defined
-			if(definingClass == null)
-				throw new RuntimeException(e);
-			try {
-				value = getFieldWithReflection(target, propertyName, definingClass); //try obtaining directly the field
-			} catch(Exception e2) {
-				throw new RuntimeException(e2);
-			}
-		}
-		return value;
-	}
-	
-	public static void setProperty(Object target, String propertyName, Object value, Class definingClass) {
-		try {
-			setPropertyWithSetter(target, propertyName, value);
-		} catch (Exception e) { //setter no defined
-			if(definingClass == null)
-				throw new RuntimeException(e);
-			try {
-				setFieldWithReflection(target, propertyName, definingClass, value); //try obtaining directly the field
-			} catch(Exception e2) { 
-				throw new RuntimeException(e2);
-			}
-		} 
-	}
 
-	private static final String GETTER_PREFIX_NON_BOOLEAN = "get";
-	private static final String GETTER_PREFIX_BOOLEAN = "is";
-	private static final String SETTER_PREFIX_NON_BOOLEAN = "set";
-	
-	public static boolean looksLikeGetter(Method method) {
-		String name = method.getName();
-		return ( (name.startsWith(GETTER_PREFIX_NON_BOOLEAN) || name.startsWith(GETTER_PREFIX_BOOLEAN)) && method.getParameterTypes().length == 0 );
-	}
-	
-	public static boolean looksLikeSetter(Method method) {
-		String name = method.getName();
-		return (name.startsWith(SETTER_PREFIX_NON_BOOLEAN) && method.getParameterTypes().length == 1 );
-	}
-	
-	public static boolean looksLikeBeanMethod(Method method) {
-		return looksLikeGetter(method) || looksLikeSetter(method);
-	}
-
-	public static String getterName(String propertyName, Class clazz) {
-		String prefix;
-		if(clazz.equals(Boolean.class) || clazz.equals(boolean.class))
-			prefix = GETTER_PREFIX_BOOLEAN;
-		else
-			prefix = GETTER_PREFIX_NON_BOOLEAN;
-		return prefix + propertyName.substring(0,1).toUpperCase() + propertyName.substring(1);
-	}
-	
-	public static String setterName(String propertyName) {
-		return SETTER_PREFIX_NON_BOOLEAN + propertyName.substring(0,1).toUpperCase() + propertyName.substring(1);
-	}
-	
-	public static Method getter(Class clazz, String propertyName) {
-		PropertyDescriptor propertyDescriptor = getPropertyDescriptor(clazz, propertyName);
-		if(propertyDescriptor != null)
-			return propertyDescriptor.getReadMethod();
-		else
-			return null;
-	}
-	
-	public static Method setter(Class clazz, String propertyName) {
-		PropertyDescriptor propertyDescriptor = getPropertyDescriptor(clazz, propertyName);
-		if(propertyDescriptor != null)
-			return propertyDescriptor.getWriteMethod();
-		else
-			return null;
-	}
-	
-	
-	private static PropertyDescriptor getPropertyDescriptor(Class clazz, String propertyName) {
-		for(PropertyDescriptor propertyDescriptor : PropertyUtils.getPropertyDescriptors(clazz)) {
-			if(propertyDescriptor.getName().equals(propertyName))
-				return propertyDescriptor;
-		}
-		return null;
-	}
-	
-	public Type getPropertyType(Object target, String propertyName) {
-		Type type = null;
-		try {
-			PropertyDescriptor propertyDescriptor = PropertyUtils.getPropertyDescriptor(target, propertyName);
-			Method getter = propertyDescriptor.getReadMethod();
-			if(getter != null)
-				type = getter.getGenericReturnType();
-			else {
-				Method setter = propertyDescriptor.getWriteMethod();
-				if(setter != null)
-					type = setter.getGenericParameterTypes()[0];
-				else
-					throw new RuntimeException("Unknown property type: " + propertyName + " in object: " + target);
-			}
-		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-			throw new RuntimeException(e);
-		}
-		return type;
-	}
 	
 	public static <A extends Annotation> A getAnnotationParameter(Method method, int position, Class<A> annotationClass) {
 		for(Annotation anAnnotation : method.getParameterAnnotations()[position]) {
@@ -399,39 +282,6 @@ public class ReflectionUtil {
 		return null;
 	}
 
-	
-	
-	public static class A {
-		protected String s = "x";
-		private String p;
-		String p1;
-		public String p2;
-		
-		
-		public String getS() {
-			return s;
-		}
-	}
-	
-	public static abstract class B extends A {
-		protected String s = "y";
-		
-		public String getS() {
-			p1 = "";
-			return s;
-		}
-		
-		public abstract void setS(String s);
-	}
-	
-	public static abstract class C extends B {
-		
-		
-		public void setS1(String s){};
-	}
-	
-	
-	
 	
 	
 	public static Class findFirstNonSyntheticClass(Class candidateClass) {

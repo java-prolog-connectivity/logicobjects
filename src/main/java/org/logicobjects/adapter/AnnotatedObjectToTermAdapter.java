@@ -1,17 +1,15 @@
 package org.logicobjects.adapter;
 
-import java.lang.reflect.Field;
-
 import jpl.Term;
 
+import org.logicobjects.adapter.adaptingcontext.AbstractLogicObjectDescriptor;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.AnnotatedElementAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.BeanPropertyAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.ClassAdaptationContext;
-import org.logicobjects.adapter.adaptingcontext.AbstractLogicObjectDescriptor;
 import org.logicobjects.core.LogicObject;
 import org.logicobjects.util.LogicUtil;
-import org.reflectiveutils.ReflectionUtil;
+import org.reflectiveutils.BeansUtil;
 
 public class AnnotatedObjectToTermAdapter<From> extends Adapter<From, Term> {
 
@@ -57,7 +55,7 @@ public class AnnotatedObjectToTermAdapter<From> extends Adapter<From, Term> {
 		String argsListPropertyName = logicObjectDescription.argsList();
 		if(argsListPropertyName != null && !argsListPropertyName.isEmpty()) {
 			BeanPropertyAdaptationContext adaptationContext = new BeanPropertyAdaptationContext(object.getClass(), argsListPropertyName);
-			Object[] objects = (Object[]) ReflectionUtil.getProperty(object, argsListPropertyName, adaptationContext.getGuidingClass());
+			Object[] objects = (Object[]) BeansUtil.getProperty(object, argsListPropertyName, adaptationContext.getGuidingClass());
 			//Field field = ReflectionUtil.getField(object, argsList);
 			arguments = new ObjectToTermAdapter().adaptObjects(objects, adaptationContext);
 		} else {

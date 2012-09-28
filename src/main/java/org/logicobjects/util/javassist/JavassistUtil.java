@@ -3,6 +3,7 @@ package org.logicobjects.util.javassist;
 
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -11,6 +12,7 @@ import javassist.ClassMap;
 import javassist.ClassPool;
 import javassist.CtBehavior;
 import javassist.CtClass;
+import javassist.CtField;
 import javassist.CtMember;
 import javassist.CtMethod;
 import javassist.LoaderClassPath;
@@ -19,10 +21,9 @@ import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.MethodInfo;
 import javassist.bytecode.ParameterAnnotationsAttribute;
-import javassist.bytecode.SignatureAttribute.BaseType;
 
+import org.reflectiveutils.ReflectionUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
-import org.reflectiveutils.wrappertype.SingleTypeWrapper;
 
 public class JavassistUtil {
 	
@@ -32,16 +33,27 @@ public class JavassistUtil {
 	 * "By default, all the occurrences of the names of the class declaring m and the superclass are replaced with the name of the class and the superclass that the created method is added to. 
 	 * This is done whichever map is null or not. To prevent this replacement, call ClassMap.fix()."
 	 */
-	public static ClassMap fixedClassMap(Class clazz, ClassPool classPool) {
+	public static ClassMap fixedClassMap(CtClass ctClazz, ClassPool classPool) {
 		ClassMap classMap = new ClassMap();
-		classMap.fix(JavassistUtil.asCtClass(clazz, classPool));
-		Class superClass = clazz.getSuperclass();
+		classMap.fix(ctClazz);
+		CtClass superClass = null;
+		try {
+			superClass = ctClazz.getSuperclass();
+		} catch (NotFoundException e) {
+		}
 		if(superClass != null)
-			classMap.fix(JavassistUtil.asCtClass(superClass, classPool));
-		for(Class interfaze : clazz.getInterfaces())
-			classMap.fix(JavassistUtil.asCtClass(interfaze, classPool));
-		
+			classMap.fix(superClass);
+		try {
+			for(CtClass interfaze : ctClazz.getInterfaces())
+				classMap.fix(interfaze);
+		} catch (NotFoundException e) {
+		}
 		return classMap;
+		
+	}
+	
+	public static ClassMap fixedClassMap(Class clazz, ClassPool classPool) {
+		return fixedClassMap(JavassistUtil.asCtClass(clazz, classPool), classPool);
 	}
 	
 /*
@@ -53,7 +65,6 @@ public class JavassistUtil {
 	public static CtClass asCtClass(Type type, ClassPool pool) {
 		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
 		CtClass ctClass = asCtClass(typeWrapper.asClass(), pool);
-		
 		return ctClass;
 	}
 	
@@ -92,15 +103,24 @@ public class JavassistUtil {
 	*/
 
 	public static CtMethod asCtMethod(Method m, ClassPool pool) {
-		CtClass rtClass = asCtClass(m.getDeclaringClass(), pool);
+		CtClass ctDeclaringClass = asCtClass(m.getDeclaringClass(), pool);
 		try {
 			CtClass[] ctParamClasses = asCtClasses(m.getParameterTypes(), pool);
-			return rtClass.getDeclaredMethod(m.getName(), ctParamClasses);
+			return ctDeclaringClass.getDeclaredMethod(m.getName(), ctParamClasses);
 		} catch (NotFoundException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
+	public static CtField asCtField(Field f, ClassPool pool) {
+		CtClass ctDeclaringClass = asCtClass(f.getDeclaringClass(), pool);
+		try {
+			return ctDeclaringClass.getField(f.getName());
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	public static void createClassFile(String basePath, Class aClass) {
 		try {
 			createClassFile(basePath, ClassPool.getDefault().get(aClass.getCanonicalName()));
@@ -122,12 +142,8 @@ public class JavassistUtil {
 		}
 	}
 	
-	public static boolean isVoid(CtMethod m) {
-		try {
-			return m.getReturnType().getName().equals("void");
-		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
-		}
+	public static boolean isAbstract(CtClass clazz) {
+		return Modifier.isAbstract(clazz.getModifiers());
 	}
 	
 	//this does not work if the class has already been loaded
@@ -139,9 +155,53 @@ public class JavassistUtil {
 		m.setModifiers(m.getModifiers() & ~Modifier.ABSTRACT);
 	}
 
-	public static boolean isAbstract(CtBehavior m) {
-		return Modifier.isAbstract(m.getModifiers());
+	public static boolean isVoid(CtMethod m) {
+		try {
+			return m.getReturnType().getName().equals("void");
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
+	
+	public static void makePublic(CtMember ctMember) {
+		ctMember.setModifiers( (ctMember.getModifiers() & ~Modifier.PROTECTED & ~Modifier.PRIVATE) | Modifier.PUBLIC);
+	}
+	
+	public static void makeProtected(CtMember ctMember) {
+		ctMember.setModifiers( (ctMember.getModifiers() & ~Modifier.PUBLIC & ~Modifier.PRIVATE) | Modifier.PROTECTED);
+	}
+	
+	public static void makePrivate(CtMember ctMember) {
+		ctMember.setModifiers( (ctMember.getModifiers() & ~Modifier.PUBLIC & ~Modifier.PROTECTED) | Modifier.PRIVATE);
+	}
+	
+	public static void makePackageAccess(CtMember ctMember) {
+		ctMember.setModifiers(ctMember.getModifiers() & ~Modifier.PUBLIC & ~Modifier.PROTECTED & ~Modifier.PRIVATE);
+	}
+	
+	public static boolean isAbstract(CtMember ctMember) {
+		return Modifier.isAbstract(ctMember.getModifiers());
+	}
+	
+	public static boolean isPublic(CtMember ctMember) {
+		return Modifier.isPublic(ctMember.getModifiers());
+	}
+	
+	public static boolean isProtected(CtMember ctMember) {
+		return Modifier.isProtected(ctMember.getModifiers());
+	}
+	
+	public static boolean isPrivate(CtMember ctMember) {
+		return Modifier.isPrivate(ctMember.getModifiers());
+	}
+	
+	public static boolean hasPackageAccessModifier(CtMember ctMember) {
+		return ReflectionUtil.hasPackageAccessModifier(ctMember.getModifiers());
+	}
+	
+	
+
+	
 	
 	
 	/**
@@ -175,89 +235,7 @@ public class JavassistUtil {
 	
 	
 	
-	/**
-	 * 
-	 * This class is a workaround to the issue that Javassist works often with the java 1.4 specification.
-	 * This is useful in certain method generation routines, where the generated method returns an object from a given expression
-	 * This class just converts primitive types to objects
-	 * TODO find an equivalent in Guava or something like that
-	 *
-	 */
-	public static class ObjectConverter {
-		
-		public static Object toObject(Object o) {
-			return o;
-		}
-		
-		public static Object toObject(boolean o) {
-			return o;
-		}
-		
-		public static Object toObject(byte o) {
-			return o;
-		}
-		
-		public static Object toObject(char o) {
-			return o;
-		}
-		
-		public static Object toObject(short o) {
-			return o;
-		}
-		
-		public static Object toObject(int o) {
-			return o;
-		}
-		
-		public static Object toObject(long o) {
-			return o;
-		}
-		
-		public static Object toObject(float o) {
-			return o;
-		}
-		
-		public static Object toObject(Double o) {
-			return o;
-		}
-		
-		/*
-		public static Object toObject(Object o) {
-			return o;
-		}
-		
-		public static Object toObject(boolean o) {
-			return Boolean.valueOf(o);
-		}
-		
-		public static Object toObject(byte o) {
-			return Byte.valueOf(o);
-		}
-		
-		public static Object toObject(char o) {
-			return Character.valueOf(o);
-		}
-		
-		public static Object toObject(short o) {
-			return Short.valueOf(o);
-		}
-		
-		public static Object toObject(int o) {
-			return Integer.valueOf(o);
-		}
-		
-		public static Object toObject(long o) {
-			return Long.valueOf(o);
-		}
-		
-		public static Object toObject(float o) {
-			return Float.valueOf(o);
-		}
-		
-		public static Object toObject(Double o) {
-			return Double.valueOf(o);
-		}
-		*/
-	}
+
+
 	
 }

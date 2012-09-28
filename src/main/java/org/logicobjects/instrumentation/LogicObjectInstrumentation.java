@@ -36,7 +36,8 @@ import org.logicobjects.core.LogicRoutine;
 import org.logicobjects.core.NoLogicResultException;
 import org.logicobjects.util.javassist.CodeGenerationUtil;
 import org.logicobjects.util.javassist.JavassistUtil;
-import org.logicobjects.util.javassist.JavassistUtil.ObjectConverter;
+import org.logicobjects.util.javassist.PrimitiveTypesWorkaround;
+import org.reflectiveutils.BeansUtil;
 import org.reflectiveutils.ReflectionUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
@@ -193,59 +194,84 @@ public class LogicObjectInstrumentation {
 	}
 
 
-	
 	private void createGettersAndSetters(CtClass son) {
 		ClassMap classMap = JavassistUtil.fixedClassMap(classToExtend, classPool);
-		
-		
+
 		LogicObjectClass parentLogicObjectClass = LogicObjectClass.findLogicObjectClass(classToExtend);
-		Map<String, Field> visibleFields = ReflectionUtil.visibleFields(classToExtend);
+		//Map<String, Field> visibleFields = ReflectionUtil.visibleFields(classToExtend);
 		for(String arg : parentLogicObjectClass.getLObjectArgs()) {
 			
-			Field visiblePropertyField = visibleFields.get(arg);
+			//Field visiblePropertyField = visibleFields.get(arg);
 			
 			LogicBeanProperty beanProperty = new LogicBeanProperty(classToExtend, arg);
+			Field propertyField = beanProperty.getPropertyField();
 			Method currentGetter = beanProperty.getPropertyGetter();
 			Method currentSetter = beanProperty.getPropertySetter();
 			
-			if(currentGetter != null && currentSetter != null && !(isAbstract(currentGetter) || isAbstract(currentSetter)))
-				continue;
+			CtField ctPropertyField = null;
+
 			
 			if( (currentGetter == null || isAbstract(currentGetter)) //there is not a valid getter
 				&& (currentSetter != null && !isAbstract(currentSetter)) //but there is a valid setter
-				&& visiblePropertyField == null) //and there is not a visible field for the property
+				&& propertyField == null) //and there is not a visible field for the property
 				throw new RuntimeException("Impossible to generate accessor for property " + arg + ". Mutator exists but field does not.");
 			
 			if( (currentSetter == null || isAbstract(currentSetter)) //there is not a valid getter
 					&& (currentGetter != null && !isAbstract(currentGetter)) //but there is a valid setter
-					&& visiblePropertyField == null) //and there is not a visible field for the property
+					&& propertyField == null) //and there is not a visible field for the property
 					throw new RuntimeException("Impossible to generate mutator for property " + arg + ". Accessor exists but field does not.");
 			
-			//at this point, either the setter, the getter or both methods should be generated
-			//if either a setter or getter are present, that implies that the field is visible
-			
-			
-			if(visiblePropertyField == null) {
-				Type beanPropertyType = beanProperty.getPropertyType();
-				Type beanPropertyClass = AbstractTypeWrapper.wrap(beanPropertyType).asClass();
-				CtClass ctFieldClass = JavassistUtil.asCtClass(beanPropertyClass, classPool);
-				CodeGenerationUtil.createField(ctFieldClass, beanPropertyType, arg, son);
+			if(propertyField == null) { //a field should be generated
+				if( (currentGetter == null || isAbstract(currentGetter)) && (currentSetter == null || isAbstract(currentSetter))) { //no implementation for getter and setter
+					Type beanPropertyType = beanProperty.getPropertyType();
+					Type beanPropertyClass = AbstractTypeWrapper.wrap(beanPropertyType).asClass();
+					CtClass ctFieldClass = JavassistUtil.asCtClass(beanPropertyClass, classPool);
+					ctPropertyField = CodeGenerationUtil.createField(ctFieldClass, beanPropertyType, arg, son);
+				}
+			} else {
+				ctPropertyField = JavassistUtil.asCtField(propertyField, classPool);
 			}
-				
-
+			
+/*
+			//verify the access modifiers of the existing field
+			if(ctPropertyField != null && 
+					JavassistUtil.isPrivate(ctPropertyField) || 
+					(JavassistUtil.hasPackageAccessModifier(ctPropertyField) && !ctPropertyField.getDeclaringClass().getPackageName().equals(son.getPackageName()))) {
+				//throw new RuntimeException(new IllegalAccessException("The field " + propertyField + " should be declared as protected"));
+				JavassistUtil.makeProtected(ctPropertyField); //this does not work since the extended class is already loaded and cannot be modified anymore (apparently it is not necessary anyway...)
+			}
+*/
+			
+			
 			if(currentGetter == null || isAbstract(currentGetter)) {
-				CtMethod ctGeneratedGetter = CodeGenerationUtil.createGetter(beanProperty.getPropertyType(), arg, son);
+				CtMethod ctGeneratedGetter = CodeGenerationUtil.createGetter(beanProperty.getPropertyType(), arg, ctPropertyField.getDeclaringClass(), son);
 				if(currentGetter != null) { //then it is abstract
 					CtMethod ctCurrentGetter = JavassistUtil.asCtMethod(currentGetter, classPool);
 					JavassistUtil.copyAnnotationsAttribute(ctGeneratedGetter, ctCurrentGetter, classMap);
 				}
+			} else {
+				if(!ReflectionUtil.isPublic(currentGetter)) {
+					CtMethod ctGeneratedGetter = CodeGenerationUtil.createOverriddingGetter(beanProperty.getPropertyType(), arg, son);
+					CtMethod ctCurrentGetter = JavassistUtil.asCtMethod(currentGetter, classPool);
+					JavassistUtil.copyAnnotationsAttribute(ctGeneratedGetter, ctCurrentGetter, classMap);
+					//JavassistUtil.makePublic(ctCurrentGetter);  //this does not work since the extended class is already loaded and cannot be modified anymore
+					//throw new RuntimeException(new IllegalAccessException("The method " + currentGetter + " should be declared as public"));
+				}
 			}
 			
 			if(currentSetter == null || isAbstract(currentSetter)) {
-				CtMethod ctGeneratedSetter = CodeGenerationUtil.createSetter(beanProperty.getPropertyType(), arg, son);
+				CtMethod ctGeneratedSetter = CodeGenerationUtil.createSetter(beanProperty.getPropertyType(), arg, ctPropertyField.getDeclaringClass(), son);
 				if(currentSetter != null) { //then it is abstract
 					CtMethod ctCurrentSetter = JavassistUtil.asCtMethod(currentSetter, classPool);
 					JavassistUtil.copyAnnotationsAttribute(ctGeneratedSetter, ctCurrentSetter, classMap);
+				}
+			} else {
+				if(!ReflectionUtil.isPublic(currentSetter)) {
+					CtMethod ctGeneratedSetter = CodeGenerationUtil.createOverriddingSetter(beanProperty.getPropertyType(), arg, son);
+					CtMethod ctCurrentSetter = JavassistUtil.asCtMethod(currentSetter, classPool);
+					JavassistUtil.copyAnnotationsAttribute(ctGeneratedSetter, ctCurrentSetter, classMap);
+					//JavassistUtil.makePublic(ctCurrentSetter);  //this does not work since the extended class is already loaded and cannot be modified anymore
+					//throw new RuntimeException(new IllegalAccessException("The method " + currentSetter + " should be declared as public"));
 				}
 			}
 			
@@ -322,7 +348,7 @@ public class LogicObjectInstrumentation {
 			String methodExpression = methodEntry.getValue();
 			CtMethod ctMethod;
 			try {
-				String code = "public Object "+ methodName + "(" + getParamDeclarationString(method) + ") { return " + ObjectConverter.class.getCanonicalName() + "." + OBJECT_CONVERSION_METHOD_NAME + "(" + methodExpression + "); }";
+				String code = "public Object "+ methodName + "(" + getParamDeclarationString(method) + ") { return " + PrimitiveTypesWorkaround.class.getCanonicalName() + "." + OBJECT_CONVERSION_METHOD_NAME + "(" + methodExpression + "); }";
 				ctMethod = CtNewMethod.make(code, ctClass);
 				ctClass.addMethod(ctMethod);
 			} catch (CannotCompileException e) {
@@ -344,7 +370,7 @@ public class LogicObjectInstrumentation {
 		List<Method> abstractMethods = ReflectionUtil.getAllAbstractMethods(c);
 		List<Method> methodsToOverride = new ArrayList<Method>();
 		for(Method abstractMethod: abstractMethods) {
-			if(!ReflectionUtil.looksLikeBeanMethod(abstractMethod) || LogicRoutine.isAnnotatedAsLogicRoutine(abstractMethod))
+			if(!BeansUtil.looksLikeBeanMethod(abstractMethod) || LogicRoutine.isAnnotatedAsLogicRoutine(abstractMethod))
 				methodsToOverride.add(abstractMethod);
 		}
 		return methodsToOverride.toArray(new Method[]{});

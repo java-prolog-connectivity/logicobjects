@@ -12,11 +12,10 @@ import jpl.Term;
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.BeanPropertyAdaptationContext;
-import org.logicobjects.adapter.adaptingcontext.FieldAdaptationContext;
 import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
 import org.logicobjects.adapter.objectadapters.TermToArrayAdapter;
 import org.logicobjects.util.LogicUtil;
-import org.reflectiveutils.ReflectionUtil;
+import org.reflectiveutils.BeansUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 import org.reflectiveutils.wrappertype.ArrayTypeWrapper;
 
@@ -103,7 +102,7 @@ public class LogicObject implements ITermObject {
 	public static void setProperty(Object lObject, String propertyName, Term term) {
 		BeanPropertyAdaptationContext adaptationContext = new BeanPropertyAdaptationContext(lObject.getClass(), propertyName);
 		Object value = new TermToObjectAdapter().adapt(term, adaptationContext.getPropertyType(), adaptationContext);
-		ReflectionUtil.setProperty(lObject, propertyName, value, adaptationContext.getGuidingClass());
+		BeansUtil.setProperty(lObject, propertyName, value, adaptationContext.getGuidingClass());
 	}
 	
 	public static void setPropertiesArray(Object lObject, String argsList, Term term) {
@@ -114,7 +113,7 @@ public class LogicObject implements ITermObject {
 			throw new RuntimeException("The property " + argsList + " is not an array instance variable in object " + lObject);
 		Term[] termArguments = term.args();
 		Object adaptedArgs = new TermToObjectAdapter().adaptTerms(termArguments, adaptationContext.getPropertyType(), adaptationContext);
-		ReflectionUtil.setProperty(lObject, argsList, adaptedArgs, adaptationContext.getGuidingClass());
+		BeansUtil.setProperty(lObject, argsList, adaptedArgs, adaptationContext.getGuidingClass());
 	}
 	
 	public static void setPropertiesFromTermArgs(Object lObject, String[] properties, Term term) {
@@ -139,7 +138,7 @@ public class LogicObject implements ITermObject {
 	
 	public static Term propertyAsTerm(Object lObject, String propertyName) {
 		BeanPropertyAdaptationContext adaptationContext = new BeanPropertyAdaptationContext(lObject.getClass(), propertyName);
-		Object propertyValue = ReflectionUtil.getProperty(lObject, propertyName, adaptationContext.getGuidingClass());
+		Object propertyValue = BeansUtil.getProperty(lObject, propertyName, adaptationContext.getGuidingClass());
 		//Field field = ReflectionUtil.getProperty(lObject, propertyName);
 		return new ObjectToTermAdapter().adapt(propertyValue, adaptationContext);
 	}

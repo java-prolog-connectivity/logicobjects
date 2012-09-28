@@ -15,12 +15,48 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.core.LogicObjectFactory;
+import org.reflectiveutils.BeansUtil;
 import org.reflectiveutils.ReflectionUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
 @RunWith(value = Parameterized.class)
 public class TestMutatorsAndAccessorsGeneration {
 
+	
+	
+	
+	
+	
+	public static class A extends org.logicobjects.test.TestMutatorsAndAccessorsGeneration.PrimitiveProperty {
+		private int f = 1;
+	}
+	
+	public static class B extends A{
+		
+		private int f = 2;
+		
+		int getF() {
+			return ((A)this).f;
+		}
+		
+	}
+	
+	public static void main(String[] args) {
+		A a = new A();
+		System.out.println(a.f);
+		A a2 = new B();
+		System.out.println(a2.f);
+		System.out.println(((B)a2).f);
+		System.out.println(new B().getF());
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	@LObject(args = {"p"})
 	public static class PrimitiveProperty {
 		int p;
@@ -100,33 +136,31 @@ public class TestMutatorsAndAccessorsGeneration {
 	}
 	
 	@Test
-	public void testPrimitiveProperty() {
-		
+	public void testGenerationMutatosAndAccessors() {
 		Object lo = LogicObjectFactory.getDefault().create(testingClass);
 		assertEquals(lo.getClass().getSuperclass(), testingClass);
 		Field field;
 		try {
-			field = testingClass.getDeclaredField(TESTED_FIELD);
+			field = ReflectionUtil.getVisibleField(lo.getClass(), TESTED_FIELD);
+			assertNotNull(field);
 			Type fieldType = field.getGenericType();
 			AbstractTypeWrapper fieldTypeWrapper = AbstractTypeWrapper.wrap(fieldType);
 			
-			Method getterMethod = lo.getClass().getMethod(ReflectionUtil.getterName(TESTED_FIELD, fieldTypeWrapper.asClass()));
+			Method getterMethod = lo.getClass().getMethod(BeansUtil.getterName(TESTED_FIELD, fieldTypeWrapper.asClass()));
 			assertNotNull(getterMethod);
 			Type getterType = getterMethod.getGenericReturnType();
 			AbstractTypeWrapper getterTypeWrapper = AbstractTypeWrapper.wrap(getterType);
 			assertEquals(fieldTypeWrapper, getterTypeWrapper);
 			
-			Method setterMethod = lo.getClass().getMethod(ReflectionUtil.setterName(TESTED_FIELD), fieldTypeWrapper.asClass());
+			Method setterMethod = lo.getClass().getMethod(BeansUtil.setterName(TESTED_FIELD), fieldTypeWrapper.asClass());
 			assertNotNull(setterMethod);
 			Type setterParameterType = setterMethod.getGenericParameterTypes()[0];
 			AbstractTypeWrapper setterParameterTypeWrapper = AbstractTypeWrapper.wrap(setterParameterType);
 			assertEquals(fieldTypeWrapper, setterParameterTypeWrapper);
 			
-		} catch (NoSuchFieldException | SecurityException | NoSuchMethodException e) {
+		} catch (SecurityException | NoSuchMethodException e) {
 			throw new RuntimeException(e);
 		}
-		
-		
 	}
 	
 }

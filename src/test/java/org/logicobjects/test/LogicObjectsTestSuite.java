@@ -11,6 +11,7 @@ import org.reflectiveutils.test.ReflectiveUtilsTestSuite;
 	TestParsingExpressions.class, 
 	TestLogicObjectsUtil.class, 
 	TestMutatorsAndAccessorsGeneration.class, 
+	TestMutatorsAndAccessorsGeneration2.class,
 	TestLogicExpressions.class, 
 	TestWrapperAdapter.class, 
 	TestRawQueries.class, 
