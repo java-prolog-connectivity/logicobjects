@@ -22,7 +22,7 @@ public class StationJpl implements IStation {
 		this.name = name;
 	}
 
-	@Override
+	//@Override
 	public String getName() {
 		return name;
 	}

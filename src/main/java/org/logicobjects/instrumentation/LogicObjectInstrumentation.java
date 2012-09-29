@@ -302,11 +302,6 @@ public class LogicObjectInstrumentation {
 */
 	
 	
-	
-	
-
-	
-	
 	private void createConstructors(CtClass son) {
 		CtConstructor[] parentConstructors = ctClassToExtend.getConstructors();
 		ClassMap classMap = JavassistUtil.fixedClassMap(classToExtend, classPool);

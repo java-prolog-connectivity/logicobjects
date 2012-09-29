@@ -1,12 +1,11 @@
 package org.reflectiveutils;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-
-import org.apache.commons.beanutils.PropertyUtils;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * In the spirit of Apache bean utils. 
@@ -24,12 +23,12 @@ public class BeansUtil {
 	
 	public static boolean looksLikeGetter(Method method) {
 		String name = method.getName();
-		return ( (name.startsWith(GETTER_PREFIX_NON_BOOLEAN) || name.startsWith(GETTER_PREFIX_BOOLEAN)) && method.getParameterTypes().length == 0 );
+		return ( method.getParameterTypes().length == 0 && (name.startsWith(GETTER_PREFIX_NON_BOOLEAN) || name.startsWith(GETTER_PREFIX_BOOLEAN)) );
 	}
 	
 	public static boolean looksLikeSetter(Method method) {
 		String name = method.getName();
-		return (name.startsWith(SETTER_PREFIX_NON_BOOLEAN) && method.getParameterTypes().length == 1 );
+		return (method.getParameterTypes().length == 1 && name.startsWith(SETTER_PREFIX_NON_BOOLEAN));
 	}
 	
 	public static boolean looksLikeBeanMethod(Method method) {
@@ -55,6 +54,12 @@ public class BeansUtil {
 		return SETTER_PREFIX_NON_BOOLEAN + propertyName.substring(0,1).toUpperCase() + propertyName.substring(1);
 	}
 	
+	
+	
+	
+	
+	
+	
 	/**
 	 * Given a property name, answers the first getter in a class hierarchy
 	 * @param clazz
@@ -62,23 +67,24 @@ public class BeansUtil {
 	 * @return
 	 */
 	public static Method getterInHierarchy(Class clazz, String propertyName) {
-		if(clazz == null)
-			return null;
-		Method method = declaredGetter(clazz, propertyName);
-		if(method != null)
-			return method;
-		else
-			return getterInHierarchy(clazz.getSuperclass(), propertyName);
+		return getterInHierarchy(clazz, propertyName, null);
 	}
 	
 	public static Method getterInHierarchy(Class clazz, String propertyName, Class getterClass) {
+		Method method = publicGetter(clazz, propertyName);
+		if(method == null)
+			method = getterInHierarchyAux(clazz, propertyName, getterClass);
+		return method;
+	}
+	
+	public static Method getterInHierarchyAux(Class clazz, String propertyName, Class getterClass) {
 		if(clazz == null)
 			return null;
 		Method method = declaredGetter(clazz, propertyName, getterClass);
 		if(method != null)
 			return method;
 		else
-			return getterInHierarchy(clazz.getSuperclass(), propertyName, getterClass);
+			return getterInHierarchyAux(clazz.getSuperclass(), propertyName, getterClass);
 	}
 	
 	/**
@@ -90,87 +96,123 @@ public class BeansUtil {
 	 * @return
 	 */
 	public static Method setterInHierarchy(Class clazz, String propertyName) {
-		if(clazz == null)
-			return null;
-		Method method = declaredSetter(clazz, propertyName);
-		if(method != null)
-			return method;
-		else
-			return setterInHierarchy(clazz.getSuperclass(), propertyName);
+		return setterInHierarchy(clazz, propertyName, null);
 	}
 	
 	public static Method setterInHierarchy(Class clazz, String propertyName, Class setterClass) {
+		Method method = publicSetter(clazz, propertyName);
+		if(method == null)
+			method = setterInHierarchyAux(clazz, propertyName, setterClass);
+		return method;
+	}
+	
+	public static Method setterInHierarchyAux(Class clazz, String propertyName, Class setterClass) {
 		if(clazz == null)
 			return null;
 		Method method = declaredSetter(clazz, propertyName, setterClass);
 		if(method != null)
 			return method;
 		else
-			return setterInHierarchy(clazz.getSuperclass(), propertyName, setterClass);
+			return setterInHierarchyAux(clazz.getSuperclass(), propertyName, setterClass);
 	}
 	
-	public static Method declaredGetter(Class clazz, String propertyName) {
-		Method getter = null;
-		try {
-			getter = clazz.getDeclaredMethod(nonBooleanGetterName(propertyName));
-		} catch (NoSuchMethodException e) {
-			try {
-				getter = clazz.getDeclaredMethod(booleanGetterName(propertyName));
-				if(! (getter.getReturnType().equals(Boolean.class) || getter.getReturnType().equals(boolean.class)) )
-					getter = null;
-			} catch (NoSuchMethodException e1) {
-			}
-		}
-		return getter;
-	}
+
+	
 	
 	public static Method declaredGetter(Class clazz, String propertyName, Class getterClass) {
 		Method getter = null;
-		try {
-			getter = clazz.getDeclaredMethod(getterName(propertyName, getterClass));
-		} catch (NoSuchMethodException e) {
+		if(getterClass != null)
+			try {
+				getter = clazz.getDeclaredMethod(getterName(propertyName, getterClass));
+			} catch (NoSuchMethodException e2) {
+			}
+		else {
+			try {
+				getter = clazz.getDeclaredMethod(nonBooleanGetterName(propertyName));
+			} catch (NoSuchMethodException e) {
+				try {
+					getter = clazz.getDeclaredMethod(booleanGetterName(propertyName));
+					if(! (getter.getReturnType().equals(Boolean.class) || getter.getReturnType().equals(boolean.class)) )
+						getter = null;
+				} catch (NoSuchMethodException e1) {
+				}
+			}
 		}
 		return getter;
 	}
 	
-	public static Method declaredSetter(Class clazz, String propertyName) {
+
+	public static Method declaredSetter(Class clazz, String propertyName, Class setterClass) {
 		Method setter = null;
-		String setterName = setterName(propertyName);
-		for(Method declaredMethod : clazz.getDeclaredMethods()) {
-			if(declaredMethod.getName().equals(setterName) && declaredMethod.getParameterTypes().length == 1) {
-				setter = declaredMethod;
-				break;
+		if(setterClass != null)
+			try {
+				setter = clazz.getDeclaredMethod(setterName(propertyName), setterClass);
+			} catch (NoSuchMethodException e) {
+			}
+		else {
+			String setterName = setterName(propertyName);
+			for(Method method : clazz.getDeclaredMethods()) {
+				if(method.getName().equals(setterName) && method.getParameterTypes().length == 1) {
+					setter = method;
+					break;
+				}
 			}
 		}
 		return setter;
 	}
 	
-	public static Method declaredSetter(Class clazz, String propertyName, Class setterClass) {
+	public static Method publicGetter(Class clazz, String propertyName, Class getterClass) {
+		Method getter = null;
+		if(getterClass != null)
+			try {
+				getter = clazz.getMethod(getterName(propertyName, getterClass));
+			} catch (NoSuchMethodException e2) {
+			}
+		else {
+			try {
+				getter = clazz.getMethod(nonBooleanGetterName(propertyName));
+			} catch (NoSuchMethodException e) {
+				try {
+					getter = clazz.getMethod(booleanGetterName(propertyName));
+					if(! (getter.getReturnType().equals(Boolean.class) || getter.getReturnType().equals(boolean.class)) )
+						getter = null;
+				} catch (NoSuchMethodException e1) {
+				}
+			}
+		}
+		return getter;
+	}
+	
+
+	public static Method publicSetter(Class clazz, String propertyName, Class setterClass) {
 		Method setter = null;
-		try {
-			setter = clazz.getDeclaredMethod(setterName(propertyName), setterClass);
-		} catch (NoSuchMethodException e) {
+		if(setterClass != null)
+			try {
+				setter = clazz.getMethod(setterName(propertyName), setterClass);
+			} catch (NoSuchMethodException e) {
+			}
+		else {
+			String setterName = setterName(propertyName);
+			for(Method method : clazz.getMethods()) {
+				if(method.getName().equals(setterName) && method.getParameterTypes().length == 1) {
+					setter = method;
+					break;
+				}
+			}
 		}
 		return setter;
 	}
 	
+	
 	public static Method publicGetter(Class clazz, String propertyName) {
-		PropertyDescriptor propertyDescriptor = getPropertyDescriptor(clazz, propertyName);
-		if(propertyDescriptor != null)
-			return propertyDescriptor.getReadMethod();
-		else
-			return null;
+		return publicGetter(clazz, propertyName, null);
 	}
 	
 	public static Method publicSetter(Class clazz, String propertyName) {
-		PropertyDescriptor propertyDescriptor = getPropertyDescriptor(clazz, propertyName);
-		if(propertyDescriptor != null)
-			return propertyDescriptor.getWriteMethod();
-		else
-			return null;
+		return publicSetter(clazz, propertyName, null);
 	}
 	
-	
+	/*
 	private static PropertyDescriptor getPropertyDescriptor(Class clazz, String propertyName) {
 		for(PropertyDescriptor propertyDescriptor : PropertyUtils.getPropertyDescriptors(clazz)) {
 			if(propertyDescriptor.getName().equals(propertyName))
@@ -178,23 +220,25 @@ public class BeansUtil {
 		}
 		return null;
 	}
+	*/
 	
 	public Type getPropertyType(Object target, String propertyName) {
 		Type type = null;
-		try {
-			PropertyDescriptor propertyDescriptor = PropertyUtils.getPropertyDescriptor(target, propertyName);
-			Method getter = propertyDescriptor.getReadMethod();
-			if(getter != null)
-				type = getter.getGenericReturnType();
+		
+		Method getter = publicGetter(target.getClass(), propertyName);
+		if(getter != null)
+			type = getter.getGenericReturnType();
+		else {
+			Method setter = publicSetter(target.getClass(), propertyName);
+			if(setter != null)
+				type = setter.getGenericParameterTypes()[0];
 			else {
-				Method setter = propertyDescriptor.getWriteMethod();
-				if(setter != null)
-					type = setter.getGenericParameterTypes()[0];
+				Field field = ReflectionUtil.getVisibleField(target.getClass(), propertyName);
+				if(field != null)
+					type = field.getGenericType();
 				else
-					throw new RuntimeException("Unknown property type: " + propertyName + " in object: " + target);
+					throw new RuntimeException("The property: " + propertyName + " does not exist in class " + target.getClass());
 			}
-		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-			throw new RuntimeException(e);
 		}
 		return type;
 	}
@@ -211,37 +255,61 @@ public class BeansUtil {
 		return field;
 	}
 
-	public static Object getPropertyWithGetter(Object target, String propertyName) {
+	public static Object getPropertyWithGetter(Object target, String propertyName) throws NoSuchMethodException {
+		Method getter = publicGetter(target.getClass(), propertyName);
+		if(getter == null)
+			throw new NoSuchMethodException();
 		try {
-			return PropertyUtils.getProperty(target, propertyName);
-		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-			throw new RuntimeException(e);
+			return getter.invoke(target);
+		} catch (IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e1) {
+			throw new RuntimeException(e1);
 		}
 	}
 	
-	public static void setPropertyWithSetter(Object target, String propertyName, Object value) {
+	public static void setPropertyWithSetter(Object target, String propertyName, Object value) throws NoSuchMethodException {
+		Method setter = publicSetter(target.getClass(), propertyName);
+		if(setter == null)
+			throw new NoSuchMethodException();
 		try {
-			PropertyUtils.setProperty(target, propertyName, value);
-		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+			setter.invoke(target, value);
+		} catch (IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
 
-	public static Object getFieldWithReflection(Object target, String propertyName, Class definingClass) {
+	public static Object getField(Object target, Field field) {
 		try {
-			Field field = getAccessibleField(propertyName, definingClass);
 			return field.get(target);
 		} catch (SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		} 
 	}
 	
-	public static void setFieldWithReflection(Object target, String propertyName, Class definingClass, Object value) {
+	public static void setField(Object target, Field field, Object value) {
 		try {
-			Field field = getAccessibleField(propertyName, definingClass);
 			field.set(target, value);
 		} catch (SecurityException | IllegalArgumentException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		} 
+	}
+	
+	public static Object getField(Object target, String propertyName, Class definingClass) {
+		try {
+			Field field = getAccessibleField(propertyName, definingClass);
+			return getField(target, field);
+		} catch (SecurityException | IllegalArgumentException e) {
+			throw new RuntimeException(e);
+		} 
+	}
+	
+	public static void setField(Object target, String propertyName, Class definingClass, Object value) {
+		try {
+			Field field = getAccessibleField(propertyName, definingClass);
+			setField(target, field, value);
+		} catch (SecurityException | IllegalArgumentException e) {
 			throw new RuntimeException(e);
 		} 
 	}
@@ -251,29 +319,58 @@ public class BeansUtil {
 		try {
 			value = getPropertyWithGetter(target, propertyName); //try with an accessor if possible
 		} catch(Exception e) { //getter no defined
-			if(definingClass == null)
-				throw new RuntimeException(e);
-			try {
-				value = getFieldWithReflection(target, propertyName, definingClass); //try obtaining directly the field
-			} catch(Exception e2) {
-				throw new RuntimeException(e2);
+			if(definingClass == null) {
+				Field visibleField = ReflectionUtil.getVisibleField(target.getClass(), propertyName);
+				if(visibleField != null)
+					value = getField(target, visibleField);
+				else
+					throw new RuntimeException(e);
 			}
+			value = getField(target, propertyName, definingClass); //try obtaining directly the field
 		}
 		return value;
+	}
+	
+	public static Object getProperty(Object target, String propertyName) {
+		return getProperty(target, propertyName, null);
+	}
+	
+	public static Object[] getProperties(Object target, String[] propertiesNames, Class definingClass) {
+		List propertiesValues = new ArrayList<>();
+		for(String propertyName: propertiesNames)
+			propertiesValues.add(getProperty(target, propertyName, definingClass));
+		return propertiesValues.toArray();
+	}
+	
+	public static Object[] getProperties(Object target, String[] propertiesNames) {
+		return getProperties(target, propertiesNames, null);
 	}
 	
 	public static void setProperty(Object target, String propertyName, Object value, Class definingClass) {
 		try {
 			setPropertyWithSetter(target, propertyName, value);
 		} catch (Exception e) { //setter no defined
-			if(definingClass == null)
-				throw new RuntimeException(e);
-			try {
-				setFieldWithReflection(target, propertyName, definingClass, value); //try obtaining directly the field
-			} catch(Exception e2) { 
-				throw new RuntimeException(e2);
+			if(definingClass == null) {
+				Field visibleField = ReflectionUtil.getVisibleField(target.getClass(), propertyName);
+				if(visibleField != null)
+					setField(target, visibleField, value);
+				else
+					throw new RuntimeException(e);
 			}
+			setField(target, propertyName, definingClass, value); //try obtaining directly the field
 		} 
 	}
 	
+	public static void setProperty(Object target, String propertyName, Object value) {
+		setProperty(target, propertyName, value, null);
+	}
+	
+	public static void setProperties(Object target, String[] propertiesNames, Object[] propertiesValues, Class definingClass) {
+		for(int i=0; i<propertiesNames.length; i++)
+			setProperty(target, propertiesNames[i], propertiesValues[i], definingClass);
+	}
+	
+	public static void setProperties(Object target, String[] propertiesNames, Object[] propertiesValues) {
+		setProperties(target, propertiesNames, propertiesValues, null);
+	}
 }

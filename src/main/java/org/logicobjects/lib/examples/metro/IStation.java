@@ -8,8 +8,6 @@ import org.logicobjects.annotation.method.LComposition;
 
 public interface IStation {
 
-	public String getName(); //not a logic method, just to facilitate testing
-	
 	//@LMethod
 	public abstract boolean connected(IStation station);
 	

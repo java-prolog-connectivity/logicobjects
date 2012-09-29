@@ -112,7 +112,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 						logger.warn("Attempting to transform the variable term " + term + " to an object of class " + singleTypeWrapper.asClass() + ". Transformed as null.");
 						return null;
 					}
-					if(singleTypeWrapper.asClass().equals(Entry.class)) {
+					if(Entry.class.equals(singleTypeWrapper.asClass())) {
 						Type entryParameters[] = new GenericsUtil().findAncestorTypeParameters(Entry.class, singleTypeWrapper.getWrappedType());
 						return (To) new TermToEntryAdapter().adapt((Compound)term, entryParameters[0], entryParameters[1], adaptingContext);
 					}
@@ -153,7 +153,8 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 								throw new RuntimeException("Impossible to transform the string " + termString + "to a single character");
 						} else
 							return (To) valueOf(singleTypeWrapper.asClass(), LogicUtil.toString(term));
-					} else if(singleTypeWrapper.asClass().equals(String.class)) {
+					} else if( (singleTypeWrapper.asClass().isAssignableFrom(String.class)  && term.isAtom())
+							|| singleTypeWrapper.asClass().equals(String.class)) {
 						if(term.isAtom())
 							return (To) ((Atom)term).name();
 						else /*if(term.isVariable())

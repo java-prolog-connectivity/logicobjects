@@ -138,6 +138,7 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 		//throw new ObjectToTermException(object); //no idea how to adapt the object
 	}
 
+
 	public static Term asTerm(Object object) {
 		return new ObjectToTermAdapter().adapt(object);
 	}

@@ -14,6 +14,7 @@ import org.logicobjects.context.AbstractLContext;
 import org.logicobjects.context.GlobalLContext;
 import org.logicobjects.instrumentation.LogicObjectInstrumentation;
 import org.reflections.util.ClasspathHelper;
+import org.reflectiveutils.BeansUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,16 +116,35 @@ public class LogicObjectFactory {
 		
 
 		try {
-			if(params.length == 0 && declaringObject == null) {
-				return (T)instantiatingClass.newInstance();
+			List<Object> logicObjectsParamsConstructor = Arrays.asList(params);
+			List<Class> logicObjectsParamsClasses = objectsClasses(Arrays.asList(params));
+			
+			List<Object> allParamsConstructor = new ArrayList(logicObjectsParamsConstructor); //the surrounding new ArrayList is to make the original list mutable
+			List<Class> allParamsClasses = new ArrayList(logicObjectsParamsClasses);
+			
+			if(declaringObject != null) {
+				allParamsConstructor.add(0, declaringObject);
+				allParamsClasses.add(0, declaringObject.getClass());
+			}
+			Constructor constructorWithParams = null;
+			try {
+				constructorWithParams = instantiatingClass.getConstructor(allParamsClasses.toArray(new Class[]{}));
+			} catch(NoSuchMethodException e) {
+				//the constructor with all the parameters does not exist
+			}
+			T logicClassInstance;
+			
+			if(constructorWithParams != null) {
+				logicClassInstance = (T)constructorWithParams.newInstance(allParamsConstructor.toArray());
 			} else {
-				List<Object> paramsConstructor = new ArrayList(Arrays.asList(params)); //the surrounding new ArrayList is to make the original list mutable
-				List<Class> paramsClasses = new ArrayList(objectsClasses(Arrays.asList(params)));
-				
 				if(declaringObject != null) {
-					paramsConstructor.add(0, declaringObject);
-					paramsClasses.add(0, declaringObject.getClass());
-				}
+					Constructor declaringObjectConstructor = instantiatingClass.getConstructor(new Class[]{Object.class});
+					logicClassInstance = (T)declaringObjectConstructor.newInstance(new Object[]{declaringObjectConstructor});
+				} else
+					logicClassInstance = (T)instantiatingClass.newInstance();
+				
+				BeansUtil.setProperties(logicClassInstance, LogicObjectClass.findLogicObjectClass(instantiatingClass).getLObjectArgs(), logicObjectsParamsConstructor.toArray());
+
 				/*
 				if(LogicObjectClass.hasNoArgsConstructor(clazz)) {
 					Object o = instantiatingClass.newInstance();
@@ -134,10 +154,9 @@ public class LogicObjectFactory {
 					//TODO
 				}
 				*/
-				Constructor constructor = instantiatingClass.getConstructor(paramsClasses.toArray(new Class[]{}));  //NoSuchMethodException ???
-				return (T)constructor.newInstance(paramsConstructor.toArray());
+				
 			}
-			
+			return logicClassInstance;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

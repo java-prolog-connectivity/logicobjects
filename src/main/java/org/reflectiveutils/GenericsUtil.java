@@ -14,6 +14,14 @@ import org.reflectiveutils.wrappertype.VariableTypeWrapper;
 
 public class GenericsUtil {
 	
+	public static interface i0 {}
+	public static interface i1 {}
+	public static interface i2 extends i1, i0 {}
+	
+	
+	public static void main(String[] args) {
+		System.out.println(i2.class.getSuperclass());
+	}
 	/**
 	 * Answers a parameterized type with its actual type arguments depending on the descendant
 	 * @param ancestor is the type to parameterize

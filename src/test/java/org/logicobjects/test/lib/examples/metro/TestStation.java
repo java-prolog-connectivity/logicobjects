@@ -15,6 +15,7 @@ import org.logicobjects.lib.examples.metro.IStation;
 import org.logicobjects.lib.examples.metro.Line;
 import org.logicobjects.lib.examples.metro.Station;
 import org.logicobjects.test.LocalLogicTest;
+import org.reflectiveutils.BeansUtil;
 
 public class TestStation extends AbstractMetroTest {
 
@@ -41,7 +42,7 @@ public class TestStation extends AbstractMetroTest {
 		ILine line2 = createLine("northern");
 		IStation connectedStation = station.connected(line1);
 		assertNotNull(connectedStation);
-		assertEquals(connectedStation.getName(), "oxford_circus");
+		assertEquals(BeansUtil.getProperty(connectedStation, "name"), "oxford_circus");
 		//System.out.println("The station " + station + " is connected with " + connectedStation + " by means of the line " + line1);
 		connectedStation = station.connected(line2);  //no connected with any station by means of line2
 		assertNull(connectedStation);
