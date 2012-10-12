@@ -6,7 +6,7 @@ import jpl.Term;
 
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.core.LogicEngine;
-import org.logicobjects.instrumentation.AbstractLogicMethodParser;
+import org.logicobjects.instrumentation.LogicMethodParser;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
 import org.logicobjects.util.termvisitor.ReplaceVariableVisitor;
 

@@ -12,6 +12,15 @@ import org.logicobjects.annotation.method.LExpression;
 import org.logicobjects.annotation.method.LSolution;
 
 public abstract class MyLogicExpressions {
+
+	@LExpression
+	@LSolution("@this")
+	public abstract String this1();
+	
+	@LExpression
+	@LSolution("$0")
+	public abstract String this2();
+	
 	
 	@LExpression
 	@LSolution("text")

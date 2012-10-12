@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.logicobjects.core.LogicEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Keep a hash of preferences
@@ -11,10 +13,12 @@ import org.logicobjects.core.LogicEngine;
  * Alternatively, provides functionality for querying preferences from environmental variables
  */
 public class LogicObjectsPreferences {
+	private static Logger logger = LoggerFactory.getLogger(LogicObjectsPreferences.class);
+	
 	public static final String LOGIC_OBJECTS_NAME = "Logic Objects";
 	public static final String[] SUPPORTED_ENGINES = new String[] {"yap", "swi"};  //supported prolog engines
 	//Properties configuring the framework behaviour
-	public static final String JPLPATH = "JPLPATH"; //path of the JPL library in the host computer. This will determine if the prolog engine is SWI or YAP
+	
 	public final static String LOGTALKHOME = "LOGTALKHOME";  //needed by the framework to find the integration scripts
 	public final static String LOGTALKUSER = "LOGTALKUSER"; //logtalk environment variable TODO: remembering what this variable was for ...
 	//public final static String PROLOG_DIALECT = "PL";  //defines the prolog engine to use (DEPRECATED since this is decided by the JPLPATH environment variable
@@ -78,8 +82,8 @@ public class LogicObjectsPreferences {
 		} catch(Exception e) {
 		} finally {
 			if(value == null || value.equals("")) {
+				logger.info("WARNING: Property " + key +" has not been set. Attempting to obtain its value from environment variable with same name: " + value);
 				value = getEnvironmentVar(key);
-				System.out.println("WARNING: Property " + key +" has not been set. Attempting to obtain its value from environment variable with same name: " + value);
 			}
 		}
 		return value;

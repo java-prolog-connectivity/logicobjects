@@ -5,7 +5,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import jpl.Term;
 import jpl.Variable;
@@ -14,42 +13,51 @@ import org.logicobjects.adapter.Adapter;
 import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.annotation.IgnoreLAdapter;
 import org.logicobjects.core.LogicObjectClass;
-import org.reflections.Reflections;
-import org.reflections.scanners.ResourcesScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
+import org.logicobjects.logicengine.LogicEngineConfiguration;
+import org.reflectiveutils.ReflectionUtil;
 
 public abstract class AbstractLContext {
 
-	public abstract void addSearchFilter(String packageName);
+	//includes a package in the search path
+	public abstract void addPackage(String packageName);
+	//includes the classpath url of a given class in the search path
 	public abstract void addSearchUrlFromClass(Class clazz);
+	//includes a url in the search path
 	public abstract void addSearchUrls(URL... urls);
 	
 	public abstract Set<Class<?>> getLogicClasses();
 	public abstract Set<Class<? extends WrapperAdapter>> getWrapperAdapters();
 	
 	
-	protected void filterLogicClasses(Set<Class<?>> unfilteredLogicClasses, Set<Class<?>> filteredClasses) {
-		for(Class clazz : unfilteredLogicClasses) {
+	protected Set<Class<?>> filterInterfaces(Set<Class<?>> unfilteredClasses) {
+		Set<Class<?>> filteredClasses = new HashSet<>();
+		for(Class clazz : unfilteredClasses) {
 			if(!clazz.isInterface()) {
 				filteredClasses.add(clazz);
-			} /*else {
-				for(Object _implementor : system_reflections.getSubTypesOf(clazz)) {//TODO discover how i can put a Class in the for
-					Class implementor = (Class)_implementor; //this kind of things make me hate java ...
-					if(!implementor.isInterface() && ReflectionUtil.includesInterfaceInHierarchy(implementor, clazz))
-						filteredClasses.add(implementor);
-				}
-			} */
+			}
 		}
+		return filteredClasses;
 	}
 	
-	protected void filterAdapters(Set<Class<? extends Adapter>> foundAdapters, Set<Class<? extends WrapperAdapter>> wrapperAdapters) {
+	protected <T> Set<Class<? extends T>> filterAbstractClasses(Set<Class<? extends T>> unfilteredClasses) {
+		Set<Class<? extends T>> filteredClasses = new HashSet<>();
+		for(Class clazz : unfilteredClasses) {
+			if(!ReflectionUtil.isAbstract(clazz)) {
+				filteredClasses.add(clazz);
+			}
+		}
+		return filteredClasses;
+	}
+	
+	protected Set<Class<? extends WrapperAdapter>> filterAdapters(Set<Class<? extends Adapter>> foundAdapters) {
+		Set<Class<? extends WrapperAdapter>> wrapperAdapters = new HashSet<>();
 		for(Class<? extends Adapter> adapterClass : foundAdapters) {
 			if(adapterClass.getAnnotation(IgnoreLAdapter.class) == null) {
 				if(WrapperAdapter.class.isAssignableFrom(adapterClass) && !Modifier.isAbstract(adapterClass.getModifiers()))
 					wrapperAdapters.add((Class<? extends WrapperAdapter>) adapterClass);
 			}
 		}
+		return wrapperAdapters;
 	}
 	
 	
@@ -61,7 +69,7 @@ public abstract class AbstractLContext {
 	 * @param urls
 	 * @return
 	 */
-	protected Set<URL> filterURLs(Set<URL> urls) {
+	protected Set<URL> fixURLs(Set<URL> urls) {
         Set<URL> results = new HashSet<URL>(urls.size());
         for (URL url : urls) {
             String cleanURL = url.toString();
@@ -73,13 +81,11 @@ public abstract class AbstractLContext {
             } else if(url.getProtocol().startsWith("vfs")) {//added by me
                   cleanURL = cleanURL.replaceFirst("vfs:", "file:");
             } 
-            
-            
             cleanURL = cleanURL.replaceFirst("\\.jar/", ".jar!/");
             try {
                 results.add(new URL(cleanURL));
             } catch (MalformedURLException ex) {
-                // Shouldn't happen, but we can't do more to fix this URL.
+            	throw new RuntimeException(ex);  // Shouldn't happen, but we can't do more to fix this URL.
             }
         }
         return results;
@@ -102,5 +108,6 @@ public abstract class AbstractLContext {
 		return findLogicClass(term.name(), term.args().length);
 	}
 	
+	public abstract LogicEngineConfiguration getLogicEngineConfiguration(Class clazz);
 
 }

@@ -137,10 +137,16 @@ public class LogicObject implements ITermObject {
 	}
 	
 	public static Term propertyAsTerm(Object lObject, String propertyName) {
-		BeanPropertyAdaptationContext adaptationContext = new BeanPropertyAdaptationContext(lObject.getClass(), propertyName);
-		Object propertyValue = BeansUtil.getProperty(lObject, propertyName, adaptationContext.getGuidingClass());
-		//Field field = ReflectionUtil.getProperty(lObject, propertyName);
-		return new ObjectToTermAdapter().adapt(propertyValue, adaptationContext);
+		Term propertyAsTerm = null;
+		if(propertyName.equals("this"))
+			propertyAsTerm = new ObjectToTermAdapter().adapt(lObject);
+		else {
+			BeanPropertyAdaptationContext adaptationContext = new BeanPropertyAdaptationContext(lObject.getClass(), propertyName);
+			Object propertyValue = BeansUtil.getProperty(lObject, propertyName, adaptationContext.getGuidingClass());
+			//Field field = ReflectionUtil.getProperty(lObject, propertyName);
+			propertyAsTerm = new ObjectToTermAdapter().adapt(propertyValue, adaptationContext);
+		}
+		return propertyAsTerm;
 	}
 
 

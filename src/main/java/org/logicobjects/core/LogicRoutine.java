@@ -30,7 +30,7 @@ import org.logicobjects.annotation.method.LExpression;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.annotation.method.LSolution;
-import org.logicobjects.instrumentation.AbstractLogicMethodParser;
+import org.logicobjects.instrumentation.LogicMethodParser;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
 import org.logicobjects.util.LogicObjectsPreferences;
@@ -238,7 +238,7 @@ public abstract class LogicRoutine {
 		Object[] adaptedMethodArguments = adaptOriginalMethodArguments(originalMethodArguments);
 		//ParsingData parsedData = AbstractLogicMethodParser.create(this).parse().parsedData(targetObject, adaptedMethodArguments);
 		
-		ParsedLogicMethod parsedLogicMethod = AbstractLogicMethodParser.create(this).parse().parsedLogicMethod(targetObject, adaptedMethodArguments);
+		ParsedLogicMethod parsedLogicMethod = LogicMethodParser.create(this).parse().parsedLogicMethod(targetObject, adaptedMethodArguments);
 		//configureParsedLogicMethod(parsedLogicMethod);
 		return parsedLogicMethod;
 	}

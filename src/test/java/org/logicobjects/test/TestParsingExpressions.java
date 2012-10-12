@@ -4,28 +4,29 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.ALL_ARGUMENTS_SUFFIX;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.BEGIN_IMMEDIATE_JAVA_EXPRESSION;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.END_JAVA_EXPRESSION_BLOCK;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.INSTANCE_PROPERTY_PREFIX;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.JAVA_NAME_REX;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.ARGUMENT_PREFIX;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.ARGUMENTS_TAG;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.QUERY_TAG;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.RETURN_TAG;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.scanSymbols;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.getExpressionValue;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.getJavaExpressions;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.isInstancePropertySymbol;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.isValidJavaExpression;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.normalizeExpression;
-import static org.logicobjects.instrumentation.AbstractLogicMethodParser.methodArgumentSymbol;
+
+import static org.logicobjects.instrumentation.AbstractParser.INSTANCE_PROPERTY_PREFIX;
+import static org.logicobjects.instrumentation.AbstractParser.JAVA_NAME_REX;
+import static org.logicobjects.instrumentation.LogicMethodParser.ALL_ARGUMENTS_SUFFIX;
+import static org.logicobjects.instrumentation.LogicMethodParser.METHOD_ARGUMENTS_TAG;
+import static org.logicobjects.instrumentation.LogicMethodParser.ARGUMENT_PREFIX;
+import static org.logicobjects.instrumentation.LogicMethodParser.BEGIN_JAVA_VALUE_EXP;
+import static org.logicobjects.instrumentation.LogicMethodParser.END_JAVA_EXPRESSION_BLOCK;
+import static org.logicobjects.instrumentation.LogicMethodParser.QUERY_TAG;
+import static org.logicobjects.instrumentation.LogicMethodParser.RETURN_TAG;
+import static org.logicobjects.instrumentation.AbstractParser.isInstancePropertySymbol;
+import static org.logicobjects.instrumentation.LogicMethodParser.getExpressionValue;
+import static org.logicobjects.instrumentation.LogicMethodParser.getJavaExpressions;
+import static org.logicobjects.instrumentation.LogicMethodParser.isValidJavaExpression;
+import static org.logicobjects.instrumentation.LogicMethodParser.methodArgumentSymbol;
+import static org.logicobjects.instrumentation.LogicMethodParser.normalizeExpression;
+import static org.logicobjects.instrumentation.LogicMethodParser.scanMethodSymbols;
 
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
-import org.logicobjects.instrumentation.AbstractLogicMethodParser;
+import org.logicobjects.instrumentation.LogicMethodParser;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
 
 
@@ -33,7 +34,7 @@ public class TestParsingExpressions extends LocalLogicTest {
 	
 	@Test
 	public void testParseJavaExpressions() {
-		String beginExp = BEGIN_IMMEDIATE_JAVA_EXPRESSION;
+		String beginExp = BEGIN_JAVA_VALUE_EXP;
 		String endExp = END_JAVA_EXPRESSION_BLOCK;
 		
 		String test = "xxx"+beginExp + "match1" + endExp + "xxx"+beginExp + "match1" + endExp + "xxx" + beginExp + "match2" + endExp +"xxx";
@@ -74,7 +75,7 @@ public class TestParsingExpressions extends LocalLogicTest {
 		//String beginExp = BEGIN_IMMEDIATE_JAVA_EXPRESSION;
 		//String endExp = END_JAVA_EXPRESSION_BLOCK;
 		
-		List<String> symbols = scanSymbols(
+		List<String> symbols = scanMethodSymbols(
 			INSTANCE_PROPERTY_PREFIX+"this"
 			+" xxx " 
 			+ ARGUMENT_PREFIX + "1" 
@@ -138,8 +139,8 @@ public class TestParsingExpressions extends LocalLogicTest {
 		String query = "myQuery";
 		String params = "myParams";
 		String returnValue = "returnValue";
-		String testString = QUERY_TAG+query+ARGUMENTS_TAG+params+RETURN_TAG+returnValue;
-		LogicMethodParsingData parsedData = AbstractLogicMethodParser.decomposeLogicString(testString);
+		String testString = QUERY_TAG+query+METHOD_ARGUMENTS_TAG+params+RETURN_TAG+returnValue;
+		LogicMethodParsingData parsedData = LogicMethodParser.decomposeLogicString(testString);
 		
 		assertEquals(parsedData.getQueryString(), query);
 		assertEquals(parsedData.getMethodArguments()[0], params);
@@ -147,8 +148,8 @@ public class TestParsingExpressions extends LocalLogicTest {
 		
 		query = "";
 		params = "";
-		testString = QUERY_TAG+query+ARGUMENTS_TAG+params+RETURN_TAG+returnValue;
-		parsedData = AbstractLogicMethodParser.decomposeLogicString(testString);
+		testString = QUERY_TAG+query+METHOD_ARGUMENTS_TAG+params+RETURN_TAG+returnValue;
+		parsedData = LogicMethodParser.decomposeLogicString(testString);
 		assertEquals(parsedData.getQueryString(), null);
 		assertEquals(parsedData.getMethodArguments(), null);
 		assertEquals(parsedData.getSolutionString(), returnValue);

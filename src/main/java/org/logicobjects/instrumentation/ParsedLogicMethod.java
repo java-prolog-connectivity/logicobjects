@@ -53,24 +53,6 @@ public class ParsedLogicMethod {
 	public LogicMethodParsingData getParsedData() {
 		return parsedData;
 	}
-
-	/*
-	public String getComputedMethodName() {
-		
-	}
-	
-	public String getComputedQueryString() {
-		return parsedData.getQueryString();
-	}
-	
-	public Object[] getComputedMethodArguments() {
-		return parsedData.getMethodArguments();
-	}
-	
-	public String getComputedSolutionString() {
-		return parsedData.getSolutionString();
-	}
-	*/
 	
 	public String getComputedQueryString() {
 		return computedQueryString;

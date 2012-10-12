@@ -17,11 +17,13 @@ import jpl.Variable;
 
 import org.logicobjects.adapter.ObjectToTermException;
 import org.logicobjects.annotation.LObject;
+import org.logicobjects.annotation.method.LComposition;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LSolution;
-import org.logicobjects.annotation.method.LComposition;
 import org.logicobjects.core.flags.LogtalkFlag;
+import org.logicobjects.logicengine.jpl.DefaultJplConfiguration;
 import org.logicobjects.util.LogicObjectsPreferences;
+import org.logicobjects.util.LogicUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +69,7 @@ public abstract class LogicEngine {
 	 * This method is static since it configures how the logic engine will be instantiated
 	 */
 	protected static void configure(LogicObjectsPreferences preferences) {
-		JPL.setNativeLibraryDir(preferences.findOrDie(LogicObjectsPreferences.JPLPATH)); //configuring the JPL path according to preferences. So a Prolog engine can be started
+		new DefaultJplConfiguration().configure();
 	}
 	
 	public synchronized static void initialize(LogicObjectsPreferences newPreferences) {
@@ -175,7 +177,7 @@ public abstract class LogicEngine {
 	public Term textToTerm(String text) {
 		Term term = null;
 		try {
-			term = Util.textToTerm(text);
+			term = LogicUtil.textToTerm(text);
 		} catch(Exception e) {
 			throw new ObjectToTermException(text);
 		}

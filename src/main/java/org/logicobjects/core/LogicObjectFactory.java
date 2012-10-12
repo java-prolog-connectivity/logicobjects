@@ -7,9 +7,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import javassist.ClassPool;
+import jpl.Term;
 
+import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.context.AbstractLContext;
 import org.logicobjects.context.GlobalLContext;
 import org.logicobjects.instrumentation.LogicObjectInstrumentation;
@@ -49,7 +52,7 @@ public class LogicObjectFactory {
 	public ResourceManager getResourceManager(){
 		return resourceManager;
 	}
-	
+
 	public ClassPool getClassPool() {
 		if(classPool == null)
 			classPool = ClassPool.getDefault();
@@ -60,7 +63,7 @@ public class LogicObjectFactory {
 		this.classPool = classPool;
 	}
 
-	public AbstractLContext getContext() {
+	private AbstractLContext getContext() {
 		if(context == null) {
 			context = new GlobalLContext();
 		}
@@ -72,13 +75,20 @@ public class LogicObjectFactory {
 	}
 	
 	public void addSearchFilter(String packageName) {
-		getContext().addSearchFilter(packageName);
+		getContext().addPackage(packageName);
 	}
 
 	public void addSearchUrl(URL url) {
 		getContext().addSearchUrls(url);
 	}
 
+	public Class findLogicClass(Term term) {
+		return getContext().findLogicClass(term);
+	}
+	
+	public Set<Class<? extends WrapperAdapter>> getWrapperAdapters() {
+		return getContext().getWrapperAdapters();
+	}
 	/*
 	public <T> T create(Class<T> c, Term term) {
 		return (T) new TermToObjectAdapter().adapt(term, c);

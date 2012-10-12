@@ -22,6 +22,10 @@ public class TestLogicExpressions extends LocalLogicTest {
 	@Test
 	public void testSimpleLogicExpressions() {
 		MyLogicExpressions logicExpressions = LogicObjectFactory.getDefault().create(MyLogicExpressions.class);
+		
+		assertEquals("my_logic_expressions", logicExpressions.this1());
+		assertEquals("my_logic_expressions", logicExpressions.this2());
+		
 		assertEquals("text", logicExpressions.methodExpression1());
 		assertEquals("text", logicExpressions.methodExpression2());
 		assertTrue(logicExpressions.methodTrue1());

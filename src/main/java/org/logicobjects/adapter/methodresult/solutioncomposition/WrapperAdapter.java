@@ -1,9 +1,5 @@
 package org.logicobjects.adapter.methodresult.solutioncomposition;
 
-import java.lang.reflect.Type;
-
-import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
-import org.reflectiveutils.wrappertype.SingleTypeWrapper;
 
 
 //public abstract class MyWrapper extends WrapperAdapter<List<X>, X>    List<String>

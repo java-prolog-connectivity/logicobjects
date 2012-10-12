@@ -10,6 +10,7 @@ import jpl.Variable;
 
 import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.core.LogicObjectClass;
+import org.logicobjects.logicengine.LogicEngineConfiguration;
 import org.reflections.Reflections;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
@@ -21,7 +22,7 @@ public class GlobalLContext extends AbstractLContext {
 	
 	public GlobalLContext() {
 		systemContext = new SystemLContext();
-		userContext = new SimpleLContext();
+		userContext = new UserLContext();
 	}
 
 	public SimpleLContext getSystemContext() {
@@ -33,8 +34,8 @@ public class GlobalLContext extends AbstractLContext {
 	}
 
 	@Override
-	public void addSearchFilter(String packageName) {
-		userContext.addSearchFilter(packageName);
+	public void addPackage(String packageName) {
+		userContext.addPackage(packageName);
 	}
 	
 	@Override
@@ -98,5 +99,11 @@ public class GlobalLContext extends AbstractLContext {
 		}
 		*/
 	}
+
+	@Override
+	public LogicEngineConfiguration getLogicEngineConfiguration(Class clazz) {
+		return userContext.getLogicEngineConfiguration(clazz);
+	}
+
 }
 

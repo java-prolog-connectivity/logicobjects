@@ -153,7 +153,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 								throw new RuntimeException("Impossible to transform the string " + termString + "to a single character");
 						} else
 							return (To) valueOf(singleTypeWrapper.asClass(), LogicUtil.toString(term));
-					} else if( (singleTypeWrapper.asClass().isAssignableFrom(String.class)  && term.isAtom())
+					} else if( (term.isAtom() && singleTypeWrapper.asClass().isAssignableFrom(String.class))
 							|| singleTypeWrapper.asClass().equals(String.class)) {
 						if(term.isAtom())
 							return (To) ((Atom)term).name();
@@ -175,11 +175,9 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 				throw new RuntimeException(e);
 			}
 		}
-		
 		if(engine.isList(term)) {
 			return adaptListTerm(term, type, adaptingContext);
 		}
-		
 		throw new TermToObjectException(term, type);  //no idea how to adapt the term
 	}
 

@@ -1,7 +1,6 @@
 package org.logicobjects.context;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -9,18 +8,22 @@ import java.util.Set;
 import org.logicobjects.adapter.Adapter;
 import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.annotation.LObject;
+import org.logicobjects.logicengine.LogicEngineConfiguration;
 import org.reflections.Reflections;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
+import org.reflectiveutils.PackagePropertiesTree;
+import org.reflectiveutils.ReflectionUtil;
 import org.slf4j.LoggerFactory;
 
-public class SimpleLContext extends AbstractLContext {
+public abstract class SimpleLContext extends AbstractLContext {
 
 	private Set<Class<?>> logicClasses;
 	private Set<Class<? extends WrapperAdapter>> compositionAdapters;
+	protected Reflections reflections;
+	
 
-	private Reflections reflections;
 	
 	public SimpleLContext() {
 	}
@@ -33,9 +36,13 @@ public class SimpleLContext extends AbstractLContext {
 		this.reflections = reflections;
 		refresh();
 	}
-	
+/*
+	protected void setEngineConfigurations(Set<Class<? extends LogicEngineConfiguration>> engineConfigurations) {
+		this.engineConfigurations = engineConfigurations;
+	}
+*/
 	private void loadDefaultSearchUrlWithWarning(String reason) {
-		LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for "+reason+" without having provided a filter.");
+		LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for "+reason+" without having provided a filter url.");
 		URL url = findCallerClasspath();
 		LoggerFactory.getLogger(SimpleLContext.class).warn("Looking for classes in the same classpath than the user of the library: "+url);
 		addSearchUrls(url);
@@ -77,7 +84,7 @@ public class SimpleLContext extends AbstractLContext {
 	}
 	
 	@Override
-	public void addSearchFilter(String packageName) {
+	public void addPackage(String packageName) {
 		if(reflections == null) {
 			//reflections = new Reflections(packageName);
 			ConfigurationBuilder config = new ConfigurationBuilder();
@@ -85,7 +92,7 @@ public class SimpleLContext extends AbstractLContext {
 			fb.include(FilterBuilder.prefix(packageName));
 			config.filterInputsBy(fb);
 			Set<URL> urls = ClasspathHelper.forPackage(packageName);
-			urls = filterURLs(urls); //jboss compatibility hack
+			urls = fixURLs(urls); //jboss compatibility hack
 			config.setUrls(urls);
 			reflections = new Reflections(config);
 		} else {
@@ -106,7 +113,7 @@ public class SimpleLContext extends AbstractLContext {
 		ConfigurationBuilder config = new ConfigurationBuilder();
 		//TODO new ArrayList().;
 		
-		Set<URL>filteredUrls = filterURLs(new HashSet<URL>(Arrays.<URL>asList(urls))); //jboss compatibility hack
+		Set<URL>filteredUrls = fixURLs(new HashSet<URL>(Arrays.<URL>asList(urls))); //jboss compatibility hack
 		//System.out.println("************************************* FILTERED URLSs");
 		//System.out.println(filteredUrls);
 		config.addUrls(filteredUrls);
@@ -119,13 +126,11 @@ public class SimpleLContext extends AbstractLContext {
 		refresh();
 	} 
 	
-	//this could be optimized indeed ...
-	private void refresh() {
-		logicClasses = new HashSet<Class<?>>();
-		filterLogicClasses(reflections.getTypesAnnotatedWith(LObject.class), logicClasses);
-		Set<Class<? extends Adapter>> unfilteredAdapters = reflections.getSubTypesOf(Adapter.class);
-		compositionAdapters = new HashSet<Class<? extends WrapperAdapter>>();
-		filterAdapters(unfilteredAdapters, compositionAdapters);
+	//TODO this could be optimized using the reflections API. In the current version the filtering of classes is in two steps...
+	protected void refresh() {
+		logicClasses = filterInterfaces(reflections.getTypesAnnotatedWith(LObject.class));
+		compositionAdapters = filterAdapters(reflections.getSubTypesOf(Adapter.class));
 	}
 
+	
 }

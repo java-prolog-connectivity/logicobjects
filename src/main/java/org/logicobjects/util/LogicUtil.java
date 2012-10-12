@@ -25,6 +25,10 @@ import org.logicobjects.util.termvisitor.CollectVariableNamesVisitor;
  */
 public class LogicUtil {
 
+	public static Term assertTerm(Term term) {
+		return new Compound("assert", new Term[]{term});
+	}
+	
 	public static boolean containVariable(Term term, String variableName) {
 		return getVariablesNames(term).contains(variableName);
 	}

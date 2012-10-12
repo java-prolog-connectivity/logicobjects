@@ -18,7 +18,7 @@ import org.reflections.scanners.ResourcesScanner;
 import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import static com.google.common.base.Preconditions.*;
 import com.google.common.base.Predicate;
 import com.google.common.io.Resources;
 
@@ -34,7 +34,8 @@ public class ResourceManager {
 	
 	
 	public ResourceManager(String tmpDirPath) {
-		assert(tmpDirPath != null && !tmpDirPath.isEmpty());
+		checkNotNull(tmpDirPath);
+		checkArgument(!tmpDirPath.isEmpty());
 		this.tmpDirPath = tmpDirPath;
 		processedURLs = new HashSet<URL>();
 		logicObjectsTmpDir = new File(tmpDirPath, LOGIC_OBJECTS_TMP_FOLDER);

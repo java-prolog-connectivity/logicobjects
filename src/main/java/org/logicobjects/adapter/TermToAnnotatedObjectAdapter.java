@@ -85,7 +85,7 @@ public class TermToAnnotatedObjectAdapter<To> extends Adapter<Term, Object> {
 	public static AnnotatedElementAdaptationContext getTermAnnotationContext(Term term, Type type) {
 		AnnotatedElementAdaptationContext annotatedContext = null;
 		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
-		Class logicClass = LogicObjectFactory.getDefault().getContext().findLogicClass(term);  
+		Class logicClass = LogicObjectFactory.getDefault().findLogicClass(term);  
 		/*
 		 * find out if the term could be mapped to a logic object
 		 * the additional type compatibilities verifications are necessary since the fact that the term 'could' be converted to a logic object does not mean that it 'should'

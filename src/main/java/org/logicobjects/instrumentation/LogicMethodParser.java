@@ -41,103 +41,86 @@ import org.slf4j.LoggerFactory;
  * @author scastro
  *
  */
-public abstract class AbstractLogicMethodParser<LM extends LogicRoutine> {
-	private static Logger logger = LoggerFactory.getLogger(AbstractLogicMethodParser.class);
+public abstract class LogicMethodParser<LM extends LogicRoutine> extends AbstractParser {
+	private static Logger logger = LoggerFactory.getLogger(LogicMethodParser.class);
 
 	public static final String GENERATED_METHOD_PREFIX = "$logicobjects_";
 	
-	public static final String IMMEDIATE_EXP_EVALUATION_SYMBOL = "$";
+	//WHY THESE NAMES?: http://scala-programming-language.1934581.n4.nabble.com/Why-quot-by-name-quot-parameters-are-called-this-way-td1944598.html
+	public static final String VALUE_EXP_EVALUATION_SYMBOL = "$";
 	public static final String DEFERRED_EXP_EVALUATION_SYMBOL = "#";
 	
 	public static final String BEGIN_JAVA_EXPRESSION_BLOCK = "{";
 	public static final String END_JAVA_EXPRESSION_BLOCK = "}";
 	
-	public static final String BEGIN_IMMEDIATE_JAVA_EXPRESSION = IMMEDIATE_EXP_EVALUATION_SYMBOL + BEGIN_JAVA_EXPRESSION_BLOCK;
-	public static final String BEGIN_DEFERRED_JAVA_EXPRESSION = DEFERRED_EXP_EVALUATION_SYMBOL + BEGIN_JAVA_EXPRESSION_BLOCK;
+	public static final String BEGIN_JAVA_VALUE_EXP = VALUE_EXP_EVALUATION_SYMBOL + BEGIN_JAVA_EXPRESSION_BLOCK;
+	public static final String BEGIN_JAVA_DEFERRED_EXP = DEFERRED_EXP_EVALUATION_SYMBOL + BEGIN_JAVA_EXPRESSION_BLOCK;
 	
-	
-	//public static final String BEGIN_JAVA_EXPRESSION = "/{";
-	//public static final String END_JAVA_EXPRESSION = "/}";
-	
-	
-	
-	public static final String INSTANCE_PROPERTY_PREFIX = "@";
 	
 	public static final String ARGUMENT_PREFIX = "$";
 	
-	public static final String THIS_SUFFIX = "0";
+	public static final String THIS_METHOD_ARGUMENT_SUFFIX = "0";
 	
-	public static final String THIS_SYMBOL = ARGUMENT_PREFIX + THIS_SUFFIX;
+	public static final String THIS_METHOD_ARGUMENT_SYMBOL = ARGUMENT_PREFIX + THIS_METHOD_ARGUMENT_SUFFIX;
 	
 	public static final String ALL_ARGUMENTS_SUFFIX = "$";
 	
 	public static final String ALL_ARGUMENTS_SYMBOL = ARGUMENT_PREFIX + ALL_ARGUMENTS_SUFFIX;
 	
-	public static final String JAVA_NAME_REX = "([a-zA-Z_\\$][\\w\\$]*)";
 	
+	/**
+	 * substitution markers for expressions.
+	 * The idea is that java expressions could be temporarily removed while replacing term symbols, and after the replacement they have to be added again
+	 */
 	public static final String HIDDEN_EXPRESSION_PREFIX = "~HIDDEN_EXPRESSION~_";
 	
-	/*
-	 * the question mark is to specify a reluctant quantifier, so 'any' characters (the '.') will occur the minimum possible amount of times
-	 */
-	//public static final String DELIMITED_JAVA_REX = Pattern.quote(BEGIN_JAVA_EXPRESSION) + "(.*?)" + Pattern.quote(END_JAVA_EXPRESSION);
-	
-	public static final String ARGUMENTS_SEPARATOR = "~~~";
-	
-	public static final String ARGUMENTS_TAG = "~ARGUMENTS~";
-	
 	public static final String QUERY_TAG = "~QUERY~";
+	
+	public static final String METHOD_ARGUMENTS_TAG = "~METHOD_ARGUMENTS~";
 	
 	public static final String RETURN_TAG = "~RET~";
 
 	
 	//private Method method;  
+	private LM logicMethod;
 	
 	//THE FOLLOWING VALUES ARE CALCULATED WHEN PARSING
-	private LM logicMethod;
-	//private ParsingData unparsedData;
-	private String allLogicStrings;
 	private List<String> expressions;
 	private Map<String, String> expressionsReplacementMap;
-	private List<String> foundSymbols;
+
 	
-	
-	public static AbstractLogicMethodParser create(Method method) {
-		return new AbstractLogicMethodParser(method) {};
+	//TODO the idea of the factory is to be able to look in a cache if a method has already been parsed, to do some day when having time ...
+	public static LogicMethodParser create(Method method) {
+		return new LogicMethodParser(method) {};
 	}
 	
-	public static AbstractLogicMethodParser create(LogicRoutine logicMethod) {
-		return new AbstractLogicMethodParser(logicMethod) {};
+	public static LogicMethodParser create(LogicRoutine logicMethod) {
+		return new LogicMethodParser(logicMethod) {};
 	}
 	
-	AbstractLogicMethodParser(Method method) {
+	LogicMethodParser(Method method) {
 		this((LM) LogicRoutine.create(method));
 	}
 	
-	AbstractLogicMethodParser(LM logicMethod) {
+	LogicMethodParser(LM logicMethod) {
 		this.logicMethod = logicMethod;
 	}
 
-	public AbstractLogicMethodParser parse() {
+	@Override
+	public LogicMethodParser parse() {
 		LogicMethodParsingData unparsedData = logicMethod.getDataToParse(); //the data to parse depends on the kind of logic method that was instantiated in a previous step
-		String queryToParse = asNotNullString(unparsedData.getQueryString());
-		String unparsedLogicArgumentsString = concatenateMethodArguments(asNotNullStringArray(unparsedData.getMethodArguments()));
-		String solutionToParse = asNotNullString(unparsedData.getSolutionString());
-		allLogicStrings = QUERY_TAG + queryToParse + ARGUMENTS_TAG + unparsedLogicArgumentsString + RETURN_TAG + solutionToParse;
+		String unparsedQuery = asNotNullString(unparsedData.getQueryString());
+		String unparsedLogicArgumentsString = concatenateTokens(asNotNullStringArray(unparsedData.getMethodArguments()));
+		String unparsedSolution = asNotNullString(unparsedData.getSolutionString());
+		allLogicStrings = QUERY_TAG + unparsedQuery + METHOD_ARGUMENTS_TAG + unparsedLogicArgumentsString + RETURN_TAG + unparsedSolution;
 		expressions = getJavaExpressions(allLogicStrings); //gather all java expressions
 		expressionsReplacementMap = expressionsReplacementMap(expressions);
-		foundSymbols = getAllSymbols(allLogicStrings);
+		foundSymbols = getAllMethodSymbols(allLogicStrings);
 		return this;
 	}
 
 
-	private String asNotNullString(String s) {
-		return s!=null?s:"";
-	}
-	
-	private String[] asNotNullStringArray(String[] a) {
-		return a!=null?a:new String[] {};
-	}
+
 	/*
 	public String getQueryToParse() {
 		return asNotNullString(unparsedData.getQueryString());
@@ -182,13 +165,13 @@ public abstract class AbstractLogicMethodParser<LM extends LogicRoutine> {
 	}
 
 	/**
-	 * This method is public just for testing purposes
+	 * This method is public for testing purposes
 	 * @param allLogicStringsProcessed
 	 * @return
 	 */
 	public static LogicMethodParsingData decomposeLogicString(String allLogicStringsProcessed) {
 		LogicMethodParsingData parsedData = new LogicMethodParsingData();
-		Pattern pattern = Pattern.compile(Pattern.quote(QUERY_TAG)+"(.*)"+Pattern.quote(ARGUMENTS_TAG)+"(.*)"+Pattern.quote(RETURN_TAG)+"(.*)");
+		Pattern pattern = Pattern.compile(Pattern.quote(QUERY_TAG)+"(.*)"+Pattern.quote(METHOD_ARGUMENTS_TAG)+"(.*)"+Pattern.quote(RETURN_TAG)+"(.*)");
 		Matcher matcher = pattern.matcher(allLogicStringsProcessed);
 		matcher.find();
 		String queryString = matcher.group(1);
@@ -217,19 +200,7 @@ public abstract class AbstractLogicMethodParser<LM extends LogicRoutine> {
 		return solvedEachSolutionValue;
 	}
 */
-	private static String concatenateMethodArguments(Object[] args) {
-		StringBuilder concatenatedArgs = new StringBuilder();
-		for(int i=0; i<args.length; i++) {
-			concatenatedArgs.append(args[i]);
-			if(i<args.length-1)
-				concatenatedArgs.append(ARGUMENTS_SEPARATOR);
-		}
-		return concatenatedArgs.toString();
-	}
-	
-	private static String[] splitConcatenatedTokens(String tokensString) {
-		return tokensString.split(ARGUMENTS_SEPARATOR);
-	}
+
 	
 	
 	
@@ -242,23 +213,7 @@ public abstract class AbstractLogicMethodParser<LM extends LogicRoutine> {
 		return ARGUMENT_PREFIX+pos;
 	}
 	
-	/**
-	 * 
-	 * @param symbol
-	 * @return true if @symbol is a valid instance property symbol
-	 */
-	public static boolean isInstancePropertySymbol(String symbol) {
-		if(symbol==null)
-			return false;
-		Pattern pattern = Pattern.compile(Pattern.quote(INSTANCE_PROPERTY_PREFIX) + JAVA_NAME_REX);
-		Matcher findingMatcher = pattern.matcher(symbol);
-		return findingMatcher.matches();
-		//return symbol.substring(0, 1).equals(INSTANCE_PROPERTY_PREFIX);
-	}
-	
-	private static String getPropertyName(String symbol) {
-		return symbol.substring(INSTANCE_PROPERTY_PREFIX.length());
-	}
+
 	
 	
 	public String suppressJavaExpressions(String s) {
@@ -278,26 +233,17 @@ public abstract class AbstractLogicMethodParser<LM extends LogicRoutine> {
 	 * @param concatenatedArguments
 	 * @return A list of symbol params referenced in the string sent as a parameter
 	 */
-	public List<String> getAllSymbols(String concatenatedArguments) {
+	public List<String> getAllMethodSymbols(String concatenatedArguments) {
 		concatenatedArguments = suppressJavaExpressions(concatenatedArguments);
-		return scanSymbols(concatenatedArguments);
+		return scanMethodSymbols(concatenatedArguments);
 	}
 
-	/**
-	 * Created a separated method just to facilitate a bit testing
-	 * @param s
-	 * @return
-	 */
-	public static List<String> scanSymbols(String s) {
-		Set<String> symbolsSet = new LinkedHashSet<String>();
-		Pattern pattern = Pattern.compile("("+Pattern.quote(ARGUMENT_PREFIX)+"(\\d+|"+Pattern.quote(ALL_ARGUMENTS_SUFFIX)+"))|"+Pattern.quote(INSTANCE_PROPERTY_PREFIX)+JAVA_NAME_REX);
-		Matcher findingMatcher = pattern.matcher(s);
-		while(findingMatcher.find()) {
-			String match = findingMatcher.group();
-			symbolsSet.add(match);
-		}
-		return new ArrayList<String>(symbolsSet);
+	public static List<String> scanMethodSymbols(String s) {
+		return scanSymbols(s, "("+Pattern.quote(ARGUMENT_PREFIX)+"(\\d+|"+Pattern.quote(ALL_ARGUMENTS_SUFFIX)+"))|"+Pattern.quote(INSTANCE_PROPERTY_PREFIX)+JAVA_NAME_REX);
 	}
+	
+	
+
 
 	/**
 	 * Extract the expression value from a delimited expression
@@ -305,7 +251,7 @@ public abstract class AbstractLogicMethodParser<LM extends LogicRoutine> {
 	 * @return
 	 */
 	public static String getExpressionValue(String delimitedExpression) {
-		Pattern pattern = Pattern.compile("^(" + Pattern.quote(BEGIN_IMMEDIATE_JAVA_EXPRESSION) + "|" + Pattern.quote(BEGIN_DEFERRED_JAVA_EXPRESSION) + ")(.*)" + END_JAVA_EXPRESSION_BLOCK + "$");
+		Pattern pattern = Pattern.compile("^(" + Pattern.quote(BEGIN_JAVA_VALUE_EXP) + "|" + Pattern.quote(BEGIN_JAVA_DEFERRED_EXP) + ")(.*)" + END_JAVA_EXPRESSION_BLOCK + "$");
 		
 		//Pattern pattern = Pattern.compile(DELIMITED_JAVA_REX);
 		Matcher findingMatcher = pattern.matcher(delimitedExpression);
@@ -380,7 +326,7 @@ public abstract class AbstractLogicMethodParser<LM extends LogicRoutine> {
 
 	private static List<MatchResult> getJavaExpressionMatches(String expression) {
 		List<MatchResult> expressionMatches = new ArrayList<MatchResult>();
-		Pattern pattern = Pattern.compile( Pattern.quote(BEGIN_IMMEDIATE_JAVA_EXPRESSION) + "|" + Pattern.quote(BEGIN_DEFERRED_JAVA_EXPRESSION) );
+		Pattern pattern = Pattern.compile( Pattern.quote(BEGIN_JAVA_VALUE_EXP) + "|" + Pattern.quote(BEGIN_JAVA_DEFERRED_EXP) );
 		Matcher matcher = pattern.matcher(expression);
 		while(matcher.find()) {
 			int start = matcher.start();
@@ -470,6 +416,9 @@ public abstract class AbstractLogicMethodParser<LM extends LogicRoutine> {
 		return logicString;
 	}
 	
+	
+
+	
 	/**
 	 * 
 	 * @param logicString a string with all the new params concatenated
@@ -477,19 +426,11 @@ public abstract class AbstractLogicMethodParser<LM extends LogicRoutine> {
 	 * @return
 	 */
 	private String replaceSymbolsAndExpressions(String logicString, List<String> setSymbols, Map<String, String> expressionsMap, Object targetObject, Object[] oldArguments) {
-		Map<String, String> symbolsMap = symbolsReplacementMap(targetObject, oldArguments, setSymbols);
-
-		
 		List<String> expressions = new ArrayList<String>(expressionsMap.keySet());
 		logicString = hideExpressions(logicString, expressions);
 		
-		//replacing symbols
-		for(String symbol : setSymbols) {			
-			String termObjectString = symbolsMap.get(symbol);
-			termObjectString = Matcher.quoteReplacement(termObjectString);//this is necessary if the String contains the symbol "$". Otherwise it will be interpreted as a group in the regular expression
-			logicString=logicString.replaceAll(Pattern.quote(symbol), termObjectString);
-		}
-		
+		Map<String, String> symbolsMap = symbolsReplacementMap(targetObject, oldArguments, setSymbols); //obtaining a map with the symbols to replace
+		logicString = replaceSymbols(logicString, symbolsMap); //replacing symbols
 		
 		logicString = restoreExpressions(logicString, expressions);
 		
@@ -516,20 +457,20 @@ public abstract class AbstractLogicMethodParser<LM extends LogicRoutine> {
 		return logicString;
 	}
 
-
+	
 	/**
 	 * Builds a dictionary of symbol params to values
 	 * @param args the java method parameters
 	 * @return
 	 */
 	private Map<String, String> symbolsReplacementMap(Object targetObject, Object[] args, List<String> symbols) {
-		Map<String, String> dictionary = new HashMap<String, String>();
+		Map<String, String> dictionary = propertiesSymbolsReplacementMap(targetObject, symbols);
 		if(args.length > 0) {
 			LogicEngine engine = LogicEngine.getDefault();
 			List<Term> listTerms = new ArrayList<Term>();
-			boolean allArgumentsRequired = symbols.contains(AbstractLogicMethodParser.ALL_ARGUMENTS_SYMBOL);
+			boolean allArgumentsRequired = symbols.contains(LogicMethodParser.ALL_ARGUMENTS_SYMBOL);
 			for(int i = 0; i<args.length; i++) {
-				String paramName = AbstractLogicMethodParser.methodArgumentSymbol(i+1);
+				String paramName = LogicMethodParser.methodArgumentSymbol(i+1);
 				if(allArgumentsRequired || symbols.contains(paramName)) {
 					Term termArgument = ObjectToTermAdapter.asTerm(args[i]);
 					if(engine.nonAnonymousVariablesNames(termArgument).size() > 0)
@@ -539,19 +480,13 @@ public abstract class AbstractLogicMethodParser<LM extends LogicRoutine> {
 				}
 			}
 			if(allArgumentsRequired)
-				dictionary.put(AbstractLogicMethodParser.ALL_ARGUMENTS_SYMBOL, engine.termListToTextSequence(listTerms));
+				dictionary.put(LogicMethodParser.ALL_ARGUMENTS_SYMBOL, engine.termListToTextSequence(listTerms));
 		}
-		if(symbols.contains(AbstractLogicMethodParser.THIS_SYMBOL)) {
-			Term thisAsTerm = new ObjectToTermAdapter().adapt(targetObject);
-			dictionary.put(AbstractLogicMethodParser.THIS_SYMBOL, thisAsTerm.toString());
-		}
-		
-		for(String setSymbol : symbols) {
-			if(AbstractLogicMethodParser.isInstancePropertySymbol(setSymbol)) {
-				String instanceVarName = AbstractLogicMethodParser.getPropertyName(setSymbol);
-				Term instanceVarAsTerm = instanceVarAsTerm = LogicObject.propertyAsTerm(targetObject, instanceVarName);//TODO problem !!!
-				dictionary.put(setSymbol, instanceVarAsTerm.toString());
-			}
+		if(symbols.contains(LogicMethodParser.THIS_METHOD_ARGUMENT_SYMBOL)) { //the symbol $0 was found
+			String thisAsTermString = dictionary.get(THIS_INSTANCE_PROPERTY_SYMBOL); //find if the synonym @this has already been translated
+			if(thisAsTermString == null) //if the synonym does not exist, calculate the translation as term of this, otherwise reuse the existing translation
+				thisAsTermString = new ObjectToTermAdapter().adapt(targetObject).toString();
+			dictionary.put(LogicMethodParser.THIS_METHOD_ARGUMENT_SYMBOL, thisAsTermString);
 		}
 		return dictionary;
 	}
@@ -565,9 +500,9 @@ public abstract class AbstractLogicMethodParser<LM extends LogicRoutine> {
 		Map<String, String> expressionsReplacementMap = new HashMap<String, String>();
 		for(int i = 0; i<delimitedExpressions.size(); i++) {
 			String delimitedExpression = delimitedExpressions.get(i);
-			String expression = AbstractLogicMethodParser.getExpressionValue(delimitedExpression);  //suppress the delimiter characters
+			String expression = LogicMethodParser.getExpressionValue(delimitedExpression);  //suppress the delimiter characters
 			String substitutionValue;
-			if(AbstractLogicMethodParser.isValidJavaExpression(expression)) {
+			if(LogicMethodParser.isValidJavaExpression(expression)) {
 				substitutionValue = methodNameForExpression(i + 1); //calculate a method name for this expression given the expression position. Using as index i+1 to work with 1-based index. Later the expression will be replaced by a call to this method
 			} else {
 				logger.warn("The expression: " + delimitedExpression + "in the method "+ getMethod().toGenericString()+" is not valid. It will be ignored.");
@@ -583,9 +518,9 @@ public abstract class AbstractLogicMethodParser<LM extends LogicRoutine> {
 		Map<String, String> generatedMethodsMap = new HashMap<String, String>();
 		for(Entry<String, String> entry : expressionsReplacementMap.entrySet()) {
 			String expression = entry.getKey();
-			expression = AbstractLogicMethodParser.getExpressionValue(expression);
-			if(AbstractLogicMethodParser.isValidJavaExpression(expression)) {
-				expression = AbstractLogicMethodParser.normalizeExpression(expression);
+			expression = LogicMethodParser.getExpressionValue(expression);
+			if(LogicMethodParser.isValidJavaExpression(expression)) {
+				expression = LogicMethodParser.normalizeExpression(expression);
 				String methodName = entry.getValue();
 				generatedMethodsMap.put(methodName, expression);
 			}

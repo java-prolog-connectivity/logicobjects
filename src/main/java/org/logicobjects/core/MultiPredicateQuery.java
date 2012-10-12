@@ -6,7 +6,7 @@ import jpl.Query;
 import jpl.Term;
 
 import org.logicobjects.annotation.method.LSolution;
-import org.logicobjects.instrumentation.AbstractLogicMethodParser;
+import org.logicobjects.instrumentation.LogicMethodParser;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
 

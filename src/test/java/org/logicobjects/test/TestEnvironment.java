@@ -16,11 +16,13 @@ public class TestEnvironment extends LocalLogicTest {
 		verifyEnvironmentVar(LogicObjectsPreferences.LOGTALKUSER);
 	}
 	
-	
+	/*
 	@Test
 	public void testJPLPATH() {
 		verifyEnvironmentVar(LogicObjectsPreferences.JPLPATH);
 	}
+	*/
+	
 	/*
 	@Test
 	public void testPL() {

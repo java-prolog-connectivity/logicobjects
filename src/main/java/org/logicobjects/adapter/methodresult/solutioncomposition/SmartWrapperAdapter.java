@@ -24,12 +24,12 @@ public class SmartWrapperAdapter extends WrapperAdapter<Object, Object>  {
 				throw new RuntimeException(e);
 			}
 		} else {
-			throw new RuntimeException("Impossible to find a wrapper adapter");
+			throw new RuntimeException("Impossible to find a composition adapter");
 		}
 	}
 	
 	public Class findWrapperAdapterClass() {
-		Set<Class<? extends WrapperAdapter>> wrapperAdaptersClasses = LogicObjectFactory.getDefault().getContext().getWrapperAdapters();
+		Set<Class<? extends WrapperAdapter>> wrapperAdaptersClasses = LogicObjectFactory.getDefault().getWrapperAdapters();
 		AbstractTypeWrapper methodTypeWrapper = AbstractTypeWrapper.wrap(getConcreteMethodResultType());
 		
 		for(Class wrapperAdaptersClass : wrapperAdaptersClasses) {

@@ -12,6 +12,7 @@ import org.logicobjects.adapter.adaptingcontext.AbstractLogicObjectDescriptor;
 import org.logicobjects.annotation.LDelegationObject;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LTermAdapter;
+import org.logicobjects.instrumentation.LogicClassParsingData;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.ReflectionUtil;
 import org.reflectiveutils.visitor.FindFirstTypeVisitor;
@@ -298,9 +299,19 @@ public class LogicObjectClass {
 	}
 
 
-	
+	public LogicClassParsingData getDataToParse() {
+		LogicClassParsingData parsingData = new LogicClassParsingData();
+		if(hasCustomClassName()) //this is to avoid parsing method names such as $1. This is a valid Java method name, but would be interpreted by the parser as "a String given by the first argument of the logic method"
+			parsingData.setName(getLObjectName());
+		parsingData.setClassArguments(getLObjectArgs());
+		parsingData.setArgumentsAsListProperty(getLObjectArgsList());
+		return parsingData;
+	}
 
 
+	public boolean hasCustomClassName() {
+		return logicObjectDescriptor.name() != null && !logicObjectDescriptor.name().isEmpty();
+	}
 
 	
 }
