@@ -2,8 +2,9 @@ package org.logicobjects.adapter.methodresult.solutioncomposition;
 
 
 import java.util.Set;
-import jpl.Query;
-import org.logicobjects.core.LogicObjectFactory;
+
+import org.logicobjects.LogicObjects;
+import org.logicobjects.term.Query;
 import org.reflectiveutils.GenericsUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
@@ -29,7 +30,7 @@ public class SmartWrapperAdapter extends WrapperAdapter<Object, Object>  {
 	}
 	
 	public Class findWrapperAdapterClass() {
-		Set<Class<? extends WrapperAdapter>> wrapperAdaptersClasses = LogicObjectFactory.getDefault().getWrapperAdapters();
+		Set<Class<? extends WrapperAdapter>> wrapperAdaptersClasses = LogicObjects.getWrapperAdapters();
 		AbstractTypeWrapper methodTypeWrapper = AbstractTypeWrapper.wrap(getConcreteMethodResultType());
 		
 		for(Class wrapperAdaptersClass : wrapperAdaptersClasses) {

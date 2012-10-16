@@ -1,7 +1,15 @@
 package org.logicobjects.term;
 
+import java.util.Collections;
+import java.util.List;
 
-public class LFloat extends LTerm {
+/**
+ * A class reifying a logic float term
+ * DISCLAIMER: In the current version many methods in this class have been copied or adapted from the class jpl.Float in the JPL library.
+ * @author scastro
+ *
+ */
+public class FloatTerm extends Term {
 
 	protected final double value;
 	
@@ -11,7 +19,7 @@ public class LFloat extends LTerm {
 	 * 
 	 * @param   value  this Float's value
 	 */
-	public LFloat(double value) {
+	public FloatTerm(double value) {
 		this.value = value;
 	}
 	
@@ -68,7 +76,19 @@ public class LFloat extends LTerm {
 	 * @return  true if the Object satisfies the above condition
 	 */
 	public final boolean equals(Object obj) {
-		return this == obj || (obj instanceof LFloat && value == ((LFloat) obj).value);
+		return this == obj || (obj instanceof FloatTerm && value == ((FloatTerm) obj).value);
+	}
+
+
+	@Override
+	public boolean hasFunctor(String name, int arity) {
+		return false;
+	}
+
+
+	@Override
+	public List<Term> args() {
+		return Collections.emptyList();
 	}
 	
 }

@@ -1,6 +1,6 @@
 package org.logicobjects.core;
 
-import jpl.Term;
+import org.logicobjects.term.Term;
 
 public interface ITermObject {
 	public Term asTerm();

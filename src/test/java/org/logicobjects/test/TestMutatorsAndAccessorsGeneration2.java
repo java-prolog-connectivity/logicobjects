@@ -15,6 +15,7 @@ import org.logicobjects.core.LogicObjectFactory;
 import org.reflectiveutils.BeansUtil;
 import org.reflectiveutils.ReflectionUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
+import static org.logicobjects.LogicObjects.*;
 
 /**
  * Test the special cases for the generation of mutators and accessors TODO complete!
@@ -72,7 +73,7 @@ public class TestMutatorsAndAccessorsGeneration2 {
 	@Test
 	public void testShouldNotDuplicateField() {
 		Class testingClass = ShouldNotDuplicateField.class;
-		Object lo = LogicObjectFactory.getDefault().create(testingClass);
+		Object lo = newLogicObject(testingClass);
 		assertEquals(lo.getClass().getSuperclass(), testingClass);
 		Field field;
 		try {
@@ -108,7 +109,7 @@ public class TestMutatorsAndAccessorsGeneration2 {
 	@Test
 	public void testShouldOverrideGetter() {
 		Class testingClass = ShouldOverrideGetter.class;
-		Object lo = LogicObjectFactory.getDefault().create(testingClass);
+		Object lo = newLogicObject(testingClass);
 		assertEquals(lo.getClass().getSuperclass(), testingClass);
 		Field field;
 		try {
@@ -160,7 +161,7 @@ public class TestMutatorsAndAccessorsGeneration2 {
 	@Test
 	public void testShouldOverrideGetterAndSetter() {
 		Class testingClass = ShouldOverrideGetterAndSetter.class;
-		Object lo = LogicObjectFactory.getDefault().create(testingClass);
+		Object lo = newLogicObject(testingClass);
 		assertEquals(lo.getClass().getSuperclass(), testingClass);
 		Field field;
 		try {
@@ -208,7 +209,7 @@ public class TestMutatorsAndAccessorsGeneration2 {
 	@Test
 	public void testShouldGenerateEverything() {
 		Class testingClass = ShouldGenerateEverything.class;
-		Object lo = LogicObjectFactory.getDefault().create(testingClass);
+		Object lo = newLogicObject(testingClass);
 		assertEquals(lo.getClass().getSuperclass(), testingClass);
 		Field field;
 		try{

@@ -2,9 +2,7 @@ package org.logicobjects.adapter;
 
 import java.lang.reflect.Type;
 
-import org.logicobjects.core.LogicEngine;
-
-import jpl.Term;
+import org.logicobjects.term.Term;
 
 public class TermToObjectException extends RuntimeException {
 
@@ -24,9 +22,9 @@ public class TermToObjectException extends RuntimeException {
 	public String getMessage() {
 		//System.out.println("*****"+LogicEngine.getDefault().termToText(term));		
 		if(type!=null)
-			return "Term "+term+" cannot be transformed into a logic object";
+			return "LTerm "+term+" cannot be transformed into a logic object";
 		else
-			return "Term "+term+" cannot be transformed into an object of type "+type;
+			return "LTerm "+term+" cannot be transformed into an object of type "+type;
 	}
 
 }

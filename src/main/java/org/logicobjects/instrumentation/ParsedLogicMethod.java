@@ -1,9 +1,9 @@
 package org.logicobjects.instrumentation;
 
-import jpl.Query;
-import jpl.Term;
+import java.util.List;
 
 import org.logicobjects.core.LogicRoutine;
+import org.logicobjects.term.Term;
 
 /**
  * This class represents a fully parsed logic method
@@ -15,13 +15,13 @@ public class ParsedLogicMethod {
 
 	private LogicRoutine logicMethod; //the logic method to be parsed
 	private Object targetObject; //the instance of the class providing context for the parsing
-	private Object[] originalMethodArguments; //the original method arguments sent to the method providing context to the parsing (after being adapted by the individual adapters and method arguments array adapter if any)
+	private List originalMethodArguments; //the original method arguments sent to the method providing context to the parsing (after being adapted by the individual adapters and method arguments array adapter if any)
 	
 	private LogicMethodParsingData parsedData; //the parsed string data
 	
 	private String computedQueryString; //the query
 	private String computedMethodName;
-	private Object[] computedMethodArguments; //the method arguments
+	private List computedMethodArguments; //the method arguments
 	
 	/**
 	 * 
@@ -30,7 +30,7 @@ public class ParsedLogicMethod {
 	 * @param originalMethodArguments the arguments of the logic method
 	 * @param parsedData contains the parsed method data
 	 */
-	public ParsedLogicMethod(LogicRoutine logicMethod, Object targetObject, Object[] originalMethodArguments, LogicMethodParsingData parsedData) {
+	public ParsedLogicMethod(LogicRoutine logicMethod, Object targetObject, List originalMethodArguments, LogicMethodParsingData parsedData) {
 		this.logicMethod = logicMethod;
 		this.targetObject = targetObject;
 		this.originalMethodArguments = originalMethodArguments;
@@ -46,7 +46,7 @@ public class ParsedLogicMethod {
 		return targetObject;
 	}
 
-	public Object[] getOriginalMethodArguments() {
+	public List getOriginalMethodArguments() {
 		return originalMethodArguments;
 	}
 	
@@ -62,11 +62,11 @@ public class ParsedLogicMethod {
 		this.computedQueryString = computedQueryString;
 	}
 
-	public Object[] getComputedMethodArguments() {
+	public List getComputedMethodArguments() {
 		return computedMethodArguments;
 	}
 
-	public void setComputedMethodArguments(Object[] computedMethodArguments) {
+	public void setComputedMethodArguments(List computedMethodArguments) {
 		this.computedMethodArguments = computedMethodArguments;
 	}
 
@@ -79,8 +79,8 @@ public class ParsedLogicMethod {
 	}
 
 	
-	public Query asQuery() {
-		return logicMethod.asQuery(this);
+	public Term asGoal() {
+		return logicMethod.asGoal(this);
 	}
 	
 	public Term getEachSolutionTerm() {

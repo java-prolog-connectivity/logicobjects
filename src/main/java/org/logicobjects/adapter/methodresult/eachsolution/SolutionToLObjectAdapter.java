@@ -2,12 +2,8 @@ package org.logicobjects.adapter.methodresult.eachsolution;
 
 import java.util.Map;
 
-import jpl.Term;
-
 import org.logicobjects.adapter.TermToObjectAdapter;
-import org.logicobjects.core.LogicEngine;
-import org.logicobjects.instrumentation.LogicMethodParser;
-import org.logicobjects.instrumentation.ParsedLogicMethod;
+import org.logicobjects.term.Term;
 import org.logicobjects.util.termvisitor.ReplaceVariableVisitor;
 
 public class SolutionToLObjectAdapter extends
@@ -26,17 +22,7 @@ public class SolutionToLObjectAdapter extends
 		Term term = engine.textToTerm(arg);
 		*/
 		Term term = getParsedLogicMethod().getEachSolutionTerm();
-		
-		ReplaceVariableVisitor replaceVariableVisitor = new ReplaceVariableVisitor(bindings);
-		
-		/*
-		for(Object o : bindings.entrySet()) {
-			Entry entry = (Entry)o;
-		}
-		*/
-		
-		//System.out.println("before replacing variables: "+term);
-		term = replaceVariableVisitor.visit(term);
+		term = term.replaceVariables(bindings);
 		//System.out.println("after replacing variables: "+term);
 		//Type methodType = compositionAdapter.getMethod().getGenericReturnType();
 		

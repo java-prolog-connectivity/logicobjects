@@ -1,6 +1,8 @@
 package org.logicobjects.instrumentation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -9,9 +11,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jpl.Term;
-
 import org.logicobjects.core.LogicObject;
+import org.logicobjects.term.Term;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,22 +34,26 @@ public abstract class AbstractParser {
 		return s!=null?s:"";
 	}
 	
+	protected List<String> asNotNullStringList(List<String> a) {
+		return a!=null?a:Collections.<String>emptyList();
+	}
+	
 	protected String[] asNotNullStringArray(String[] a) {
 		return a!=null?a:new String[] {};
 	}
 	
-	protected static String concatenateTokens(Object[] args) {
+	protected static String concatenateTokens(List<String> args) {
 		StringBuilder concatenatedArgs = new StringBuilder();
-		for(int i=0; i<args.length; i++) {
-			concatenatedArgs.append(args[i]);
-			if(i<args.length-1)
+		for(int i=0; i<args.size(); i++) {
+			concatenatedArgs.append(args.get(i));
+			if(i<args.size()-1)
 				concatenatedArgs.append(TOKEN_COLLECTION_SEPARATOR);
 		}
 		return concatenatedArgs.toString();
 	}
 	
-	protected static String[] splitConcatenatedTokens(String tokensString) {
-		return tokensString.split(TOKEN_COLLECTION_SEPARATOR);
+	protected static List<String> splitConcatenatedTokens(String tokensString) {
+		return Arrays.asList(tokensString.split(TOKEN_COLLECTION_SEPARATOR));
 	}
 
 	public static String asInstancePropertySymbol(String property) {

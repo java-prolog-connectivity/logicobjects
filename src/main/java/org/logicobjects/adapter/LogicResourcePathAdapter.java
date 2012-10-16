@@ -1,14 +1,14 @@
 package org.logicobjects.adapter;
 
 import java.net.URL;
+import java.util.Arrays;
 
-import jpl.Atom;
-import jpl.Compound;
-import jpl.Term;
-
-import org.logicobjects.core.LogicEngine;
-import org.logicobjects.core.LogicObjectFactory;
+import org.logicobjects.core.ResourceManager;
+import org.logicobjects.logicengine.LogicEngineConfiguration;
 import org.logicobjects.resource.LogicResource;
+import org.logicobjects.term.Atom;
+import org.logicobjects.term.Compound;
+import org.logicobjects.term.Term;
 
 /*
  * Adapt a String path as a term representation
@@ -19,9 +19,12 @@ import org.logicobjects.resource.LogicResource;
 public class LogicResourcePathAdapter extends LogicAdapter<LogicResource, Term> {
 
 	private URL url;
+	private ResourceManager resourceManager;
 	
-	public LogicResourcePathAdapter(URL url) {
+	public LogicResourcePathAdapter(LogicEngineConfiguration logicEngineConfig, URL url, ResourceManager resourceManager) {
+		super(logicEngineConfig);
 		this.url = url;
+		this.resourceManager = resourceManager;
 	}
 	
 	@Override
@@ -35,15 +38,15 @@ public class LogicResourcePathAdapter extends LogicAdapter<LogicResource, Term> 
 		String[] tokens = resourceName.split("/");
 		
 		if(tokens.length > 1) {
-			String resourcePath = LogicObjectFactory.getDefault().getResourceManager().getResourcePath(resourceName, url);
+			String resourcePath = resourceManager.getResourcePath(resourceName, url);
 			//return makeCompound(atoms);
 			return new Atom(resourcePath);
 		}
 		else {
 			//URL url = getClass().getClassLoader().getResource(classPathFileName);
-			Term term = LogicEngine.getDefault().textToTerm(tokens[0]);
+			Term term = getLogicUtil().asTerm(tokens[0]);
 			if(term.isAtom()) {
-				String resourcePath = LogicObjectFactory.getDefault().getResourceManager().getResourcePath(term.name(), url);
+				String resourcePath = resourceManager.getResourcePath(((Atom)term).name(), url);
 				term = new Atom(resourcePath);
 			}
 			return term;
@@ -67,7 +70,7 @@ public class LogicResourcePathAdapter extends LogicAdapter<LogicResource, Term> 
 		if(next == symbols.length-1) //no more symbols to process
 			return new Atom(symbols[next]);
 		else {
-			return new Compound(symbols[next], new Term[] {makeCompound(symbols, next+1) });
+			return new Compound(symbols[next], Arrays.asList(makeCompound(symbols, next+1)));
 		}
 	}
 

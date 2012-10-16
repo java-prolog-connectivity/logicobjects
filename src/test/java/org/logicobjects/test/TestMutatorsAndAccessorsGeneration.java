@@ -18,6 +18,7 @@ import org.logicobjects.core.LogicObjectFactory;
 import org.reflectiveutils.BeansUtil;
 import org.reflectiveutils.ReflectionUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
+import static org.logicobjects.LogicObjects.*;
 
 @RunWith(value = Parameterized.class)
 public class TestMutatorsAndAccessorsGeneration {
@@ -137,7 +138,7 @@ public class TestMutatorsAndAccessorsGeneration {
 	
 	@Test
 	public void testGenerationMutatosAndAccessors() {
-		Object lo = LogicObjectFactory.getDefault().create(testingClass);
+		Object lo = newLogicObject(testingClass);
 		assertEquals(lo.getClass().getSuperclass(), testingClass);
 		Field field;
 		try {

@@ -34,7 +34,7 @@ public class LogicClassParser extends AbstractParser {
 	public LogicClassParser parse() {
 		LogicClassParsingData unparsedData = logicObjectClass.getDataToParse();
 		unparsedClassName = unparsedData.getName();
-		unparsedLogicArgumentsString = concatenateTokens(asNotNullStringArray(unparsedData.getClassArguments()));
+		unparsedLogicArgumentsString = concatenateTokens(asNotNullStringList(unparsedData.getClassArguments()));
 		unparsedListArguments = unparsedData.getArgumentsAsListProperty();
 		allLogicStrings = CLASS_NAME_TAG + unparsedClassName + CLASS_ARGUMENTS_TAG + unparsedLogicArgumentsString + CLASS_LIST_ARGUMENTS_TAG + unparsedListArguments;
 		foundSymbols = scanClassSymbols(allLogicStrings);

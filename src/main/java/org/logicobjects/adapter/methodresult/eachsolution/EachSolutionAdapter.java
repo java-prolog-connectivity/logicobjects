@@ -1,6 +1,5 @@
 package org.logicobjects.adapter.methodresult.eachsolution;
 
-import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.logicobjects.adapter.LogicAdapter;
@@ -49,18 +48,5 @@ public abstract class EachSolutionAdapter<EachSolutionType> extends LogicAdapter
 		this.compositionAdapter = compositionAdapter;
 	}
 	
-	/*
-	public Method getMethod() {
-		return getCompositionAdapter().getMethod();
-	}
-	*/
-	/*
-	public Object getTargetObject() {
-		return getCompositionAdapter().getTargetObject();
-	}
-	
-	public Object[] getJavaMethodParams() {
-		return getCompositionAdapter().getJavaMethodParams();
-	}
-	*/
+
 }

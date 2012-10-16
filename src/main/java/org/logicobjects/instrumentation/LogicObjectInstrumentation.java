@@ -34,6 +34,7 @@ import org.logicobjects.core.LogicBeanProperty;
 import org.logicobjects.core.LogicObjectClass;
 import org.logicobjects.core.LogicRoutine;
 import org.logicobjects.core.NoLogicResultException;
+import org.logicobjects.logicengine.LogicEngineConfiguration;
 import org.logicobjects.util.javassist.CodeGenerationUtil;
 import org.logicobjects.util.javassist.JavassistUtil;
 import org.logicobjects.util.javassist.PrimitiveTypesWorkaround;
@@ -76,6 +77,8 @@ public class LogicObjectInstrumentation {
 	//public static final String GENERATED_PARAMETER_PREFIX = "$logicObjectsParam";
 	public static final String GENERATED_CLASS_SUFFIX = "___LogicObjectsInstrumented";  //avoid the character "$" this could create problems since it has an special meaning in javassist
 	public static final String GENERATED_PARAMETER_PREFIX = "logicObjectsParam";
+	public static final String GENERATED_INSTANCE_VAR_SUFFIX = "___LogicObjectsInstrumented"; //avoid the character "$" this could create problems since it has an special meaning in javassist
+	public static final String LOGIC_ENGINE_CONFIG_FIELD_NAME = "logicEngineConfig" + GENERATED_INSTANCE_VAR_SUFFIX;
 	
 	public static String instrumentedClassName(Class aClass) {
 		return aClass.getName() + GENERATED_CLASS_SUFFIX;
@@ -134,6 +137,7 @@ public class LogicObjectInstrumentation {
 		
 		try {
 			newCtClass.setSuperclass(ctClassToExtend);
+			addLogicEngineProperty(newCtClass);
 			createGettersAndSetters(newCtClass);
 			createConstructors(newCtClass);
 			createLogicMethods(newCtClass);
@@ -193,7 +197,12 @@ public class LogicObjectInstrumentation {
 		}
 	}
 
-
+	private void addLogicEngineProperty(CtClass son) {
+		CtClass ctFieldClass = JavassistUtil.asCtClass(LogicEngineConfiguration.class, classPool);
+		CodeGenerationUtil.createField(ctFieldClass, LogicEngineConfiguration.class, LOGIC_ENGINE_CONFIG_FIELD_NAME, son);
+		CodeGenerationUtil.createGetter(LogicEngineConfiguration.class, LOGIC_ENGINE_CONFIG_FIELD_NAME, null, son);
+	}
+	
 	private void createGettersAndSetters(CtClass son) {
 		ClassMap classMap = JavassistUtil.fixedClassMap(classToExtend, classPool);
 
@@ -471,9 +480,9 @@ public class LogicObjectInstrumentation {
 			methodCodeBuilder.append("Object[] args = $args; ");
 			
 			methodCodeBuilder.append(Method.class.getCanonicalName()+" thisMethod = getClass().getMethod(methodName, "+methodParameterTypesString+"); ");
-			
+			methodCodeBuilder.append(invokerClass.getCanonicalName()+" methodInvoker = new "+invokerClass.getCanonicalName()+"("+LOGIC_ENGINE_CONFIG_FIELD_NAME+"); ");
 
-			methodCodeBuilder.append("result = "+invokerClass.getCanonicalName()+"."+invokerMethodName+"(this, thisMethod, args); ");
+			methodCodeBuilder.append("result = "+"methodInvoker"+"."+invokerMethodName+"(this, thisMethod, args); ");
 			
 			methodCodeBuilder.append("} catch (Exception e) {throw new RuntimeException(e);} ");
 			

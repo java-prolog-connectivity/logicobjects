@@ -6,14 +6,16 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
-import jpl.Term;
-import jpl.Variable;
-
 import org.logicobjects.adapter.Adapter;
 import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.annotation.IgnoreLAdapter;
 import org.logicobjects.core.LogicObjectClass;
 import org.logicobjects.logicengine.LogicEngineConfiguration;
+import org.logicobjects.term.Compound;
+import org.logicobjects.term.FloatTerm;
+import org.logicobjects.term.IntegerTerm;
+import org.logicobjects.term.Term;
+import org.logicobjects.term.Variable;
 import org.reflectiveutils.ReflectionUtil;
 
 public abstract class AbstractLContext {
@@ -96,18 +98,24 @@ public abstract class AbstractLContext {
 		Set<Class<?>> set = getLogicClasses();
 		for(Class clazz : set) {
 			LogicObjectClass logicClass = new LogicObjectClass(clazz);
-			if(logicClass.getLObjectName().equals(logicName) && logicClass.getLObjectArgs().length == args)
+			if(logicClass.getLObjectName().equals(logicName) && logicClass.getLObjectArgs().size() == args)
 				return clazz;
 		}
 		return null;
 	}
 	
 	public Class findLogicClass(Term term) {
-		if( term instanceof Variable || term instanceof jpl.Integer || term instanceof jpl.Float || term.name().equals(".") )
-			return null;
-		return findLogicClass(term.name(), term.args().length);
+		Class logicClass = null;
+		if(term instanceof Compound) {
+			Compound compound = (Compound) term;
+			if(compound.name().equals("."))
+				logicClass = findLogicClass(compound.name(), compound.arity());
+		}
+		return logicClass;
 	}
 	
-	public abstract LogicEngineConfiguration getLogicEngineConfiguration(Class clazz);
+	public abstract LogicEngineConfiguration getLogicEngineConfiguration(String packageName);
+	
+
 
 }

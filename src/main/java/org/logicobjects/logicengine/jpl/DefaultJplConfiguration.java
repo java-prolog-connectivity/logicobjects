@@ -2,9 +2,10 @@ package org.logicobjects.logicengine.jpl;
 
 import jpl.JPL;
 
+import org.logicobjects.LogicObjects;
+import org.logicobjects.LogicObjectsPreferences;
 import org.logicobjects.logicengine.LogicEngine;
 import org.logicobjects.logicengine.LogicEngineConfiguration;
-import org.logicobjects.util.LogicObjectsPreferences;
 
 public class DefaultJplConfiguration extends LogicEngineConfiguration {
 
@@ -13,7 +14,7 @@ public class DefaultJplConfiguration extends LogicEngineConfiguration {
 	@Override
 	public void configure() {
 		//configuring the JPL path according to an environment variable. So a JPL Prolog engine can be started
-		JPL.setNativeLibraryDir(LogicObjectsPreferences.getEnvironmentVarOrDie(JPLPATH)); 
+		JPL.setNativeLibraryDir(LogicObjects.getPreferences().findOrDie(JPLPATH)); 
 	}
 
 	@Override
@@ -29,5 +30,7 @@ public class DefaultJplConfiguration extends LogicEngineConfiguration {
 		 */
 		return JPL.getActualInitArgs() != null;
 	}
+	
+
 	
 }

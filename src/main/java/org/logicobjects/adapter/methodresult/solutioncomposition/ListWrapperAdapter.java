@@ -1,12 +1,8 @@
 package org.logicobjects.adapter.methodresult.solutioncomposition;
 
-import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Map;
 
-import jpl.Query;
-
-import org.reflectiveutils.GenericsUtil;
+import org.logicobjects.term.Query;
 
 /*
  * Adapt a logic query as a List

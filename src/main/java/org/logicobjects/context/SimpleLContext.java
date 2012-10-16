@@ -36,22 +36,14 @@ public abstract class SimpleLContext extends AbstractLContext {
 		this.reflections = reflections;
 		refresh();
 	}
-/*
-	protected void setEngineConfigurations(Set<Class<? extends LogicEngineConfiguration>> engineConfigurations) {
-		this.engineConfigurations = engineConfigurations;
-	}
-*/
-	private void loadDefaultSearchUrlWithWarning(String reason) {
-		LoggerFactory.getLogger(SimpleLContext.class).warn("Asking for "+reason+" without having provided a filter url.");
-		URL url = findCallerClasspath();
-		LoggerFactory.getLogger(SimpleLContext.class).warn("Looking for classes in the same classpath than the user of the library: "+url);
-		addSearchUrls(url);
-	}
+
+	
+	protected abstract void loadDefaultSearchUrl();
 	
 	@Override
 	public Set<Class<?>> getLogicClasses() {
 		if(reflections == null) {
-			loadDefaultSearchUrlWithWarning("user logic classes");
+			loadDefaultSearchUrl();
 		} 
 		return logicClasses;
 	}
@@ -59,29 +51,12 @@ public abstract class SimpleLContext extends AbstractLContext {
 	@Override
 	public Set<Class<? extends WrapperAdapter>> getWrapperAdapters() {
 		if(reflections == null) {
-			loadDefaultSearchUrlWithWarning("user wrapper adapters");
+			loadDefaultSearchUrl();
 		} 
 		return compositionAdapters;
 	}
 	
-	private URL findCallerClasspath() {
-		URL logicObjectsURL = ClasspathHelper.forClass(getClass(), null);
-		//The first element in the stack trace is the getStackTrace method, and the second is this method
-		//Then we start at the third member
-		for(int i = 2; i<Thread.currentThread().getStackTrace().length; i++) {
-			StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[i];
-			try {
-				Class callerClass = Class.forName(stackTraceElement.getClassName());
-				URL callerURL = ClasspathHelper.forClass(callerClass, null);
-				//for generated classes the callerURL will be null.
-				if(callerURL != null && !callerURL.equals(logicObjectsURL))
-					return callerURL;
-			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		return null;
-	}
+
 	
 	@Override
 	public void addPackage(String packageName) {

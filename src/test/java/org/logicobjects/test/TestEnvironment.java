@@ -2,18 +2,18 @@ package org.logicobjects.test;
 
 import static junit.framework.TestCase.*;
 import org.junit.Test;
-import org.logicobjects.util.LogicObjectsPreferences;
+import org.logicobjects.LogicObjectsPreferences;
 
 public class TestEnvironment extends LocalLogicTest {
 	
 	@Test
 	public void testLOGTALKHOME() {
-		verifyEnvironmentVar(LogicObjectsPreferences.LOGTALKHOME);
+		verifyEnvironmentVar(LogicObjectsPreferences.LOGTALKHOME_ENV);
 	}
 	
 	@Test
 	public void testLOGTALKUSER() {
-		verifyEnvironmentVar(LogicObjectsPreferences.LOGTALKUSER);
+		verifyEnvironmentVar(LogicObjectsPreferences.LOGTALKUSER_ENV);
 	}
 	
 	/*

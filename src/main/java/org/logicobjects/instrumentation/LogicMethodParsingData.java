@@ -1,5 +1,7 @@
 package org.logicobjects.instrumentation;
 
+import java.util.List;
+
 
 /**
  * Encapsulates the parsing data of a logic method
@@ -15,7 +17,7 @@ package org.logicobjects.instrumentation;
 public class LogicMethodParsingData {
 
 	private String queryString;
-	private String[] methodArguments;
+	private List<String> methodArguments;
 	private String solutionString;
 
 	public String getQueryString() {
@@ -24,10 +26,10 @@ public class LogicMethodParsingData {
 	public void setQueryString(String queryString) {
 		this.queryString = queryString;
 	}
-	public String[] getMethodArguments() {
+	public List<String> getMethodArguments() {
 		return methodArguments;
 	}
-	public void setMethodArguments(String[] methodArguments) {
+	public void setMethodArguments(List<String> methodArguments) {
 		this.methodArguments = methodArguments;
 	}
 	public String getSolutionString() {

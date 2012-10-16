@@ -1,23 +1,22 @@
 package org.logicobjects.term;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkElementIndex;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 
-public abstract class LQuery implements Iterator<Map<String, LTerm>> {
+public abstract class Query implements AutoCloseable, Iterator<Map<String, Term>> {
 
-	private LCompound goal;
+	private Compound goal;
 	
-	public LQuery(LCompound goal) {
-		this.goal = goal;
+	public Query(Term goal) {
+		this.goal = (Compound) goal;
 	}
 
-	public LCompound getGoal() {
+	public Compound goal() {
 		return goal;
 	}
 
@@ -37,37 +36,50 @@ public abstract class LQuery implements Iterator<Map<String, LTerm>> {
 	 * @param n the number of solutions the method should return
 	 * @return is the number of solutions
 	 */
-	public synchronized Map<String, LTerm>[] nSolutions(int n) {
-		return solutionsRange(0, n-1);
+	public synchronized List<Map<String, Term>> nSolutions(long n) {
+		return solutionsRange(0, n);
 	}
 
+	public synchronized Map<String, Term> oneSolution() {
+		try {
+			return nSolutions(1).get(0);
+		} catch(IndexOutOfBoundsException e) {
+			return null;
+		}
+	}
+	
+	public synchronized boolean hasSolution() {
+		return oneSolution() != null;
+	}
+	
 	/**
 	 * 
-	 * @param from the (0-based) index of the first solution
-	 * @param to the (0-based) index of the last solution
+	 * @param from the (0-based) index (inclusive) of the first solution
+	 * @param to the (0-based) index (exclusive) of the last solution
 	 * @return an array with the solutions according to the indexes sent as parameters
 	 */
-	public synchronized Map<String, LTerm>[] solutionsRange(int from, int to) {
+	public synchronized List<Map<String, Term>> solutionsRange(long from, long to) {
 		checkArgument(from >= 0);
-		checkArgument(to >= from);
+		checkArgument(to > from);
+		List<Map<String, Term>> solutions = new ArrayList<>();
 		if (isOpen()) {
 			throw new LException("Query is already open");
 		} else {
-			int count = 0;
-			List<Map<String, LTerm>> solutions = new ArrayList<>();
-			while(count<=to) {
-				Map<String, LTerm> solution = null;
-				if(hasNext()) {
-					solution = next();
-					if(count >= from)
-						solutions.add(solution);
+			try (Query queryToCLose = this){
+				long count = 0;
+				while(count<to) {
+					Map<String, Term> solution = null;
+					if(hasNext()) {
+						solution = next();
+						if(count >= from)
+							solutions.add(solution);
+					}
+					else
+						throw new IndexOutOfBoundsException("The query " + this + "has only " + count + " solutions");
+					count++;
 				}
-				else
-					throw new LException("The query " + this + "has only " + count + " solutions");
-				count++;
 			}
-			close();
-			return solutions.toArray(new Map[]{});
+			return solutions;
 		}
 	}
 	
@@ -77,15 +89,15 @@ public abstract class LQuery implements Iterator<Map<String, LTerm>> {
 	 * and returns an array of zero or more Maps of zero or more variablename-to-term bindings (each Map represents a solution, in the order in which they were found).
 	 * @return an array of zero or more Hashtables of zero or more variablename-to-term bindings (each Map represents a solution, in the order in which they were found)
 	 */
-	public synchronized Map<String, LTerm>[] allSolutions() {
+	public synchronized List<Map<String, Term>> allSolutions() {
 		if (isOpen()) {
 			throw new LException("Query is already open");
 		} else {
-			List<Map<String, LTerm>> allSolutions = new ArrayList<>();
+			List<Map<String, Term>> allSolutions = new ArrayList<>();
 			while (hasNext()) { 
 				allSolutions.add(next());
 			}
-			return allSolutions.toArray(new Map[]{});
+			return allSolutions;
 		}
 	}
 	
@@ -116,7 +128,7 @@ public abstract class LQuery implements Iterator<Map<String, LTerm>> {
 	 * }
 	 */
 	@Override
-	public abstract Map<String, LTerm> next();
+	public abstract Map<String, Term> next();
 	
 	@Override
 	public void remove() {

@@ -1,53 +1,27 @@
 package org.logicobjects.util.termvisitor;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
-import jpl.Compound;
-import jpl.Term;
-import jpl.Variable;
+import org.logicobjects.term.Term;
+import org.logicobjects.term.Variable;
 
 /**
  * This visitor replace variable names for another one
- * Given that there is not a mutator for the name attribute at the class Variable, this visitor returns a term with new Variable objects
- * (in the current implementation the original term is also changed, this will be fixed some day when having time ...)
  */
-public class ChangeVariableNameVisitor extends TermVisitor {
-	Map<String, String> map;
-	
+public class ChangeVariableNameVisitor extends ReplaceVariableVisitor {
+
 	public ChangeVariableNameVisitor(Map<String, String> map) {
-		this.map = map;
+		super(asVariableReplacementMap(map));
 	}
 	
-	@Override
-	public Term visit(Term term) {
-		if(term instanceof Variable) {
-			return replacementVariable((Variable)term);
-		} else
-			return (Term) super.visit(term);
-	}
-	
-	
-	@Override
-	protected boolean doVisit(Term term) {
-		if(term instanceof Compound) {
-			Compound compound = (Compound)term;
-			Term[] args = compound.args();
-			for(int i = 0; i<args.length; i++) {
-				if(args[i] instanceof Variable) {
-					args[i] = replacementVariable((Variable)args[i]);
-				}
-			}
-			return true;
-		} 
-		return false;
-	}
-	
-	private Variable replacementVariable(Variable var) {
-		String newName = map.get(var.name());
-		if(newName != null)
-			return new Variable(newName);
-		else
-			return var;
+	private static Map<String, Term> asVariableReplacementMap(Map<String, String> variableNamesMap) {
+		Map<String, Term> termReplacementMap = new HashMap<>();
+		for(Entry<String, String> entry : variableNamesMap.entrySet()) {
+			termReplacementMap.put(entry.getKey(), new Variable(entry.getValue()));
+		}
+		return termReplacementMap;
 	}
 
 }

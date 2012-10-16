@@ -1,11 +1,9 @@
 package org.logicobjects.adapter.methodresult.solutioncomposition;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Type;
 import java.util.List;
 
-import jpl.Query;
-
+import org.logicobjects.term.Query;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 import org.reflectiveutils.wrappertype.ArrayTypeWrapper;
 

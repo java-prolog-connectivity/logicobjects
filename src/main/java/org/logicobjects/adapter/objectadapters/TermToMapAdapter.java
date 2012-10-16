@@ -5,11 +5,10 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import jpl.Compound;
-import jpl.Term;
-
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
+import org.logicobjects.term.Compound;
+import org.logicobjects.term.Term;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.wrappertype.SingleTypeWrapper;
 
@@ -31,7 +30,7 @@ public class TermToMapAdapter extends TermToObjectAdapter<Map> {
 		//SingleTypeWrapper typeWrapper = (SingleTypeWrapper) AbstractTypeWrapper.wrap(type);
 		Type entryType = getEntryType(map);
 		//Type[] mapTypeParameters = AbstractTypeWrapper.unwrap(new GenericsUtil().findParametersInstantiations(Map.class, type));
-		for(Term termItem : LogicUtil.listToTermArray(listTerm)) {
+		for(Term termItem : LogicUtil.listToTerms(listTerm)) {
 			Entry entry = (Entry) new TermToObjectAdapter().adapt(termItem, entryType, adaptingContext);
 			map.put(entry.getKey(), entry.getValue());
 		}

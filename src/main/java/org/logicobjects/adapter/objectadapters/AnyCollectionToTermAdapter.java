@@ -4,11 +4,10 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 
-import jpl.Term;
-
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.ObjectToTermException;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
+import org.logicobjects.term.Term;
 
 
 public class AnyCollectionToTermAdapter extends ObjectToTermAdapter<Object> {

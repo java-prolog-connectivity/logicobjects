@@ -3,13 +3,12 @@ package org.logicobjects.core;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import jpl.Query;
-import jpl.Term;
-import jpl.Variable;
-
+import org.logicobjects.LogicObjects;
+import org.logicobjects.LogicObjectsPreferences;
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.methodparameters.MethodArgumentsAdapter;
 import org.logicobjects.adapter.methodresult.HasSolutionAdapter;
@@ -33,7 +32,11 @@ import org.logicobjects.annotation.method.LSolution;
 import org.logicobjects.instrumentation.LogicMethodParser;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
-import org.logicobjects.util.LogicObjectsPreferences;
+import org.logicobjects.logicengine.LogicEngineConfiguration;
+import org.logicobjects.term.Compound;
+import org.logicobjects.term.Query;
+import org.logicobjects.term.Term;
+import org.logicobjects.term.Variable;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 import org.slf4j.Logger;
@@ -51,6 +54,8 @@ import com.google.common.primitives.Primitives;
 public abstract class LogicRoutine {
 	private Logger logger = LoggerFactory.getLogger(LogicRoutine.class);
 	private Method method;
+	//protected LogicEngineConfiguration logicEngineConfig;
+	protected LogicUtil logicUtil;
 	
 	//private String queryString;
 	
@@ -61,9 +66,21 @@ public abstract class LogicRoutine {
 	//protected boolean unparsedQueryString; 
 	
 	public LogicRoutine(Method method) {
+		this.logicUtil = LogicObjects.getLogicUtilFor(method.getDeclaringClass());
 		this.method = method;
 	}
 	
+	public static LogicRoutine create(Method method) {
+		if(LogicMethod.isLogicMethod(method))
+			return new LogicMethod(method);
+		else
+			return RawLogicQuery.create(method);
+	}
+	/*
+	public static LogicRoutineFactory with(LogicEngineConfiguration logicEngineConfig) {
+		return new LogicRoutineFactory(logicEngineConfig);
+	}
+	*/
 	public static boolean isAnnotatedAsLogicRoutine(Method method) {
 		return method.isAnnotationPresent(LMethod.class) || method.isAnnotationPresent(LQuery.class) || method.isAnnotationPresent(LExpression.class);
 	}
@@ -76,12 +93,7 @@ public abstract class LogicRoutine {
 		return getAnnotation(annotation) != null;
 	}
 	
-	public static LogicRoutine create(Method method) {
-		if(LogicMethod.isLogicMethod(method))
-			return new LogicMethod(method);
-		else
-			return RawLogicQuery.create(method);
-	}
+
 
 	public Method getWrappedMethod() {
 		return method;
@@ -175,10 +187,11 @@ public abstract class LogicRoutine {
 		}
 	}
 	
-	public ObjectToTermAdapter[] getEachMethodArgumentAdapters() {
+	public List<ObjectToTermAdapter> getEachMethodArgumentAdapters() {
 		Annotation[][] parameterAnnotationsTable = getWrappedMethod().getParameterAnnotations(); //a bidimensional array with all the annotations in the method parameters
-		ObjectToTermAdapter[] allMethodArgumentAdapters = new ObjectToTermAdapter[parameterAnnotationsTable.length];
+		List<ObjectToTermAdapter> allMethodArgumentAdapters = new ArrayList<>();
 		for(int i = 0; i < parameterAnnotationsTable.length; i++) {
+			ObjectToTermAdapter methodArgumentAdapter = null;
 			Annotation[] parameterAnnotations = parameterAnnotationsTable[i];
 			for(Annotation parameterAnnotation : parameterAnnotations) {
 				LTermAdapter aLTermAdapter =  null;
@@ -188,18 +201,17 @@ public abstract class LogicRoutine {
 				if(aLTermAdapter != null) {
 					Class methodArgumentAdapterClass = LTermAdapterUtil.getAdapterClass(aLTermAdapter);
 					if(methodArgumentAdapterClass != null) {
-						ObjectToTermAdapter methodArgumentAdapter = null;
 						try {
 							methodArgumentAdapter = (ObjectToTermAdapter)methodArgumentAdapterClass.newInstance(); //the method arguments should be transformed using an instance of the MethodArgumentsAdapterClass
 						} catch(Exception e) {
 							throw new RuntimeException(e);
 						}
-						methodArgumentAdapter.setParameters(aLTermAdapter.value());
-						allMethodArgumentAdapters[i] = methodArgumentAdapter;
+						methodArgumentAdapter.setParameters(Arrays.asList(aLTermAdapter.args()));
 					}
 					
 				}
 			}
+			allMethodArgumentAdapters.set(i, methodArgumentAdapter);
 		}
 		return allMethodArgumentAdapters;
 	}
@@ -209,13 +221,13 @@ public abstract class LogicRoutine {
 	}
 	
 	
-	public Object[] adaptOriginalMethodArguments(Object[] originalMethodArguments) {
-		Object[] adaptedMethodArguments = originalMethodArguments;
-		ObjectToTermAdapter[] methodArgumentAdapters = getEachMethodArgumentAdapters();
-		for(int i = 0; i <  methodArgumentAdapters.length; i++) {
-			ObjectToTermAdapter methodArgumentAdapter = methodArgumentAdapters[i];
+	public List adaptOriginalMethodArguments(List originalMethodArguments) {
+		List adaptedMethodArguments = originalMethodArguments;
+		List<ObjectToTermAdapter> methodArgumentAdapters = getEachMethodArgumentAdapters();
+		for(int i = 0; i <  methodArgumentAdapters.size(); i++) {
+			ObjectToTermAdapter methodArgumentAdapter = methodArgumentAdapters.get(i);
 			if(methodArgumentAdapter != null) {
-				adaptedMethodArguments[i] = methodArgumentAdapter.adapt(adaptedMethodArguments[i]);
+				adaptedMethodArguments.set(i, methodArgumentAdapter.adapt(adaptedMethodArguments.get(i)));
 			}
 		}
 	
@@ -234,8 +246,8 @@ public abstract class LogicRoutine {
 	}
 	*/
 
-	public ParsedLogicMethod parse(Object targetObject, Object[] originalMethodArguments) {
-		Object[] adaptedMethodArguments = adaptOriginalMethodArguments(originalMethodArguments);
+	public ParsedLogicMethod parse(Object targetObject, List originalMethodArguments) {
+		List adaptedMethodArguments = adaptOriginalMethodArguments(originalMethodArguments);
 		//ParsingData parsedData = AbstractLogicMethodParser.create(this).parse().parsedData(targetObject, adaptedMethodArguments);
 		
 		ParsedLogicMethod parsedLogicMethod = LogicMethodParser.create(this).parse().parsedLogicMethod(targetObject, adaptedMethodArguments);
@@ -263,13 +275,12 @@ public abstract class LogicRoutine {
 		if(aLSolution != null) {
 			String solutionString = parsedLogicMethod.getParsedData().getSolutionString();
 			if(solutionString != null && !solutionString.isEmpty()) {
-				LogicEngine engine = LogicEngine.getDefault();
-				eachSolutionTerm = engine.textToTerm(solutionString);
+				eachSolutionTerm = logicUtil.asTerm(solutionString);
 			} 
 		}
 		if(eachSolutionTerm == null) {
-			Term goal = parsedLogicMethod.asQuery().goal();
-			if(LogicUtil.containVariable(goal, LogicObjectsPreferences.IMPLICIT_RETURN_VARIABLE))
+			Term goal = parsedLogicMethod.asGoal();
+			if(goal.hasVariable(LogicObjectsPreferences.IMPLICIT_RETURN_VARIABLE))
 				eachSolutionTerm = new Variable(LogicObjectsPreferences.IMPLICIT_RETURN_VARIABLE);
 		}
 		if(eachSolutionTerm == null)
@@ -284,7 +295,7 @@ public abstract class LogicRoutine {
 	 * @return
 	 */
 	public Term asTerm(ParsedLogicMethod parsedLogicMethod) {
-		return LogicUtil.asTerm(parsedLogicMethod.getComputedMethodName(), ArrayToTermAdapter.objectsAsTerms(parsedLogicMethod.getComputedMethodArguments()));
+		return new Compound(parsedLogicMethod.getComputedMethodName(), new ObjectToTermAdapter().adaptObjects(parsedLogicMethod.getComputedMethodArguments()));
 	}
 	
 	
@@ -295,16 +306,15 @@ public abstract class LogicRoutine {
 	}
 	
 	protected void configureParsedLogicMethodArguments(ParsedLogicMethod parsedLogicMethod) {
-		Object[] arguments = null;
+		List arguments = null;
 		
 		//we convert the string representation of every argument in a term
 		if(hasLogicMethodArguments()) {
-			LogicEngine engine = LogicEngine.getDefault();
 			List<Term> newTermArgs = new ArrayList<Term>();
 			for(Object stringTerm : parsedLogicMethod.getParsedData().getMethodArguments()) {
-				newTermArgs.add(engine.textToTerm(stringTerm.toString()));
+				newTermArgs.add(logicUtil.asTerm(stringTerm.toString()));
 			}
-			arguments = newTermArgs.toArray(new Term[] {});
+			arguments = newTermArgs;
 		} else {
 			arguments = parsedLogicMethod.getOriginalMethodArguments();
 		}
@@ -340,9 +350,9 @@ public abstract class LogicRoutine {
 	 * 
 	 * @return the method arguments as specified in the annotation
 	 */
-	public abstract String[] getLogicMethodArguments();
+	public abstract List<String> getLogicMethodArguments();
 	
-	public abstract Query asQuery(ParsedLogicMethod parsedLogicMethod);
+	public abstract Term asGoal(ParsedLogicMethod parsedLogicMethod);
 	public abstract String customMethodName();
 	
 }

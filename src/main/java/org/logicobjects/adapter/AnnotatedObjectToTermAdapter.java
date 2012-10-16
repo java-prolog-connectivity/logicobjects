@@ -1,6 +1,8 @@
 package org.logicobjects.adapter;
 
-import jpl.Term;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.logicobjects.adapter.adaptingcontext.AbstractLogicObjectDescriptor;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
@@ -8,6 +10,7 @@ import org.logicobjects.adapter.adaptingcontext.AnnotatedElementAdaptationContex
 import org.logicobjects.adapter.adaptingcontext.BeanPropertyAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.ClassAdaptationContext;
 import org.logicobjects.core.LogicObject;
+import org.logicobjects.term.Term;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.BeansUtil;
 
@@ -29,13 +32,11 @@ public class AnnotatedObjectToTermAdapter<From> extends Adapter<From, Term> {
 		} else {
 			annotatedContext = new ClassAdaptationContext(object.getClass()); //the current context is null, then create default context
 		}
-		if(annotatedContext!=null) {
-			if(annotatedContext.hasObjectToTermAdapter()) { //first check if there is an explicit adapter, in the current implementation, an Adapter annotation overrides any method invoker description
-				return adaptToTermWithAdapter(object, annotatedContext);
-			}
-			else if(annotatedContext.hasLogicObjectDescription()) { 
-				return adaptToTermFromDescription(object, annotatedContext);
-			}
+		if(annotatedContext.hasObjectToTermAdapter()) { //first check if there is an explicit adapter, in the current implementation, an Adapter annotation overrides any method invoker description
+			return adaptToTermWithAdapter(object, annotatedContext);
+		}
+		else if(annotatedContext.hasLogicObjectDescription()) { 
+			return adaptToTermFromDescription(object, annotatedContext);
 		}
 		throw new IncompatibleAdapterException(this.getClass(), object);
 	}
@@ -51,13 +52,21 @@ public class AnnotatedObjectToTermAdapter<From> extends Adapter<From, Term> {
 		if(logicObjectName.isEmpty())
 			logicObjectName = infereLogicObjectName(annotatedContext);
 		
-		Term[] arguments;
+		
+
+		List<Term> arguments;
 		String argsListPropertyName = logicObjectDescription.argsList();
 		if(argsListPropertyName != null && !argsListPropertyName.isEmpty()) {
 			BeanPropertyAdaptationContext adaptationContext = new BeanPropertyAdaptationContext(object.getClass(), argsListPropertyName);
-			Object[] objects = (Object[]) BeansUtil.getProperty(object, argsListPropertyName, adaptationContext.getGuidingClass());
-			//Field field = ReflectionUtil.getField(object, argsList);
-			arguments = new ObjectToTermAdapter().adaptObjects(objects, adaptationContext);
+			Object argsListObject = BeansUtil.getProperty(object, argsListPropertyName, adaptationContext.getGuidingClass());
+			List argsList = null;
+			if(List.class.isAssignableFrom(argsListObject.getClass()))
+				argsList = (List) argsListObject;
+			else if(Object[].class.isAssignableFrom(argsListObject.getClass()))
+				argsList = Arrays.asList((Object[])argsListObject);
+			else
+				throw new RuntimeException("Property " + argsListPropertyName + " is neither a list nor an array");
+			arguments = new ObjectToTermAdapter().adaptObjects(argsList, adaptationContext);
 		} else {
 			arguments = LogicObject.propertiesAsTerms(object, logicObjectDescription.args());
 		}
@@ -65,7 +74,13 @@ public class AnnotatedObjectToTermAdapter<From> extends Adapter<From, Term> {
 	}
 	
 	
-	
+	public static void main(String[] args) {
+		Object[] o = new Object[2];
+		String[] s = new String[2];
+		o = s;
+		o[0] = new Object();
+
+	}
 
 	/**
 	 * In case the name is not explicitly specified (e.g., with an annotation), it will have to be inferred

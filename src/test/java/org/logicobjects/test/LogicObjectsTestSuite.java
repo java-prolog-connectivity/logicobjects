@@ -9,7 +9,6 @@ import org.reflectiveutils.test.ReflectiveUtilsTestSuite;
 @Suite.SuiteClasses({
 	ReflectiveUtilsTestSuite.class, 
 	TestParsingExpressions.class, 
-	TestLogicObjectsUtil.class, 
 	TestMutatorsAndAccessorsGeneration.class, 
 	TestMutatorsAndAccessorsGeneration2.class,
 	TestLogicExpressions.class, 

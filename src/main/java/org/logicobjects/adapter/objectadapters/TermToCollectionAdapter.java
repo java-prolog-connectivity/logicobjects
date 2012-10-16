@@ -1,13 +1,12 @@
 package org.logicobjects.adapter.objectadapters;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
-
-import jpl.Term;
+import java.util.List;
 
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
+import org.logicobjects.term.Term;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.GenericsUtil;
 
@@ -33,8 +32,8 @@ public class TermToCollectionAdapter extends TermToObjectAdapter<Collection> {
 		 * However, we need a Collection instance in order to be able to fill in its elements
 		 * (there are not "add" methods in an Iterable)
 		 */
-		Term[] terms = LogicUtil.listToTermArray(listTerm);
-		if(terms.length > 0) {
+		List<Term> terms = LogicUtil.listToTerms(listTerm);
+		if(terms.size() > 0) {
 			Type[] collectionTypeParameters = new GenericsUtil().findAncestorTypeParameters(Iterable.class, type);
 			//Type[] typeParameters = typeWrapper.getParameters();
 			for(Term termItem : terms) {

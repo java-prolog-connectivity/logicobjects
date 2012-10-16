@@ -1,14 +1,13 @@
 package org.logicobjects.adapter.objectadapters;
 
-import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
-
-import jpl.Compound;
-import jpl.Term;
+import org.logicobjects.term.Compound;
+import org.logicobjects.term.Term;
 
 public class MapToTermAdapter extends ObjectToTermAdapter<Map> {
 
@@ -20,7 +19,7 @@ public class MapToTermAdapter extends ObjectToTermAdapter<Map> {
 	public static class EntryToTermAdapter extends ObjectToTermAdapter<Entry> {
 		@Override
 		public Term adapt(Entry entry, AdaptationContext adaptingContext) {
-			return new Compound("=", new Term[] {new ObjectToTermAdapter().adapt(entry.getKey(), adaptingContext), new ObjectToTermAdapter().adapt(entry.getValue(), adaptingContext)});
+			return new Compound("=", Arrays.asList(new ObjectToTermAdapter().adapt(entry.getKey(), adaptingContext), new ObjectToTermAdapter().adapt(entry.getValue(), adaptingContext)));
 		}
 	}
 	

@@ -1,8 +1,8 @@
 package org.logicobjects.core;
 
 import java.lang.reflect.Method;
-
-import jpl.Query;
+import java.util.Arrays;
+import java.util.List;
 
 import org.logicobjects.adapter.LogicObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.MethodInvokerAdaptationContext;
@@ -12,6 +12,7 @@ import org.logicobjects.annotation.method.LMethod.LMethodUtil;
 import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
+import org.logicobjects.term.Term;
 
 public class LogicMethod extends LogicRoutine {
 
@@ -34,18 +35,19 @@ public class LogicMethod extends LogicRoutine {
 	 * @return the method arguments as specified in the annotation
 	 */
 	@Override
-	public String[] getLogicMethodArguments() {
+	public List<String> getLogicMethodArguments() {
 		if(aLMethod != null)
-			return LMethodUtil.getArgs(aLMethod);
+			return Arrays.asList(LMethodUtil.getArgs(aLMethod));
 		return null;
 	}
 
 	@Override
-	public Query asQuery(ParsedLogicMethod parsedMethodData) {
+	public Term asGoal(ParsedLogicMethod parsedMethodData) {
 		Object targetObject = parsedMethodData.getTargetObject();
 		LogicObject lo = new LogicObjectAdapter().adapt(targetObject, new MethodInvokerAdaptationContext(targetObject.getClass()));
 		String logicMethodName = parsedMethodData.getComputedMethodName();
-		return lo.asQuery(logicMethodName, parsedMethodData.getComputedMethodArguments());
+		Term goal = lo.asGoal(logicMethodName, parsedMethodData.getComputedMethodArguments());
+		return goal;
 	}
 
 

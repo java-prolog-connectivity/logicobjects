@@ -4,12 +4,10 @@ import static junit.framework.Assert.assertTrue;
 
 import java.util.List;
 
-import jpl.Atom;
-import jpl.Query;
-import jpl.Term;
-
 import org.junit.Test;
-import org.logicobjects.core.LogicEngine;
+import org.logicobjects.term.Atom;
+import org.logicobjects.term.Query;
+import org.logicobjects.term.Term;
 
 /**
  * This class test some Logtalk functionality (to be completed)
@@ -26,8 +24,7 @@ public class TestLogtalk extends LocalLogicTest {
 	
 	@Test
 	public void t() {
-		Atom atomOp = new Atom("::");
-		Query query = new Query("Op='?', current_op(_, Type, Op), atom_chars(Type, Chars), Chars=[_, f, _]", new Term[] {atomOp});
+		Query query = logicUtil.createQuery("Op='::', current_op(_, Type, Op), atom_chars(Type, Chars), Chars=[_, f, _]");
 		assertTrue(query.hasSolution());
 		new Thread() {
 			@Override
@@ -46,13 +43,13 @@ public class TestLogtalk extends LocalLogicTest {
 	
 	@Test
 	public void testLogtalkOperators() {
-		assertTrue(LogicEngine.getDefault().isBinaryOperator("::"));
-		assertTrue(LogicEngine.getDefault().isUnaryOperator("::"));
+		assertTrue(logicUtil.isBinaryOperator("::"));
+		assertTrue(logicUtil.isUnaryOperator("::"));
 	}
 
 	@Test
 	public void testCurrentObjects() {
-		List<Term> currentObjects = LogicEngine.getDefault().currentObjects();
+		List<Term> currentObjects = logicUtil.currentLogtalkObjects();
 		assertTrue(currentObjects.contains(new Atom("logtalk")));
 	}
 	

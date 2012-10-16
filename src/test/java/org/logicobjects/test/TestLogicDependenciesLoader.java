@@ -9,6 +9,6 @@ public class TestLogicDependenciesLoader {
 	
 	@Test
 	public void test1() {
-		LogicDependenciesLoader dependenciesLoader = new LogicDependenciesLoader();
+		//LogicDependenciesLoader dependenciesLoader = new LogicDependenciesLoader(...);
 	}
 }

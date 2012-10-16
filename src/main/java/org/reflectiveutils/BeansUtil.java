@@ -335,14 +335,14 @@ public class BeansUtil {
 		return getProperty(target, propertyName, null);
 	}
 	
-	public static Object[] getProperties(Object target, String[] propertiesNames, Class definingClass) {
+	public static List getProperties(Object target, List<String> propertiesNames, Class definingClass) {
 		List propertiesValues = new ArrayList<>();
 		for(String propertyName: propertiesNames)
 			propertiesValues.add(getProperty(target, propertyName, definingClass));
-		return propertiesValues.toArray();
+		return propertiesValues;
 	}
 	
-	public static Object[] getProperties(Object target, String[] propertiesNames) {
+	public static List getProperties(Object target, List<String> propertiesNames) {
 		return getProperties(target, propertiesNames, null);
 	}
 	
@@ -365,12 +365,12 @@ public class BeansUtil {
 		setProperty(target, propertyName, value, null);
 	}
 	
-	public static void setProperties(Object target, String[] propertiesNames, Object[] propertiesValues, Class definingClass) {
-		for(int i=0; i<propertiesNames.length; i++)
-			setProperty(target, propertiesNames[i], propertiesValues[i], definingClass);
+	public static void setProperties(Object target, List<String> propertiesNames, List propertiesValues, Class definingClass) {
+		for(int i=0; i<propertiesNames.size(); i++)
+			setProperty(target, propertiesNames.get(i), propertiesValues.get(i), definingClass);
 	}
 	
-	public static void setProperties(Object target, String[] propertiesNames, Object[] propertiesValues) {
+	public static void setProperties(Object target, List<String> propertiesNames, List propertiesValues) {
 		setProperties(target, propertiesNames, propertiesValues, null);
 	}
 }

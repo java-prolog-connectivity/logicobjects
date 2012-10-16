@@ -1,43 +1,21 @@
 package org.logicobjects.util.termvisitor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-import jpl.Compound;
-import jpl.Term;
-import jpl.Variable;
+import org.logicobjects.term.Compound;
+import org.logicobjects.term.Term;
+import org.logicobjects.term.Variable;
 
 /**
  * Replace variables for a given term
  */
-public class ReplaceVariableVisitor extends TermVisitor {
+public class ReplaceVariableVisitor extends TermTransformerVisitor {
 	Map<String, Term> map;
-	
-	@Override
-	public Term visit(Term term) {
-		if(term instanceof Variable) {
-			return replacementTerm((Variable)term);
-		} else
-			return (Term) super.visit(term);
-	}
 	
 	public ReplaceVariableVisitor(Map<String, Term> map) {
 		this.map = map;
-	}
-	
-	@Override
-	protected boolean doVisit(Term term) {
-		if(term instanceof Compound) {
-			Compound compound = (Compound)term;
-			Term[] args = compound.args();
-			
-			for(int i = 0; i<args.length; i++) {
-				if(args[i] instanceof Variable) {
-					args[i] = replacementTerm((Variable)args[i]);	
-				}
-			}
-			return true;
-		} else
-			return false;
 	}
 
 	private Term replacementTerm(Variable var) {
@@ -47,4 +25,27 @@ public class ReplaceVariableVisitor extends TermVisitor {
 		else
 			return var;
 	}
+
+	@Override
+	protected Term transform(Term term) {
+		Term transformed;
+		if(term.isCompound()) {
+			Compound compound = (Compound) term;
+			transformed = new Compound(compound.name(), transform(compound.args()));
+		} else if(term.isVariable()) {
+			transformed = replacementTerm((Variable)term);
+		} else {
+			transformed = term;
+		}
+		return transformed;
+	}
+	
+	private List<Term> transform(List<Term> terms) {
+		List<Term> transformedTerms = new ArrayList<>();
+		for(Term term : terms) {
+			transformedTerms.add(transform(term));
+		}
+		return transformedTerms;
+	}
+
 }

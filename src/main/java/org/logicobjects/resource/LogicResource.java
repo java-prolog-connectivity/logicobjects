@@ -52,9 +52,6 @@ public abstract class LogicResource { //implements ITermObject {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
 	
 	@Override
 	public String toString() {return name;}

@@ -5,8 +5,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,13 +16,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import jpl.Atom;
-import jpl.Compound;
-import jpl.Term;
-import jpl.Variable;
-
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
-import org.logicobjects.adapter.adaptingcontext.ClassAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.FieldAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.MethodAdaptationContext;
 import org.logicobjects.adapter.objectadapters.TermToArrayAdapter;
@@ -29,9 +25,10 @@ import org.logicobjects.adapter.objectadapters.TermToCollectionAdapter;
 import org.logicobjects.adapter.objectadapters.TermToMapAdapter;
 import org.logicobjects.adapter.objectadapters.TermToMapAdapter.TermToEntryAdapter;
 import org.logicobjects.adapter.objectadapters.TermToXMLGregorianCalendarAdapter;
-import org.logicobjects.core.LogicObjectClass;
-import org.logicobjects.core.LogicEngine;
-import org.logicobjects.core.LogicObjectFactory;
+import org.logicobjects.logicengine.LogicEngine;
+import org.logicobjects.term.Atom;
+import org.logicobjects.term.Compound;
+import org.logicobjects.term.Term;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.GenericsUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
@@ -49,7 +46,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 
 	private LogicEngine engine;
 	public TermToObjectAdapter() {
-		engine = LogicEngine.getDefault();
+		//engine = LogicEngine.getDefault();
 	}
 	
 	/*
@@ -71,23 +68,28 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 		return adapt(term, field.getGenericType(), new FieldAdaptationContext(field));
 	}
 	
-	public To[] adaptField(Term[] term, Field field) {
-		return adaptTerms(term, field.getGenericType(), new FieldAdaptationContext(field));
+	public List<To> adaptField(List<Term> terms, Field field) {
+		return adaptTerms(terms, field.getGenericType(), new FieldAdaptationContext(field));
 	}
 	
 	public To adaptMethod(Term term, Method method) {
 		return adapt(term, method.getGenericReturnType(), new MethodAdaptationContext(method));
 	}
 	
-	public To[] adaptMethod(Term term[], Method method) {
-		return adaptTerms(term, method.getGenericReturnType(), new MethodAdaptationContext(method));
+	public List<To> adaptMethod(List<Term> terms, Method method) {
+		return adaptTerms(terms, method.getGenericReturnType(), new MethodAdaptationContext(method));
 	}
 	
-	public To[] adaptTerms(Term[] terms, Type type, AdaptationContext adaptingContext) {
-		Object[] objects = new Object[terms.length];
-		for(int i = 0; i<terms.length; i++)
-			objects[i] = adapt(terms[i], type, adaptingContext);
-		return (To[]) objects;
+	public List<To> adaptTerms(List<Term> terms) {
+		return adaptTerms(terms, Object.class, null);
+	}
+	
+	public List<To> adaptTerms(List<Term> terms, Type type, AdaptationContext adaptingContext) {
+		List<To> objects = new ArrayList<>();
+		for(Term term : terms) {
+			objects.add(adapt(term, type, adaptingContext));
+		}
+		return objects;
 	}
 	
 	public To adapt(Term term, Type type, AdaptationContext adaptingContext) {
@@ -101,14 +103,14 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 			//do nothing, these exceptions mean the adapter recognizes it cannot transform the term to an object, but no error has been produced
 		} catch(RuntimeException e) {
 			errorMappingFromAnnotations = true;
-			if(!engine.isList(term)) //TODO verify this...
+			if(!term.isList()) //TODO verify this...
 				throw e;
 		}
 		if(!errorMappingFromAnnotations) {
 			try {
 				if( typeWrapper instanceof SingleTypeWrapper ) { //the type is not an array and not an erased type (but still it can be a collection)
 					SingleTypeWrapper singleTypeWrapper = SingleTypeWrapper.class.cast(typeWrapper);
-					if(term instanceof Variable && !Term.class.isAssignableFrom(singleTypeWrapper.asClass())) {//found a variable, and the method is not explicitly returning terms
+					if(term.isVariable() && !Term.class.isAssignableFrom(singleTypeWrapper.asClass())) {//found a variable, and the method is not explicitly returning terms
 						logger.warn("Attempting to transform the variable term " + term + " to an object of class " + singleTypeWrapper.asClass() + ". Transformed as null.");
 						return null;
 					}
@@ -122,27 +124,27 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 					if(XMLGregorianCalendar.class.isAssignableFrom(singleTypeWrapper.asClass())) {
 						return (To)new TermToXMLGregorianCalendarAdapter().adapt(term);
 					}
-					if(Number.class.isAssignableFrom(Primitives.wrap(singleTypeWrapper.asClass()))  ||  LogicUtil.isNumber(term)) { //either the required type is a number or the term is a number
+					if(Number.class.isAssignableFrom(Primitives.wrap(singleTypeWrapper.asClass()))  ||  term.isNumber()) { //either the required type is a number or the term is a number
 						if( Number.class.isAssignableFrom(Primitives.wrap(singleTypeWrapper.asClass())) ) { //the required type is a number
-							if(term.isAtom() || LogicUtil.isNumber(term)) { //check if indeed the term can be converted to a number
+							if(term.isAtom() || term.isNumber()) { //check if indeed the term can be converted to a number
 								if(singleTypeWrapper.asClass().isPrimitive() || Primitives.isWrapperType(singleTypeWrapper.asClass())) {
 									return (To) valueOf(singleTypeWrapper.asClass(), LogicUtil.toString(term));
 								} else { //try to convert to a numeric type that is not a primitive nor a wrapper type
 									if(singleTypeWrapper.asClass().equals(BigInteger.class))
-										return (To) BigInteger.valueOf(LogicUtil.asLong(term));
+										return (To) BigInteger.valueOf(LogicUtil.toLong(term));
 									else if(singleTypeWrapper.asClass().equals(AtomicInteger.class))
-										return (To) new AtomicInteger(LogicUtil.asInt(term));
+										return (To) new AtomicInteger(LogicUtil.toInt(term));
 									else if(singleTypeWrapper.asClass().equals(AtomicLong.class))
-										return (To) new AtomicLong((long)LogicUtil.asLong(term));
+										return (To) new AtomicLong((long)LogicUtil.toLong(term));
 									else if(singleTypeWrapper.asClass().equals(BigDecimal.class))
-										return (To) BigDecimal.valueOf(LogicUtil.asDouble(term));
+										return (To) BigDecimal.valueOf(LogicUtil.toDouble(term));
 									else
 										throw new RuntimeException(); //it should never arrive here !
 								}
 							}
 						} else {
 							if(singleTypeWrapper.asClass().equals(Object.class)) //if we arrive here the term should be a number (jpl.Integer or jpl.Float)
-								return (To) LogicUtil.asNumber(term);
+								return (To) LogicUtil.toNumber(term);
 						}
 					} else if (Primitives.isWrapperType( Primitives.wrap(singleTypeWrapper.asClass()))) { //checks if the class corresponds to a primitive or its wrapper. e.g., boolean, Boolean (at this point it is not a number)
 						if(Primitives.wrap(singleTypeWrapper.asClass()).equals(Character.class)) {
@@ -163,7 +165,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 							return (To) term.toString();
 					}
 					/*
-					if(Term.class.isAssignableFrom(singleTypeWrapper.asClass())) {
+					if(LTerm.class.isAssignableFrom(singleTypeWrapper.asClass())) {
 						if(singleTypeWrapper.asClass().isAssignableFrom(term.getClass() ))
 							return (To) term;
 					}*/
@@ -175,7 +177,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 				throw new RuntimeException(e);
 			}
 		}
-		if(engine.isList(term)) {
+		if(term.isList()) {
 			return adaptListTerm(term, type, adaptingContext);
 		}
 		throw new TermToObjectException(term, type);  //no idea how to adapt the term
@@ -216,7 +218,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 	
 
 /*
-	public static Object asObject(Term term, LObjectAdapter lObjectAdapterAnnotation) {
+	public static Object asObject(LTerm term, LObjectAdapter lObjectAdapterAnnotation) {
 		try {
 			TermToObjectAdapter objectAdapter = (TermToObjectAdapter)lObjectAdapterAnnotation.adapter().newInstance();
 			objectAdapter.setParameters(lObjectAdapterAnnotation.args());
@@ -232,7 +234,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 	 * The annotation is not necessarily found in the instantiating class, but in a super class
 	 */
 	/*
-	public Object asLogicObject(Term term, Type type, Class lObjectClass) {
+	public Object asLogicObject(LTerm term, Type type, Class lObjectClass) {
 		SingleTypeWrapper typeWrapper = (SingleTypeWrapper) AbstractTypeWrapper.wrap(type);
 		LObjectAdapter lObjectAdapterAnnotation = null;
 		try {

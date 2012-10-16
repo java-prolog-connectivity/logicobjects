@@ -27,12 +27,13 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jpl.Term;
-
+import org.logicobjects.LogicObjects;
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.core.LogicRoutine;
-import org.logicobjects.core.LogicEngine;
-import org.logicobjects.core.LogicObject;
+import org.logicobjects.logicengine.LogicEngine;
+import org.logicobjects.logicengine.LogicEngineConfiguration;
+import org.logicobjects.term.Term;
+import org.logicobjects.util.LogicUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,6 +89,8 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 	private List<String> expressions;
 	private Map<String, String> expressionsReplacementMap;
 
+	//protected LogicEngineConfiguration logicEngineConfig;
+	protected LogicUtil logicUtil;
 	
 	//TODO the idea of the factory is to be able to look in a cache if a method has already been parsed, to do some day when having time ...
 	public static LogicMethodParser create(Method method) {
@@ -104,13 +107,14 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 	
 	LogicMethodParser(LM logicMethod) {
 		this.logicMethod = logicMethod;
+		this.logicUtil = LogicObjects.getLogicUtilFor(logicMethod.getWrappedMethod().getDeclaringClass());
 	}
 
 	@Override
 	public LogicMethodParser parse() {
 		LogicMethodParsingData unparsedData = logicMethod.getDataToParse(); //the data to parse depends on the kind of logic method that was instantiated in a previous step
 		String unparsedQuery = asNotNullString(unparsedData.getQueryString());
-		String unparsedLogicArgumentsString = concatenateTokens(asNotNullStringArray(unparsedData.getMethodArguments()));
+		String unparsedLogicArgumentsString = concatenateTokens(asNotNullStringList(unparsedData.getMethodArguments()));
 		String unparsedSolution = asNotNullString(unparsedData.getSolutionString());
 		allLogicStrings = QUERY_TAG + unparsedQuery + METHOD_ARGUMENTS_TAG + unparsedLogicArgumentsString + RETURN_TAG + unparsedSolution;
 		expressions = getJavaExpressions(allLogicStrings); //gather all java expressions
@@ -147,7 +151,7 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 	}
 
 
-	public ParsedLogicMethod parsedLogicMethod(Object targetObject, Object[] arguments) {
+	public ParsedLogicMethod parsedLogicMethod(Object targetObject, List arguments) {
 		LogicMethodParsingData parsedData = parsedData(targetObject, arguments);
 		return new ParsedLogicMethod(getLogicMethod(), targetObject, arguments, parsedData);
 	}
@@ -158,7 +162,7 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 	 * @param oldArguments
 	 * @return
 	 */
-	private LogicMethodParsingData parsedData(Object targetObject, Object[] oldArguments) {
+	private LogicMethodParsingData parsedData(Object targetObject, List oldArguments) {
 		String allLogicStringsProcessed = replaceSymbolsAndExpressions(allLogicStrings, foundSymbols, expressionsReplacementMap, targetObject, oldArguments);
 		LogicMethodParsingData parsedData = decomposeLogicString(allLogicStringsProcessed);
 		return parsedData;
@@ -425,7 +429,7 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 	 * @param oldArguments the java method params
 	 * @return
 	 */
-	private String replaceSymbolsAndExpressions(String logicString, List<String> setSymbols, Map<String, String> expressionsMap, Object targetObject, Object[] oldArguments) {
+	private String replaceSymbolsAndExpressions(String logicString, List<String> setSymbols, Map<String, String> expressionsMap, Object targetObject, List oldArguments) {
 		List<String> expressions = new ArrayList<String>(expressionsMap.keySet());
 		logicString = hideExpressions(logicString, expressions);
 		
@@ -463,24 +467,23 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 	 * @param args the java method parameters
 	 * @return
 	 */
-	private Map<String, String> symbolsReplacementMap(Object targetObject, Object[] args, List<String> symbols) {
+	private Map<String, String> symbolsReplacementMap(Object targetObject, List args, List<String> symbols) {
 		Map<String, String> dictionary = propertiesSymbolsReplacementMap(targetObject, symbols);
-		if(args.length > 0) {
-			LogicEngine engine = LogicEngine.getDefault();
+		if(!args.isEmpty()) {
 			List<Term> listTerms = new ArrayList<Term>();
 			boolean allArgumentsRequired = symbols.contains(LogicMethodParser.ALL_ARGUMENTS_SYMBOL);
-			for(int i = 0; i<args.length; i++) {
+			for(int i = 0; i<args.size(); i++) {
 				String paramName = LogicMethodParser.methodArgumentSymbol(i+1);
 				if(allArgumentsRequired || symbols.contains(paramName)) {
-					Term termArgument = ObjectToTermAdapter.asTerm(args[i]);
-					if(engine.nonAnonymousVariablesNames(termArgument).size() > 0)
+					Term termArgument = ObjectToTermAdapter.asTerm(args.get(i));
+					if(!termArgument.nonAnonymousVariablesNames().isEmpty())
 						throw new RuntimeException("Argument objects cannot contain free non-anonymous variables: "+termArgument);//in order to avoid name collisions
 					dictionary.put(paramName, termArgument.toString());
 					listTerms.add(termArgument);
 				}
 			}
 			if(allArgumentsRequired)
-				dictionary.put(LogicMethodParser.ALL_ARGUMENTS_SYMBOL, engine.termListToTextSequence(listTerms));
+				dictionary.put(LogicMethodParser.ALL_ARGUMENTS_SYMBOL, logicUtil.termsToTextSequence(listTerms));
 		}
 		if(symbols.contains(LogicMethodParser.THIS_METHOD_ARGUMENT_SYMBOL)) { //the symbol $0 was found
 			String thisAsTermString = dictionary.get(THIS_INSTANCE_PROPERTY_SYMBOL); //find if the synonym @this has already been translated

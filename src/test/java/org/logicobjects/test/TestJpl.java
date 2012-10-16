@@ -9,9 +9,9 @@ import jpl.Util;
 import jpl.Variable;
 
 import org.junit.Test;
-import org.logicobjects.core.LogicEngine;
+import org.logicobjects.logicengine.LogicEngine;
 import org.logicobjects.logicengine.jpl.DefaultJplConfiguration;
-import org.logicobjects.util.LogicUtil;
+import org.logicobjects.test.configuration.TestSuiteJPLConfiguration;
 
 /**
  * This class test some Prolog functionality (to be completed)
@@ -58,7 +58,7 @@ public class TestJpl extends LocalLogicTest {
 	
 	@Test
 	public void testVersion() {
-		System.out.println("PROLOG DIALECT: "+LogicEngine.getDefault().prologDialect());
+		System.out.println("PROLOG DIALECT: "+logicEngineConfig.getEngine().prologDialect());
 	}
 	
 
@@ -113,13 +113,6 @@ public class TestJpl extends LocalLogicTest {
 	}
 	*/
 	
-	@Test
-	public void testTermToText() {
-		Term argTerm = new Variable("Var1");
-		Compound term = new Compound("::", new Term[] {new Atom("list"), new Compound("member", new Term[] {argTerm, Util.termArrayToList(new Term[] {new Atom("1"), new Atom("2")})})});
 
-		String text = LogicEngine.getDefault().termToText(term);
-		System.out.println("Term as text: " + text);
-	}
 
 }

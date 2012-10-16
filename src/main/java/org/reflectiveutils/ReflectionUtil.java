@@ -1,9 +1,11 @@
 package org.reflectiveutils;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import org.logicobjects.lib.examples.metro.Line;
 import org.reflectiveutils.visitor.FindFirstTypeVisitor;
 import org.reflectiveutils.visitor.TypeVisitor;
 import org.reflectiveutils.visitor.TypeVisitor.InterfaceMode;
+import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
 public class ReflectionUtil {
 
@@ -294,4 +297,9 @@ public class ReflectionUtil {
 		finderVisitor.visit(candidateClass);
 		return finderVisitor.getFoundType();
 	}
+	
+	public static Object createArray(Type type, int length) {
+		return Array.newInstance(AbstractTypeWrapper.wrap(type).asClass(), length);
+	}
+
 }

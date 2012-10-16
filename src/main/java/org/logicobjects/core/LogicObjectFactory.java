@@ -2,20 +2,15 @@ package org.logicobjects.core;
 
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import javassist.ClassPool;
-import jpl.Term;
 
-import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
-import org.logicobjects.context.AbstractLContext;
-import org.logicobjects.context.GlobalLContext;
+import org.logicobjects.LogicObjects;
 import org.logicobjects.instrumentation.LogicObjectInstrumentation;
+import org.logicobjects.logicengine.LogicEngineConfiguration;
 import org.reflections.util.ClasspathHelper;
 import org.reflectiveutils.BeansUtil;
 import org.slf4j.Logger;
@@ -25,70 +20,32 @@ public class LogicObjectFactory {
 	
 	private static Logger logger = LoggerFactory.getLogger(LogicObjectFactory.class);
 	
-	private static LogicObjectFactory factory;
 	
-	private ResourceManager resourceManager;
+	
+	
 	private LogicDependenciesLoader logicDependenciesLoader;
-	
-	public static LogicObjectFactory getDefault() {
-		if(factory == null)
-			factory = new LogicObjectFactory();
-		return factory;
-	}
-
-	
-	private AbstractLContext context;
+	private ResourceManager resourceManager;
 	private ClassPool classPool;
+
+
 	
 	/**
 	 * This class should not be directly instantiated
 	 */
-	private LogicObjectFactory() {
-		String tmpDir = LogicEngine.getDefault().getPreferences().getTmpDirectory();
+	public LogicObjectFactory(ClassPool classPool) {
+		this.classPool = classPool;
+		String tmpDir = LogicObjects.getPreferences().getTmpDirectory();
 		resourceManager = new ResourceManager(tmpDir);
-		logicDependenciesLoader = new LogicDependenciesLoader();
+		logicDependenciesLoader = new LogicDependenciesLoader(resourceManager);
+		
 	}
 
+/*
 	public ResourceManager getResourceManager(){
 		return resourceManager;
 	}
-
-	public ClassPool getClassPool() {
-		if(classPool == null)
-			classPool = ClassPool.getDefault();
-		return classPool;
-	}
-
-	public void setClassPool(ClassPool classPool) {
-		this.classPool = classPool;
-	}
-
-	private AbstractLContext getContext() {
-		if(context == null) {
-			context = new GlobalLContext();
-		}
-		return context;
-	}
-
-	public void setContext(AbstractLContext context) {
-		this.context = context;
-	}
+*/
 	
-	public void addSearchFilter(String packageName) {
-		getContext().addPackage(packageName);
-	}
-
-	public void addSearchUrl(URL url) {
-		getContext().addSearchUrls(url);
-	}
-
-	public Class findLogicClass(Term term) {
-		return getContext().findLogicClass(term);
-	}
-	
-	public Set<Class<? extends WrapperAdapter>> getWrapperAdapters() {
-		return getContext().getWrapperAdapters();
-	}
 	/*
 	public <T> T create(Class<T> c, Term term) {
 		return (T) new TermToObjectAdapter().adapt(term, c);
@@ -104,7 +61,7 @@ public class LogicObjectFactory {
 			throw new RuntimeException("The context object cannot be an instance of " + Class.class.getName());
 		Class instantiatingClass = null;
 		//if(clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
-			LogicObjectInstrumentation instrumentation = new LogicObjectInstrumentation(clazz, getClassPool());
+			LogicObjectInstrumentation instrumentation = new LogicObjectInstrumentation(clazz, classPool);
 			//instrumentation.run(); //instrument class and its ancestors
 			boolean extendingClassLoaded = instrumentation.isExtendingClassLoaded();
 			if(!extendingClassLoaded) { //the extending class has not been generated yet
@@ -153,7 +110,7 @@ public class LogicObjectFactory {
 				} else
 					logicClassInstance = (T)instantiatingClass.newInstance();
 				
-				BeansUtil.setProperties(logicClassInstance, LogicObjectClass.findLogicObjectClass(instantiatingClass).getLObjectArgs(), logicObjectsParamsConstructor.toArray());
+				BeansUtil.setProperties(logicClassInstance, LogicObjectClass.findLogicObjectClass(instantiatingClass).getLObjectArgs(), logicObjectsParamsConstructor);
 
 				/*
 				if(LogicObjectClass.hasNoArgsConstructor(clazz)) {
@@ -164,8 +121,9 @@ public class LogicObjectFactory {
 					//TODO
 				}
 				*/
-				
 			}
+			LogicEngineConfiguration logicEngineConfig = LogicObjects.getLogicEngineConfiguration(clazz);
+			BeansUtil.setProperty(logicClassInstance, LogicObjectInstrumentation.LOGIC_ENGINE_CONFIG_FIELD_NAME, logicEngineConfig);
 			return logicClassInstance;
 		} catch (Exception e) {
 			throw new RuntimeException(e);

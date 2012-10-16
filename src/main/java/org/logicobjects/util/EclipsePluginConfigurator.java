@@ -8,8 +8,7 @@ import javassist.LoaderClassPath;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Plugin;
-import org.logicobjects.core.LogicEngine;
-import org.logicobjects.core.LogicObjectFactory;
+import org.logicobjects.LogicObjects;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.vfs.Vfs;
 import org.reflectiveutils.reflections4eclipse.BundleUrlType;
@@ -25,7 +24,7 @@ public abstract class EclipsePluginConfigurator {
 		//enabling javassist to work correctly in Eclipse
 		ClassPool classPool = ClassPool.getDefault();
 		classPool.appendClassPath(new LoaderClassPath(plugin.getClass().getClassLoader()));
-		LogicObjectFactory.getDefault().setClassPool(classPool);
+		LogicObjects.setClassPool(classPool);
 		
 		Vfs.addDefaultURLTypes(new BundleUrlType(plugin.getBundle()));  //enabling the Reflections filters to work in Eclipse
 		
@@ -35,7 +34,7 @@ public abstract class EclipsePluginConfigurator {
 		 * adding all the classes in the plugin to the search path
 		 * This line has to be after the call to Vfs.addDefaultURLTypes(...)
 		 */
-		LogicObjectFactory.getDefault().addSearchUrl(urlPlugin);  
+		LogicObjects.addSearchUrl(urlPlugin);
 		try {
 			pathLogicFiles = FileLocator.toFileURL(urlPlugin).getPath();
 		} catch (IOException e) {
@@ -46,7 +45,7 @@ public abstract class EclipsePluginConfigurator {
 		 * This code uses the bootstrap engine since this engine will not trigger the loading of Logtalk
 		 * After we have moved to the location of the plugin files we can load logtalk afterwards
 		 */
-		LogicEngine.getBootstrapEngine().cd(pathLogicFiles); 
+		//LogicEngine.getBootstrapEngine().cd(pathLogicFiles); TODO verify that this is not needed anymore (it should work without this since all the logic files are copied to a tmp directory)
 		
 
 	}

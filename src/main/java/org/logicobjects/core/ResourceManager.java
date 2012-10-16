@@ -12,7 +12,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.logicobjects.util.LogicObjectsPreferences;
+import org.logicobjects.LogicObjectsPreferences;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.reflections.util.ConfigurationBuilder;

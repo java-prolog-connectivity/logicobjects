@@ -1,17 +1,18 @@
 package org.logicobjects.adapter;
 
+import static org.logicobjects.LogicObjects.newLogicObject;
+
 import java.lang.reflect.Type;
 
+import org.logicobjects.LogicObjects;
+import org.logicobjects.adapter.adaptingcontext.AbstractLogicObjectDescriptor;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.AnnotatedElementAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.ClassAdaptationContext;
-import org.logicobjects.adapter.adaptingcontext.AbstractLogicObjectDescriptor;
-import org.logicobjects.core.LogicObjectClass;
 import org.logicobjects.core.LogicObject;
-import org.logicobjects.core.LogicObjectFactory;
+import org.logicobjects.core.LogicObjectClass;
+import org.logicobjects.term.Term;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
-
-import jpl.Term;
 
 public class TermToAnnotatedObjectAdapter<To> extends Adapter<Term, Object> {
 
@@ -61,9 +62,9 @@ public class TermToAnnotatedObjectAdapter<To> extends Adapter<Term, Object> {
 		try {
 			Object lObject = null;
 			if(typeWrapper.isAssignableFrom(annotatedContext.getContextClass())) {
-                lObject = LogicObjectFactory.getDefault().create(annotatedContext.getContextClass());
+                lObject = newLogicObject(annotatedContext.getContextClass());
             } else {
-            	lObject = LogicObjectFactory.getDefault().create(typeWrapper.asClass());
+            	lObject = newLogicObject(typeWrapper.asClass());
             }
 			String argsList = logicObjectDescription.argsList();
 			if(argsList != null && !argsList.isEmpty())
@@ -85,7 +86,7 @@ public class TermToAnnotatedObjectAdapter<To> extends Adapter<Term, Object> {
 	public static AnnotatedElementAdaptationContext getTermAnnotationContext(Term term, Type type) {
 		AnnotatedElementAdaptationContext annotatedContext = null;
 		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
-		Class logicClass = LogicObjectFactory.getDefault().findLogicClass(term);  
+		Class logicClass = LogicObjects.findLogicClass(term);  
 		/*
 		 * find out if the term could be mapped to a logic object
 		 * the additional type compatibilities verifications are necessary since the fact that the term 'could' be converted to a logic object does not mean that it 'should'

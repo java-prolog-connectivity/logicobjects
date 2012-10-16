@@ -2,24 +2,19 @@ package org.logicobjects.adapter;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import jpl.Atom;
-import jpl.Term;
-
-import org.logicobjects.adapter.adaptingcontext.AbstractLogicObjectDescriptor;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
-import org.logicobjects.adapter.adaptingcontext.AnnotatedElementAdaptationContext;
-import org.logicobjects.adapter.adaptingcontext.BeanPropertyAdaptationContext;
-import org.logicobjects.adapter.adaptingcontext.ClassAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.FieldAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.MethodAdaptationContext;
 import org.logicobjects.adapter.objectadapters.AnyCollectionToTermAdapter;
@@ -27,12 +22,13 @@ import org.logicobjects.adapter.objectadapters.CalendarToTermAdapter;
 import org.logicobjects.adapter.objectadapters.ImplementationMap;
 import org.logicobjects.adapter.objectadapters.MapToTermAdapter.EntryToTermAdapter;
 import org.logicobjects.adapter.objectadapters.XMLGregorianCalendarToTermAdapter;
-import org.logicobjects.annotation.LObject;
-import org.logicobjects.annotation.LTermAdapter;
-import org.logicobjects.annotation.LTermAdapter.LTermAdapterUtil;
 import org.logicobjects.core.ITermObject;
 import org.logicobjects.core.LogicObject;
 import org.logicobjects.core.LogicObjectClass;
+import org.logicobjects.term.Atom;
+import org.logicobjects.term.FloatTerm;
+import org.logicobjects.term.IntegerTerm;
+import org.logicobjects.term.Term;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.ReflectionUtil;
 
@@ -49,7 +45,7 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 		return adapt(object, new FieldAdaptationContext(field));
 	}
 	
-	public Term[] adaptField(From[] objects, Field field) {
+	public List<Term> adaptField(List<From> objects, Field field) {
 		return adaptObjects(objects, new FieldAdaptationContext(field));
 	}
 	
@@ -57,14 +53,19 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 		return adapt(object, new MethodAdaptationContext(method));
 	}
 	
-	public Term[] adaptMethod(From[] objects, Method method) {
+	public List<Term> adaptMethod(List<From> objects, Method method) {
 		return adaptObjects(objects, new MethodAdaptationContext(method));
 	}
 	
-	public Term[] adaptObjects(From[] objects, AdaptationContext adaptingContext) {
-		Term[] terms = new Term[objects.length];
-		for(int i = 0; i<objects.length; i++)
-			terms[i] = adapt(objects[i], adaptingContext);
+	public List<Term> adaptObjects(List<From> objects) {
+		return adaptObjects(objects, null);
+	}
+	
+	public List<Term> adaptObjects(List<From> objects, AdaptationContext adaptingContext) {
+		List<Term> terms = new ArrayList<>();
+		for(From object : objects) {
+			terms.add(adapt(object, adaptingContext));
+		}
 		return terms;
 	}
 	
@@ -91,25 +92,25 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 				*/
 				return new Atom(text);
 			} else if(object.getClass().equals(java.lang.Byte.class)) {
-				return new jpl.Integer(java.lang.Byte.class.cast(object).byteValue());
+				return new IntegerTerm(java.lang.Byte.class.cast(object).byteValue());
 			} else if(object.getClass().equals(java.lang.Short.class)) {
-				return new jpl.Integer(java.lang.Short.class.cast(object).shortValue());
+				return new IntegerTerm(java.lang.Short.class.cast(object).shortValue());
 			} else if(object.getClass().equals(java.lang.Integer.class)) { //better full class name to avoid confusions here
-				return new jpl.Integer(java.lang.Integer.class.cast(object).intValue());
+				return new IntegerTerm(java.lang.Integer.class.cast(object).intValue());
 			}  else if(object.getClass().equals(AtomicInteger.class)) { 
-				return new jpl.Integer(AtomicInteger.class.cast(object).intValue());
+				return new IntegerTerm(AtomicInteger.class.cast(object).intValue());
 			}  else if(object.getClass().equals(java.lang.Long.class)) { //better full class name to avoid confusions here 
-				return new jpl.Integer(java.lang.Long.class.cast(object).longValue());
+				return new IntegerTerm(java.lang.Long.class.cast(object).longValue());
 			} else if(object.getClass().equals(AtomicLong.class)) { 
-				return new jpl.Integer(AtomicLong.class.cast(object).longValue());
+				return new IntegerTerm(AtomicLong.class.cast(object).longValue());
 			} else if(object.getClass().equals(BigInteger.class)) {
-				return new jpl.Integer(BigInteger.class.cast(object).longValue());
+				return new IntegerTerm(BigInteger.class.cast(object).longValue());
 			} else if(object.getClass().equals(java.lang.Float.class)) { 
-				return new jpl.Float(java.lang.Float.class.cast(object).floatValue());
+				return new FloatTerm(java.lang.Float.class.cast(object).floatValue());
 			} else if(object.getClass().equals(java.lang.Double.class)) { 
-				return new jpl.Float(java.lang.Double.class.cast(object).doubleValue());
+				return new FloatTerm(java.lang.Double.class.cast(object).doubleValue());
 			} else if(object.getClass().equals(BigDecimal.class)) { 
-				return new jpl.Float(BigDecimal.class.cast(object).doubleValue());
+				return new FloatTerm(BigDecimal.class.cast(object).doubleValue());
 			} else if(Primitives.isWrapperType(object.getClass())) {  //any other primitive
 				return new Atom(object.toString());
 			} else if(Calendar.class.isAssignableFrom(object.getClass())) {
@@ -145,7 +146,7 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 	
 	protected Term adaptToTermFromClass(Class clazz) {
 		String logicObjectName = LogicUtil.javaClassNameToProlog(clazz.getSimpleName());
-		return new LogicObject(logicObjectName, new Term[]{}).asTerm();
+		return new LogicObject(logicObjectName, Collections.emptyList()).asTerm();
 	}
 
 }

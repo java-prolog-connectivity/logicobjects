@@ -1,5 +1,7 @@
 package org.logicobjects.test.lib.examples.metro;
 
+import org.logicobjects.LogicObjects;
+import static org.logicobjects.LogicObjects.*;
 import org.logicobjects.core.LogicObjectFactory;
 import org.logicobjects.lib.examples.metro.Line;
 import org.logicobjects.lib.examples.metro.Metro;
@@ -10,22 +12,22 @@ public class MetroLogicObjectProvider implements IMetroObjectProvider {
 
 	@Override
 	public Metro createMetro() {
-		return LogicObjectFactory.getDefault().create(Metro.class);
+		return newLogicObject(Metro.class);
 	}
 
 	@Override
 	public MetroFactory createMetroFactory() {
-		return LogicObjectFactory.getDefault().create(MetroFactory.class);
+		return newLogicObject(MetroFactory.class);
 	}
 
 	@Override
 	public Line createLine(String name) {
-		return LogicObjectFactory.getDefault().create(Line.class, name);
+		return newLogicObject(Line.class, name);
 	}
 
 	@Override
 	public Station createStation(String name) {
-		return LogicObjectFactory.getDefault().create(Station.class, name);
+		return newLogicObject(Station.class, name);
 	}
 
 }

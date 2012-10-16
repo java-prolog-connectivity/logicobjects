@@ -16,12 +16,13 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.junit.Test;
 import org.logicobjects.core.LogicObjectFactory;
 import org.logicobjects.test.fixture.MyLogicExpressions;
+import static org.logicobjects.LogicObjects.*;
 
 public class TestLogicExpressions extends LocalLogicTest {
 
 	@Test
 	public void testSimpleLogicExpressions() {
-		MyLogicExpressions logicExpressions = LogicObjectFactory.getDefault().create(MyLogicExpressions.class);
+		MyLogicExpressions logicExpressions = newLogicObject(MyLogicExpressions.class);
 		
 		assertEquals("my_logic_expressions", logicExpressions.this1());
 		assertEquals("my_logic_expressions", logicExpressions.this2());

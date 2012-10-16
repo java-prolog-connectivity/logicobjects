@@ -1,5 +1,7 @@
 package org.logicobjects.instrumentation;
 
+import java.util.List;
+
 /**
  * Encapsulates the parsing data of a logic class
  * @author scastro
@@ -8,7 +10,7 @@ package org.logicobjects.instrumentation;
 public class LogicClassParsingData {
 
 	private String name;
-	private String[] classArguments;
+	private List<String> classArguments;
 	private String argumentsAsListProperty;
 	public String getName() {
 		return name;
@@ -16,10 +18,10 @@ public class LogicClassParsingData {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String[] getClassArguments() {
+	public List<String> getClassArguments() {
 		return classArguments;
 	}
-	public void setClassArguments(String[] classArguments) {
+	public void setClassArguments(List<String> classArguments) {
 		this.classArguments = classArguments;
 	}
 	public String getArgumentsAsListProperty() {

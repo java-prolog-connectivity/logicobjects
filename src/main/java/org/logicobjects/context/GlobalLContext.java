@@ -1,19 +1,11 @@
 package org.logicobjects.context;
 
 import java.net.URL;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import jpl.Term;
-import jpl.Variable;
-
 import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
-import org.logicobjects.core.LogicObjectClass;
 import org.logicobjects.logicengine.LogicEngineConfiguration;
-import org.reflections.Reflections;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
 
 public class GlobalLContext extends AbstractLContext {
 	
@@ -101,8 +93,8 @@ public class GlobalLContext extends AbstractLContext {
 	}
 
 	@Override
-	public LogicEngineConfiguration getLogicEngineConfiguration(Class clazz) {
-		return userContext.getLogicEngineConfiguration(clazz);
+	public LogicEngineConfiguration getLogicEngineConfiguration(String packageName) {
+		return userContext.getLogicEngineConfiguration(packageName);
 	}
 
 }

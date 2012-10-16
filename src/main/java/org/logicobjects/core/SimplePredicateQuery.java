@@ -1,14 +1,14 @@
 package org.logicobjects.core;
 
 import java.lang.reflect.Method;
-
-import jpl.Query;
+import java.util.Arrays;
+import java.util.List;
 
 import org.logicobjects.annotation.method.LExpression;
 import org.logicobjects.annotation.method.LQuery.LQueryUtil;
-import org.logicobjects.annotation.method.LSolution;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
+import org.logicobjects.term.Term;
 
 public class SimplePredicateQuery extends RawLogicQuery {
 
@@ -30,18 +30,19 @@ public class SimplePredicateQuery extends RawLogicQuery {
 	 * 
 	 * @return the query arguments as specified in the annotation
 	 */
-	public String[] getLogicMethodArguments() {
+	@Override
+	public List<String> getLogicMethodArguments() {
 		if(aLQuery != null)
-			return LQueryUtil.getArgs(aLQuery);
+			return Arrays.asList(LQueryUtil.getArgs(aLQuery));
 		return null;
 	}
 	
 	@Override
-	public Query asQuery(ParsedLogicMethod parsedLogicMethod) {
+	public Term asGoal(ParsedLogicMethod parsedLogicMethod) {
 		if(isLogicExpression())
-			return new Query(parsedLogicMethod.getComputedQueryString());
+			return logicUtil.asTerm(parsedLogicMethod.getComputedQueryString());
 		else
-			return new Query(asTerm(parsedLogicMethod));
+			return asTerm(parsedLogicMethod);
 	}
 
 	@Override

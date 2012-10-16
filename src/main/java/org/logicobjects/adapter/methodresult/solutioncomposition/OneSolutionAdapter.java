@@ -1,11 +1,8 @@
 package org.logicobjects.adapter.methodresult.solutioncomposition;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-import org.logicobjects.instrumentation.ParsedLogicMethod;
-
-import jpl.Query;
+import org.logicobjects.term.Query;
 
 
 public class OneSolutionAdapter<LogicSolutionType> extends SolutionCompositionAdapter<LogicSolutionType, LogicSolutionType> {

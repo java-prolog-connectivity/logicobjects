@@ -4,10 +4,9 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 
 import org.reflectiveutils.GenericsUtil;
-import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
-/*
- * An abstract adapter with convenient methods for finding out their generic types at runtime
+/**
+ * An abstract adapter
  * 
  */
 public abstract class Adapter<From, To> {
@@ -19,6 +18,14 @@ public abstract class Adapter<From, To> {
 		}
 	}
 	
+	
+	//convenient methods for finding out the generic types at runtime
+	
+	/**
+	 * Answers an array of the type parameter of this class given a descendant class
+	 * @param descendantAdapter
+	 * @return
+	 */
 	public static <A extends Adapter> Type[] types(Class <A> descendantAdapter) {
 		return new GenericsUtil().findAncestorTypeParameters(Adapter.class, descendantAdapter);
 	}

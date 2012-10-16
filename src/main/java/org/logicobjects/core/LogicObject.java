@@ -1,19 +1,21 @@
 package org.logicobjects.core;
 
+import static org.logicobjects.LogicObjects.LOGTALK_OPERATOR;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-
-import jpl.Atom;
-import jpl.Compound;
-import jpl.Query;
-import jpl.Term;
 
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.BeanPropertyAdaptationContext;
 import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
 import org.logicobjects.adapter.objectadapters.TermToArrayAdapter;
+import org.logicobjects.term.Atom;
+import org.logicobjects.term.Compound;
+import org.logicobjects.term.Term;
 import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.BeansUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
@@ -22,30 +24,28 @@ import org.reflectiveutils.wrappertype.ArrayTypeWrapper;
 
 public class LogicObject implements ITermObject {
 
-	public static final String LOGTALK_OPERATOR = "::";
-	
-	public static Compound logtalkMessage(Term object, String messageName, Term[] messageArguments) {
-		return new Compound(LOGTALK_OPERATOR, new Term[] {object, LogicUtil.asTerm(messageName, messageArguments)});
+	public static Compound logtalkMessage(Term object, String messageName, List<Term> messageArguments) {
+		return new Compound(LOGTALK_OPERATOR, Arrays.asList(object, new Compound(messageName, messageArguments)) );
 	}
 	
 	private String name;
-	private Object[] arguments;
+	private List arguments;
 	
 	public LogicObject(String name) {
-		this(name, new Object[]{});
+		this(name, Collections.emptyList());
 	}
 	
-	public LogicObject(String name, Object[] arguments) {
+	public LogicObject(String name, List arguments) {
 		setName(name);
 		setArguments(arguments);
 	}
 	
 	public LogicObject(String name, int arity) {
-		this(name, LogicUtil.variables(arity));
+		this(name, LogicUtil.anonymousVariables(arity));
 	}
 
 	public LogicObject(Term term) {
-		this(term.name(), TermToArrayAdapter.termsAsObjects(term.args()));
+		this(((Compound)term).name(), new TermToObjectAdapter().adaptTerms(term.args()));
 	}
 	
 	public String getName() {
@@ -57,18 +57,18 @@ public class LogicObject implements ITermObject {
 	}
 
 
-	private Object[] getArguments() {
+	private List getArguments() {
 		return arguments;
 	}
 
-	private void setArguments(Object[] arguments) {
+	private void setArguments(List arguments) {
 		this.arguments = arguments;
 	}
 
 	@Override
 	public Term asTerm() {
 		if( isParametrizedObject() )
-			return new Compound(getName(), ArrayToTermAdapter.objectsAsTerms(getArguments()));
+			return new Compound(getName(), new ObjectToTermAdapter().adaptObjects(getArguments()));
 		else
 			return new Atom(getName());
 	}
@@ -79,13 +79,12 @@ public class LogicObject implements ITermObject {
 	}
 	
 	public int arity() {
-		return getArguments().length;
+		return getArguments().size();
 	}
 	
-	public Query asQuery(String methodName, Object[] messageArgs) {
-		Compound compound = logtalkMessage(asTerm(), methodName, ArrayToTermAdapter.objectsAsTerms(messageArgs));
-		Query query = new Query(compound);
-		return query;
+	public Term asGoal(String methodName, List messageArgs) {
+		Compound compound = logtalkMessage(asTerm(), methodName, messageArgs);
+		return compound;
 	}
 
 	@Override
@@ -111,19 +110,18 @@ public class LogicObject implements ITermObject {
 		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(field.getGenericType());
 		if(!(typeWrapper instanceof ArrayTypeWrapper))
 			throw new RuntimeException("The property " + argsList + " is not an array instance variable in object " + lObject);
-		Term[] termArguments = term.args();
+		List<Term> termArguments = term.args();
 		Object adaptedArgs = new TermToObjectAdapter().adaptTerms(termArguments, adaptationContext.getPropertyType(), adaptationContext);
 		BeansUtil.setProperty(lObject, argsList, adaptedArgs, adaptationContext.getGuidingClass());
 	}
 	
-	public static void setPropertiesFromTermArgs(Object lObject, String[] properties, Term term) {
-		for(int i=0; i<properties.length; i++) {
-			String propertyName = properties[i];
-			setProperty(lObject, propertyName, term.arg(i+1));
+	public static void setPropertiesFromTermArgs(Object lObject, List<String> properties, Term term) {
+		for(int i=0; i<properties.size(); i++) {
+			setProperty(lObject, properties.get(i), term.arg(i+1));
 		}
 	}
 
-	public static Term[] propertiesAsTerms(Object object, String[] propertyNames) {
+	public static List<Term> propertiesAsTerms(Object object, List<String> propertyNames) {
 		List<Term> arguments = new ArrayList<Term>();
 		for(String propertyName : propertyNames) {
 			try {
@@ -133,7 +131,7 @@ public class LogicObject implements ITermObject {
 				throw new RuntimeException(e);
 			}
 		}
-		return arguments.toArray(new Term[] {});
+		return arguments;
 	}
 	
 	public static Term propertyAsTerm(Object lObject, String propertyName) {

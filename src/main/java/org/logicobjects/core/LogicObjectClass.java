@@ -106,7 +106,7 @@ public class LogicObjectClass {
 			return LogicUtil.javaClassNameToProlog(logicClass.getSimpleName());
 	}
 	
-	public String[] getLObjectArgs() {
+	public List<String> getLObjectArgs() {
 		return getLogicObjectDescriptor().args();
 	}
 	
@@ -114,11 +114,11 @@ public class LogicObjectClass {
 		return getLogicObjectDescriptor().argsList();
 	}
 	
-	public String[] getImports() {
+	public List<String> getImports() {
 		return getLogicObjectDescriptor().imports();
 	}
 	
-	public String[] getModules() {
+	public List<String> getModules() {
 		return getLogicObjectDescriptor().modules();
 	}
 	

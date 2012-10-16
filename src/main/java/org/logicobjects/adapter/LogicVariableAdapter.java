@@ -1,7 +1,9 @@
 package org.logicobjects.adapter;
 
-import jpl.Term;
-import jpl.Variable;
+import org.logicobjects.term.Term;
+import org.logicobjects.term.Variable;
+
+
 
 public class LogicVariableAdapter extends ObjectToTermAdapter<String> {
 

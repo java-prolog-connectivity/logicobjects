@@ -4,8 +4,11 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Arrays;
 
 import org.logicobjects.adapter.ObjectToTermAdapter;
+import org.logicobjects.adapter.TermToObjectAdapter;
+import org.logicobjects.annotation.LObjectAdapter.LObjectAdapterUtil;
 import org.logicobjects.util.AnnotationConstants.NULL;
 
 /*
@@ -31,13 +34,16 @@ public @interface LTermAdapter {
 		
 		public static ObjectToTermAdapter newAdapter(LTermAdapter aLTermAdapter) {
 			try {
-				ObjectToTermAdapter termAdapter = (ObjectToTermAdapter)LTermAdapterUtil.getAdapterClass(aLTermAdapter).newInstance();
-				termAdapter.setParameters(aLTermAdapter.args());
-				return termAdapter;
+				ObjectToTermAdapter adapter = null;
+				Class adapterClass = getAdapterClass(aLTermAdapter);
+				if(adapterClass != null) {
+					adapter = (ObjectToTermAdapter)adapterClass.newInstance();
+					adapter.setParameters(Arrays.asList(aLTermAdapter.args()));
+				}
+				return adapter;
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
-		
 	}
 }

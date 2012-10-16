@@ -3,9 +3,8 @@ package org.logicobjects.adapter.objectadapters;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import jpl.Term;
-
 import org.logicobjects.adapter.TermToObjectAdapter;
+import org.logicobjects.term.Term;
 import org.logicobjects.util.LogicUtil;
 
 public class TermToCalendarAdapter extends TermToObjectAdapter<Calendar> {
@@ -20,7 +19,7 @@ public class TermToCalendarAdapter extends TermToObjectAdapter<Calendar> {
 	 */
 	@Override
 	public Calendar adapt(Term term) {
-		double timeInSeconds = LogicUtil.asDouble(term);
+		double timeInSeconds = LogicUtil.toDouble(term);
 		long timeInMilliSeconds = (long) (timeInSeconds * 1000);
 		GregorianCalendar gregorianCalendar = new GregorianCalendar();
 		gregorianCalendar.setTimeInMillis(timeInMilliSeconds);

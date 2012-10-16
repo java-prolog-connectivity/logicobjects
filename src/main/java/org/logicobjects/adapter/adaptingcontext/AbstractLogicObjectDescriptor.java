@@ -1,5 +1,9 @@
 package org.logicobjects.adapter.adaptingcontext;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.logicobjects.annotation.LDelegationObject;
 import org.logicobjects.annotation.LObject;
 
@@ -9,6 +13,7 @@ import org.logicobjects.annotation.LObject;
  * NOTE: The class is a workaround to the problem than in Java annotations cannot extend other annotations or implement an interface,
  *   since @LObject and @LDelegationObject are quite similar, this class and its subclasses define methods to access common functionality from these two annotations
  *   (without having to be aware which of the two ones are the used ones behind the curtains).
+ *   The class also uses List types instead of arrays as the multi-value attributes of the annotations
  * @author scastro
  *
  */
@@ -16,13 +21,13 @@ public abstract class AbstractLogicObjectDescriptor {
 
 	public abstract String name();
 	
-	public abstract String[] args();
+	public abstract List<String> args();
 	
 	public abstract String argsList();
 	
-	public abstract String[] imports();
+	public abstract List<String> imports();
 	
-	public abstract String[] modules();
+	public abstract List<String> modules();
 	
 	public abstract boolean automaticImport();
 	
@@ -58,26 +63,32 @@ public abstract class AbstractLogicObjectDescriptor {
 			this.clazz = clazz;
 		}
 		*/
+		@Override
 		public String name() {
 			return "";
 		}
 		
-		public String[] args() {
-			return new String[]{};
+		@Override
+		public List<String> args() {
+			return Collections.emptyList();
 		}
 		
+		@Override
 		public String argsList() {
 			return "";
 		}
 		
-		public String[] imports() {
-			return new String[]{};
+		@Override
+		public List<String> imports() {
+			return Collections.emptyList();
 		}
 		
-		public String[] modules() {
-			return new String[]{};
+		@Override
+		public List<String> modules() {
+			return Collections.emptyList();
 		}
 		
+		@Override
 		public boolean automaticImport() {
 			return true;
 		}
@@ -94,12 +105,14 @@ public abstract class AbstractLogicObjectDescriptor {
 			this.aLObject = aLObject;
 		}
 		
+		@Override
 		public String name() {
 			return aLObject.name();
 		}
 
-		public String[] args() {
-			return aLObject.args();
+		@Override
+		public List<String> args() {
+			return Arrays.asList(aLObject.args());
 		}
 
 		@Override
@@ -107,14 +120,17 @@ public abstract class AbstractLogicObjectDescriptor {
 			return aLObject.argsList();
 		}
 		
-		public String[] imports() {
-			return aLObject.imports();
+		@Override
+		public List<String> imports() {
+			return Arrays.asList(aLObject.imports());
 		}
 
-		public String[] modules() {
-			return aLObject.modules();
+		@Override
+		public List<String> modules() {
+			return Arrays.asList(aLObject.modules());
 		}
 
+		@Override
 		public boolean automaticImport() {
 			return aLObject.automaticImport();
 		}
@@ -133,12 +149,14 @@ public abstract class AbstractLogicObjectDescriptor {
 			this.aLDelegationObject = aLDelegationObject;
 		}
 		
+		@Override
 		public String name() {
 			return aLDelegationObject.name();
 		}
 
-		public String[] args() {
-			return aLDelegationObject.args();
+		@Override
+		public List<String> args() {
+			return Arrays.asList(aLDelegationObject.args());
 		}
 
 		@Override
@@ -146,14 +164,17 @@ public abstract class AbstractLogicObjectDescriptor {
 			return aLDelegationObject.argsList();
 		}
 		
-		public String[] imports() {
-			return aLDelegationObject.imports();
+		@Override
+		public List<String> imports() {
+			return Arrays.asList(aLDelegationObject.imports());
 		}
 
-		public String[] modules() {
-			return aLDelegationObject.modules();
+		@Override
+		public List<String> modules() {
+			return Arrays.asList(aLDelegationObject.modules());
 		}
 
+		@Override
 		public boolean automaticImport() {
 			return aLDelegationObject.automaticImport();
 		}

@@ -1,14 +1,6 @@
 package org.logicobjects.adapter.methodresult.solutioncomposition;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.Iterator;
-
-import jpl.Query;
-
-import org.logicobjects.instrumentation.ParsedLogicMethod;
-import org.reflectiveutils.GenericsUtil;
-import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
+import org.logicobjects.term.Query;
 
 /*
  * Adapt a logic query as an Iterator object (or any interface implemented by SolutionEnumeration, such as Enumeration)

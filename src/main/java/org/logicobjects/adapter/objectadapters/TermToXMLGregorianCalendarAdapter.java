@@ -1,15 +1,13 @@
 package org.logicobjects.adapter.objectadapters;
 
-import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import jpl.Term;
-
 import org.logicobjects.adapter.TermToObjectAdapter;
+import org.logicobjects.term.Term;
 
 public class TermToXMLGregorianCalendarAdapter extends TermToObjectAdapter<XMLGregorianCalendar>{
 

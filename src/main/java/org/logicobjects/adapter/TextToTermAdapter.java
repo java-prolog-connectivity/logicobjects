@@ -1,12 +1,10 @@
 package org.logicobjects.adapter;
 
-import jpl.Term;
-
-import org.logicobjects.core.LogicEngine;
+import org.logicobjects.term.Term;
 
 public class TextToTermAdapter extends ObjectToTermAdapter<String> {
 	@Override
 	public Term adapt(String text) {
-		return LogicEngine.getDefault().textToTerm(text);
+		return getLogicUtil().asTerm(text);
 	}
 }

@@ -51,7 +51,7 @@ public class PackagePropertiesTree {
 		return packageFragmentsList;
 	}
 	
-	public Object findPackageProperty(Class clazz, Object property) {
+	public Object findProperty(Class clazz, Object property) {
 		return findProperty(clazz.getPackage(), property);
 	}
 	

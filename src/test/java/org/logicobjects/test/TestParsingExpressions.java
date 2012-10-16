@@ -143,7 +143,7 @@ public class TestParsingExpressions extends LocalLogicTest {
 		LogicMethodParsingData parsedData = LogicMethodParser.decomposeLogicString(testString);
 		
 		assertEquals(parsedData.getQueryString(), query);
-		assertEquals(parsedData.getMethodArguments()[0], params);
+		assertEquals(parsedData.getMethodArguments().get(0), params);
 		assertEquals(parsedData.getSolutionString(), returnValue);
 		
 		query = "";

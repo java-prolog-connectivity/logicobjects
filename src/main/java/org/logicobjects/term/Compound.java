@@ -1,16 +1,27 @@
 package org.logicobjects.term;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkElementIndex;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.logicobjects.util.termvisitor.TermVisitor;
+
 /**
- * DISCLAIMER: In the current version, most methods (and comments) in this class and subclasses have been copied or adapted from a corresponding class in the JPL library.
+ * A class reifying a logic compound term
+ * DISCLAIMER: In the current version many methods in this class have been copied or adapted from the class jpl.Compound in the JPL library.
  * @author scastro
  *
  */
-public class LCompound extends LTerm {
+public class Compound extends Term {
 
+	public static Compound newCompound(String functor, Term... parameters) {
+		Compound term = parameters.length > 0 ? new Compound(functor, Arrays.asList(parameters)) : new Atom(functor);
+		return term;
+	}
+	
 	/**
 	 * the name of this Compound
 	 */
@@ -18,7 +29,7 @@ public class LCompound extends LTerm {
 	/**
 	 * the arguments of this Compound
 	 */
-	protected final LTerm[] args;
+	protected final List<Term> args;
 	
 	/**
 	 * Creates a Compound with name but no args (i.e. an Atom).
@@ -28,11 +39,11 @@ public class LCompound extends LTerm {
 	 * @param   name   the name of this Compound
 	 * @param   args   the arguments of this Compound
 	 */
-	protected LCompound(String name) {
+	protected Compound(String name) {
 		checkNotNull(name);
 		checkArgument(!name.isEmpty(), "The name of a logic variable cannot be an empty string");
 		this.name = name;
-		this.args = new LTerm[] {};
+		this.args = new ArrayList<>();
 	}
 
 	/**
@@ -41,30 +52,22 @@ public class LCompound extends LTerm {
 	 * @param   name   the name of this Compound
 	 * @param   args   the (one or more) arguments of this Compound
 	 */
-	public LCompound(String name, LTerm[] args) {
+	public Compound(String name, List<Term> args) {
 		checkNotNull(name);
 		checkNotNull(args);
-		checkArgument(args.length > 0, "A compound term must have at least one argument");
+		checkArgument(!args.isEmpty(), "A compound term must have at least one argument");
 		this.name = name;
 		this.args = args;
 	}
 	
 	/**
-	 * Returns the ith argument (counting from 1) of this Compound;
-	 * throws an ArrayIndexOutOfBoundsException if i is inappropriate.
-	 * 
-	 * @return the ith argument (counting from 1) of this Compound
-	 */
-	public final LTerm arg(int i) {
-		return args[i - 1];
-	}
-	/**
 	 * Tests whether this Compound's functor has (String) 'name' and 'arity'.
 	 * 
 	 * @return whether this Compound's functor has (String) 'name' and 'arity'
 	 */
-	public final boolean hasFunctor(String name, int arity) {
-		return this.name.equals(name) && args.length == arity;
+	@Override
+	public boolean hasFunctor(String name, int arity) {
+		return this.name.equals(name) && args.size() == arity;
 	}
 	
 	/**
@@ -72,16 +75,27 @@ public class LCompound extends LTerm {
 	 * 
 	 * @return the name (unquoted) of this Compound
 	 */
-	public final String name() {
+	public String name() {
 		return name;
 	}
+	
+	/**
+	 * Returns the arguments of this Compound (1..arity) of this Compound as an array[0..arity-1] of Term.
+	 * 
+	 * @return the arguments (1..arity) of this Compound as an array[0..arity-1] of Term
+	 */
+	@Override
+	public List<Term> args() {
+		return args;
+	}
+	
 	/**
 	 * Returns the arity (1+) of this Compound.
 	 * 
 	 * @return the arity (1+) of this Compound
 	 */
-	public final int arity() {
-		return args.length;
+	public int arity() {
+		return args.size();
 	}
 	
 	/**
@@ -91,7 +105,7 @@ public class LCompound extends LTerm {
 	 * @return  string representation of an Compound
 	 */
 	public String toString() {
-		return prologName() + (args.length > 0 ? "(" + LTerm.toString(args) + ")" : "");
+		return prologName() + (args.size() > 0 ? "(" + Term.toString(args) + ")" : "");
 	}
 	
 	/**
@@ -101,22 +115,10 @@ public class LCompound extends LTerm {
 	 * @param   obj  the Object to compare (not necessarily another Compound)
 	 * @return  true if the Object satisfies the above condition
 	 */
-	public final boolean equals(Object obj) {
-		return (this == obj || (obj instanceof LCompound && name.equals(((LCompound) obj).name) && equals(args, ((LCompound) obj).args)));
+	public boolean equals(Object obj) {
+		return (this == obj || (obj instanceof Compound && name.equals(((Compound) obj).name) && equals(args, ((Compound) obj).args)));
 	}
 	
-	/**
-	 * Sets the i-th (from 1) arg of this Compound to the given Term instance.
-	 * This method, along with the Compound(name,arity) constructor, serves the new, native Prolog-term-to-Java-term routine,
-	 * and is public only so as to be accessible via JNI: it is not intended for general use.
-	 * 
-	 * @param   i      the index (1+) of the arg to be set
-	 * @param   arg    the Term which is to become the i-th (from 1) arg of this Compound
-	 */
-	public void setArg(int i, LTerm arg) {
-		checkElementIndex(i, args.length);
-		args[i - 1] = arg;
-	}
 	
 
 	/**
@@ -127,5 +129,12 @@ public class LCompound extends LTerm {
 	 */
 	protected String prologName() {
 		return "'" + name + "'";
+	}
+	
+	public void accept(TermVisitor termVisitor) {
+		if(termVisitor.visit(this))
+			for(Term child: args) {
+				termVisitor.visit(child);
+			}
 	}
 }

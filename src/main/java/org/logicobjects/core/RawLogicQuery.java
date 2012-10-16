@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import org.logicobjects.annotation.method.LExpression;
 import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.annotation.method.LSolution;
+import org.logicobjects.logicengine.LogicEngineConfiguration;
 
 public abstract class RawLogicQuery extends LogicRoutine {
 

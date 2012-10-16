@@ -1,6 +1,6 @@
 package org.logicobjects.adapter.methodresult;
 
-import jpl.Query;
+import org.logicobjects.term.Query;
 
 
 /*

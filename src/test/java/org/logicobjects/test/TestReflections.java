@@ -1,14 +1,12 @@
 package org.logicobjects.test;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Set;
 
 import org.junit.Test;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.context.GlobalLContext;
-import org.logicobjects.core.LogicEngine;
-import org.logicobjects.core.LogicObjectFactory;
+import org.logicobjects.logicengine.LogicEngine;
 import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
@@ -16,8 +14,6 @@ import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
-import org.reflections.vfs.Vfs;
-import org.reflections.vfs.Vfs.Dir;
 
 import com.google.common.base.Predicate;
 

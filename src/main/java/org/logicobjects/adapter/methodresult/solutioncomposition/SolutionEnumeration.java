@@ -2,14 +2,13 @@ package org.logicobjects.adapter.methodresult.solutioncomposition;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import jpl.Query;
-
 import org.logicobjects.adapter.methodresult.eachsolution.EachSolutionAdapter;
+import org.logicobjects.term.Query;
+import org.logicobjects.term.Term;
 
 /*
  * A convenient wrapper over a query using adapters.
@@ -36,20 +35,20 @@ public class SolutionEnumeration<EachSolutionType> implements Enumeration<EachSo
 	//will close the query when no more elements are present
 	@Override
 	public boolean hasMoreElements() {
-		return query.hasMoreElements();
+		return query.hasNext();
 	}
 
 	@Override
 	public EachSolutionType nextElement() {
 		if(hasMoreElements())
-			return adapter.adapt((Map)query.nextElement());
+			return adapter.adapt((Map)query.next());
 		else
 			return null;
 	}
 	
-	private List<EachSolutionType> asList(Hashtable solutions[]) {
+	private List<EachSolutionType> asList(List<Map<String, Term>> solutions) {
 		List<EachSolutionType> answers = new ArrayList<EachSolutionType>();
-		for(Hashtable aSolution : solutions) {
+		for(Map<String, Term> aSolution : solutions) {
 			answers.add(adapter.adapt(aSolution));
 		}
 		return answers;
@@ -65,19 +64,19 @@ public class SolutionEnumeration<EachSolutionType> implements Enumeration<EachSo
 	public List<EachSolutionType> allElements() {
 		return asList(query.allSolutions());
 	}
-	
+	/*
 	public void open() {
 		query.open();
 	}
-	
+	*/
 	public void close() {
 		query.close();
 	}
-	
+	/*
 	public void rewind() {
 		query.rewind();
 	}
-
+*/
 	@Override
 	public boolean hasNext() {
 		return hasMoreElements();

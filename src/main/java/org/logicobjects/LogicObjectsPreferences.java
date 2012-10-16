@@ -1,9 +1,12 @@
-package org.logicobjects.util;
+package org.logicobjects;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.io.File;
 import java.util.Map;
 import java.util.Properties;
 
-import org.logicobjects.core.LogicEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,13 +19,11 @@ public class LogicObjectsPreferences {
 	private static Logger logger = LoggerFactory.getLogger(LogicObjectsPreferences.class);
 	
 	public static final String LOGIC_OBJECTS_NAME = "Logic Objects";
-	public static final String[] SUPPORTED_ENGINES = new String[] {"yap", "swi"};  //supported prolog engines
+
 	//Properties configuring the framework behaviour
-	
-	public final static String LOGTALKHOME = "LOGTALKHOME";  //needed by the framework to find the integration scripts
-	public final static String LOGTALKUSER = "LOGTALKUSER"; //logtalk environment variable TODO: remembering what this variable was for ...
-	//public final static String PROLOG_DIALECT = "PL";  //defines the prolog engine to use (DEPRECATED since this is decided by the JPLPATH environment variable
-	public final static String SYSTEM_TEMP_DIRECTORY = "tmp";
+	public final static String LOGTALKHOME_ENV = "LOGTALKHOME";  //needed by the framework to find the integration scripts
+	public final static String LOGTALKUSER_ENV = "LOGTALKUSER"; //logtalk user directory environment variable
+	public final static String SYSTEM_TEMP_DIRECTORY_ENV = "tmp";
 	public final static String IMPLICIT_RETURN_VARIABLE = "LSolution";
 
 	private Properties properties;
@@ -33,27 +34,26 @@ public class LogicObjectsPreferences {
 	
 	
 	public String getTmpDirectory() {
-		String tmp = getEnvironmentVar(LOGTALKUSER);
+		String tmp = getEnvironmentVar(LOGTALKUSER_ENV);
 		if(tmp == null)
-			tmp = getEnvironmentVar(SYSTEM_TEMP_DIRECTORY);
+			tmp = getEnvironmentVar(SYSTEM_TEMP_DIRECTORY_ENV);
 		return tmp;
 	}
 	
-	public String logtalkIntegrationScript() {
-		String logtalkHome = getEnvironmentVarOrDie(LOGTALKHOME);
+	public String logtalkIntegrationScript(String engineName) {
+		checkNotNull(engineName);
+		checkArgument(!engineName.isEmpty());
+		engineName = engineName.toLowerCase();
+		String logtalkHome = findOrDie(LOGTALKHOME_ENV);
 		String scriptPath = logtalkHome + "/integration/";
-		
-		//String prologDialect = findOrDie(PROLOG_DIALECT);
-		String prologDialect = LogicEngine.getDefault().prologDialect();
-		if(prologDialect.equalsIgnoreCase("yap")) {
-			scriptPath += "logtalk_yap.pl";
-		} else if(prologDialect.equalsIgnoreCase("swi")) {
-			scriptPath += "logtalk_swi.pl";
-		} else {
-			throw new RuntimeException("Unsopported Prolog dialect: "+prologDialect);
-		}
+		String fileName = "logtalk_" + engineName + ".pl";
+		scriptPath += fileName;
+		File file = new File(scriptPath);
+		if(!file.exists())
+			throw new RuntimeException("The Logtalk installation at " + logtalkHome + " does not support the Prolog engine " + engineName);
 		return scriptPath;
 	}
+	
 	
 	public String getPreference(String key) {
 		return properties.getProperty(key);
@@ -77,29 +77,27 @@ public class LogicObjectsPreferences {
 	 */
 	public String getPreferenceOrEnvironment(String key) {
 		String value = null;
-		try {
-			value = getPreference(key);
-		} catch(Exception e) {
-		} finally {
-			if(value == null || value.equals("")) {
-				logger.info("WARNING: Property " + key +" has not been set. Attempting to obtain its value from environment variable with same name: " + value);
-				value = getEnvironmentVar(key);
-			}
+		value = getPreference(key);
+		if(value == null || value.equals("")) {
+			logger.info("Property " + key +" has not been set. Attempting to obtain its value from environment variable with same name: " + value);
+			value = getEnvironmentVar(key);
 		}
 		return value;
 	}
-	
+	/*
 	public static String getEnvironmentVarOrDie(String name) {
 		String value = getEnvironmentVar(name);
 		if(value==null || value.equals(""))
 			throw new MissingEnvironmentVariableException(name);
 		return value;
 	}
-	
+	*/
 	public static String getEnvironmentVar(String name) {
 		Map<String, String> env = System.getenv();
 		return env.get(name);
 	}
+	
+	
 	
 	
 	public static class MissingEnvironmentVariableException extends RuntimeException{

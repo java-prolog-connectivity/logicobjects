@@ -1,27 +1,9 @@
 package org.logicobjects.util.termvisitor;
 
-import jpl.Term;
+import org.logicobjects.term.Term;
 
 public abstract class TermVisitor {
-	
-	
-	/**
-	 * Term is part of an external library then an 'accept' method cannot be implemented there.
-	 * This visitor can visit the children of Term without it explicitly accepting it
-	 * @param term
-	 * @return
-	 */
-	public Object visit(Term term) {
-		if(doVisit(term)) {
-			Term[] children = term.args();
-			for(Term child : children) {
-				visit(child);
-			}
-		}
-		return term;
-	}
 
-	protected abstract boolean doVisit(Term term);
-	
+	public abstract boolean visit(Term term);
 	
 }

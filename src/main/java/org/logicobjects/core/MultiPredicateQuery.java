@@ -1,14 +1,11 @@
 package org.logicobjects.core;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
-import jpl.Query;
-import jpl.Term;
-
-import org.logicobjects.annotation.method.LSolution;
-import org.logicobjects.instrumentation.LogicMethodParser;
-import org.logicobjects.instrumentation.ParsedLogicMethod;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
+import org.logicobjects.instrumentation.ParsedLogicMethod;
+import org.logicobjects.term.Term;
 
 public class MultiPredicateQuery extends RawLogicQuery {
 
@@ -29,15 +26,14 @@ public class MultiPredicateQuery extends RawLogicQuery {
 	}
 
 	@Override
-	public String[] getLogicMethodArguments() {
+	public List<String> getLogicMethodArguments() {
 		return null;
 	}
 
 	@Override
-	public Query asQuery(ParsedLogicMethod parsedLogicMethod) {
+	public Term asGoal(ParsedLogicMethod parsedLogicMethod) {
 		String queryString = parsedLogicMethod.getComputedQueryString();
-		Term term = LogicEngine.getDefault().textToTerm(queryString);
-		return new Query(term);
+		return logicUtil.asTerm(queryString);
 	}
 	
 	public String getUnparsedQuery() {

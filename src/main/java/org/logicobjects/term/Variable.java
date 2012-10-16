@@ -1,15 +1,24 @@
 package org.logicobjects.term;
 
-import static com.google.common.base.Preconditions.*;
-import jpl.Variable;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Preconditions;
+import java.util.Collections;
+import java.util.List;
 
-public class LVariable extends LTerm {
+/**
+ * A class reifying a logic variable
+ * DISCLAIMER: In the current version many methods in this class have been copied or adapted from the class jpl.Variable in the JPL library.
+ * @author scastro
+ *
+ */
+public class Variable extends Term {
 
+	public static final Variable ANONYMOUS_VAR = new Variable("_");
+	
 	public final String name; // the name of this Variable
 	
-	public LVariable(String name) {
+	public Variable(String name) {
 		checkNotNull(name);
 		checkArgument(isValidVariableName(name), "The variable name " + name + " is not valid");
 		this.name = name;
@@ -45,6 +54,16 @@ public class LVariable extends LTerm {
 	 */
 	public final boolean equals(Object obj) {
 		return obj instanceof Variable && !this.name.equals("_") && this.name.equals(((Variable) obj).name);
+	}
+
+	@Override
+	public List<Term> args() {
+		return Collections.emptyList();
+	}
+	
+	@Override
+	public boolean hasFunctor(String name, int arity) {
+		return false;
 	}
 	
 }
