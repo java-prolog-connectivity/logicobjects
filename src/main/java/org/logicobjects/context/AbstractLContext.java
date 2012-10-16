@@ -12,11 +12,11 @@ import org.logicobjects.annotation.IgnoreLAdapter;
 import org.logicobjects.core.LogicObjectClass;
 import org.logicobjects.logicengine.LogicEngineConfiguration;
 import org.logicobjects.term.Compound;
-import org.logicobjects.term.FloatTerm;
-import org.logicobjects.term.IntegerTerm;
 import org.logicobjects.term.Term;
-import org.logicobjects.term.Variable;
+import org.reflections.ReflectionUtils;
 import org.reflectiveutils.ReflectionUtil;
+
+import com.google.common.base.Predicate;
 
 public abstract class AbstractLContext {
 
@@ -27,44 +27,36 @@ public abstract class AbstractLContext {
 	//includes a url in the search path
 	public abstract void addSearchUrls(URL... urls);
 	
-	public abstract Set<Class<?>> getLogicClasses();
-	public abstract Set<Class<? extends WrapperAdapter>> getWrapperAdapters();
-	
-	
 	protected Set<Class<?>> filterInterfaces(Set<Class<?>> unfilteredClasses) {
-		Set<Class<?>> filteredClasses = new HashSet<>();
-		for(Class clazz : unfilteredClasses) {
-			if(!clazz.isInterface()) {
-				filteredClasses.add(clazz);
-			}
-		}
-		return filteredClasses;
+		Predicate predicate = new Predicate<Class>() {
+			  public boolean apply(Class clazz) {
+			    return !clazz.isInterface();
+			  }
+		};
+		return ReflectionUtils.getAll(unfilteredClasses, predicate);
 	}
 	
 	protected <T> Set<Class<? extends T>> filterAbstractClasses(Set<Class<? extends T>> unfilteredClasses) {
-		Set<Class<? extends T>> filteredClasses = new HashSet<>();
-		for(Class clazz : unfilteredClasses) {
-			if(!ReflectionUtil.isAbstract(clazz)) {
-				filteredClasses.add(clazz);
-			}
-		}
-		return filteredClasses;
+		Predicate predicate = new Predicate<Class>() {
+			  public boolean apply(Class clazz) {
+			    return !ReflectionUtil.isAbstract(clazz);
+			  }
+		};
+		return ReflectionUtils.getAll(unfilteredClasses, predicate);
 	}
 	
-	protected Set<Class<? extends WrapperAdapter>> filterAdapters(Set<Class<? extends Adapter>> foundAdapters) {
-		Set<Class<? extends WrapperAdapter>> wrapperAdapters = new HashSet<>();
-		for(Class<? extends Adapter> adapterClass : foundAdapters) {
-			if(adapterClass.getAnnotation(IgnoreLAdapter.class) == null) {
-				if(WrapperAdapter.class.isAssignableFrom(adapterClass) && !Modifier.isAbstract(adapterClass.getModifiers()))
-					wrapperAdapters.add((Class<? extends WrapperAdapter>) adapterClass);
-			}
-		}
-		return wrapperAdapters;
+	protected Set<Class<? extends WrapperAdapter>> filterAdapters(Set<Class<? extends Adapter>> unfilteredClasses) {
+		Predicate predicate = new Predicate<Class>() {
+			  public boolean apply(Class clazz) {
+			    return clazz.getAnnotation(IgnoreLAdapter.class) == null && WrapperAdapter.class.isAssignableFrom(clazz) && !ReflectionUtil.isAbstract(clazz);
+			  }
+		};
+		return ReflectionUtils.getAll(unfilteredClasses, predicate);
 	}
 	
 	
 	
-
+	//TODO verify that this method is still necessary after doing what is said here: http://code.google.com/p/reflections/wiki/JBossIntegration
 	/**
 	 * This method is a workaround to the problem that the current version of reflections (at the moment of testing: 0.9.5 ) does not recognize JBoss URLs.
 	 * TODO check if next versions of Reflections still have this problem, otherwise this method can be removed.
@@ -114,8 +106,8 @@ public abstract class AbstractLContext {
 		return logicClass;
 	}
 	
+	public abstract Set<Class<?>> getLogicClasses();
+	public abstract Set<Class<? extends WrapperAdapter>> getWrapperAdapters();
 	public abstract LogicEngineConfiguration getLogicEngineConfiguration(String packageName);
-	
-
 
 }

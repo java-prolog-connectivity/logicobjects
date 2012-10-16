@@ -19,16 +19,24 @@ public class DefaultJplConfiguration extends LogicEngineConfiguration {
 
 	@Override
 	protected LogicEngine createLogicEngine() {
-		// TODO Auto-generated method stub
-		return null;
+		return new JPLLogicEngine();
 	}
 	
 	@Override
 	public boolean isConfigured() {
+			return false; //TODO find a way to see if JPL has been initialized (in any case the initialization is quite light so it does not harm if it happens many times, but it should be fixed...)
+		
 		/**
 		 * According to the JPL documentation, the getActualInitArgs() method returns null if the JPL Prolog engine has not been initialized 
+		 * The problem in fact is that this throws an error, and it is not possible to initialize the logic engine afterwards
 		 */
-		return JPL.getActualInitArgs() != null;
+		/*
+		try {
+			return JPL.getActualInitArgs() != null;
+		} catch(Error e) {
+			return false;
+		}
+		*/
 	}
 	
 

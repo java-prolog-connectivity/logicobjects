@@ -39,6 +39,8 @@ public class UserLContext extends SimpleLContext {
 
 	@Override
 	public LogicEngineConfiguration getLogicEngineConfiguration(String packageName) {
+		if(packagePropertiesTree == null)
+			loadDefaultSearchUrl();
 		return (LogicEngineConfiguration) packagePropertiesTree.findProperty(packageName, LogicEngineConfiguration.class);
 	}
 	

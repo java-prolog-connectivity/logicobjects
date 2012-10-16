@@ -22,8 +22,8 @@ public abstract class LogicEngineConfiguration {
 	protected List<String> preloadedPrologResources;
 	protected List<String> preloadedLogtalkResources;
 	protected List<String> scope;
-	protected boolean logtalkRequired;
-	protected boolean logtalkLoaded;
+	protected boolean logtalkRequired = true;
+	protected boolean logtalkLoaded = false;
 	
 	public LogicEngineConfiguration() {
 		this(new LogicObjectsPreferences()); //default preferences
@@ -121,14 +121,17 @@ public abstract class LogicEngineConfiguration {
 			if(isLogtalkRequired()) {
 				logger.info("Attempting to load logtalk ...");
 				try {
-					String logtalkIntegrationScript = preferences.logtalkIntegrationScript(logicEngine.prologDialect()); //will throw an exception if a logtalk integration script cannot be found for a given engine
+					String prologDialect = logicEngine.prologDialect();
+					String logtalkIntegrationScript = preferences.logtalkIntegrationScript(prologDialect); //will throw an exception if a logtalk integration script cannot be found for a given engine
 					logtalkLoaded = logicUtil.ensureLoaded(logtalkIntegrationScript);
 					if(!logtalkLoaded)
 						throw new RuntimeException();
 					else
 						logger.info("Logtalk loaded successfully");
 				} catch(Exception ex) {
+					System.out.println(ex);
 					logger.warn("Impossible to load Logtalk in the " + logicEngine.prologDialect() + " Logic Engine");
+					
 				}
 			}
 			loadPreloadedResources();

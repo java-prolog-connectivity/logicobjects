@@ -1,9 +1,9 @@
 package org.logicobjects.logicengine.jpl;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.logicobjects.term.Compound;
 import org.logicobjects.term.Query;
 import org.logicobjects.term.Term;
 
@@ -41,7 +41,7 @@ public class JPLQueryAdapter extends Query {
 	@Override
 	public Map<String, Term> next() {
 		JPLToLogicObjectsVisitor jplToLogicObjectsVisitor = new JPLToLogicObjectsVisitor();
-		Map<String, Term> nextSolution = null;
+		Map<String, Term> nextSolution = new HashMap<>();
 		Map<String, jpl.Term> jplSolution = jplQuery.nextSolution();
 		if(jplSolution != null) {
 			for(Entry<String, jpl.Term> jplEntry : jplSolution.entrySet()) {

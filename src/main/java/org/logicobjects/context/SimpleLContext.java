@@ -86,11 +86,7 @@ public abstract class SimpleLContext extends AbstractLContext {
 	public void addSearchUrls(URL... urls) {
 		Reflections reflections_url;
 		ConfigurationBuilder config = new ConfigurationBuilder();
-		//TODO new ArrayList().;
-		
 		Set<URL>filteredUrls = fixURLs(new HashSet<URL>(Arrays.<URL>asList(urls))); //jboss compatibility hack
-		//System.out.println("************************************* FILTERED URLSs");
-		//System.out.println(filteredUrls);
 		config.addUrls(filteredUrls);
 		reflections_url =  new Reflections(config);
 		if(reflections == null) {

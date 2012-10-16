@@ -260,13 +260,28 @@ public class LogicUtil {
 	}
 	
 	public Term asTerm(String termString) {
-		return engine.asTerm(termString);
+		return asTerm(termString, false);
+	}
+	
+	public Term asTerm(String termString, boolean force) {
+		try {
+			return engine.asTerm(termString);
+		} catch(Exception e) {
+			if(force)
+				return new Atom(termString);
+			else
+				throw e;
+		}
 	}
 	
 	public List<Term> asTerms(List<String> termsString) {
+		return asTerms(termsString, false);
+	}
+	
+	public List<Term> asTerms(List<String> termsString, boolean force) {
 		List<Term> terms = new ArrayList<>();
 		for(String s : termsString)
-			terms.add(asTerm(s));
+			terms.add(asTerm(s, force));
 		return terms;
 	}
 
@@ -279,7 +294,7 @@ public class LogicUtil {
 	}
 	
 	public boolean ensureLoaded(String... resources) {
-		return ensureLoaded(asTerms(Arrays.asList(resources)));
+		return ensureLoaded(asTerms(Arrays.asList(resources), true));
 	}
 
 	public boolean allSucceed(List<Term> terms) {
