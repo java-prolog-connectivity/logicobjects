@@ -7,6 +7,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.jpc.LogicUtil;
+import org.jpc.term.Compound;
+import org.jpc.term.Query;
+import org.jpc.term.Term;
+import org.jpc.term.Variable;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.LogicObjectsPreferences;
 import org.logicobjects.adapter.ObjectToTermAdapter;
@@ -19,7 +24,6 @@ import org.logicobjects.adapter.methodresult.eachsolution.SolutionToLObjectAdapt
 import org.logicobjects.adapter.methodresult.solutioncomposition.OneSolutionAdapter;
 import org.logicobjects.adapter.methodresult.solutioncomposition.SolutionCompositionAdapter;
 import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
-import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
 import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.annotation.LTermAdapter.LTermAdapterUtil;
 import org.logicobjects.annotation.method.LArgumentsAdapter;
@@ -32,12 +36,6 @@ import org.logicobjects.annotation.method.LSolution;
 import org.logicobjects.instrumentation.LogicMethodParser;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
-import org.logicobjects.logicengine.LogicEngineConfiguration;
-import org.logicobjects.term.Compound;
-import org.logicobjects.term.Query;
-import org.logicobjects.term.Term;
-import org.logicobjects.term.Variable;
-import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -223,7 +221,7 @@ public abstract class LogicRoutine {
 	
 	
 	public List adaptOriginalMethodArguments(List originalMethodArguments) {
-		List adaptedMethodArguments = originalMethodArguments;
+		List adaptedMethodArguments = new ArrayList(originalMethodArguments);
 		List<ObjectToTermAdapter> methodArgumentAdapters = getEachMethodArgumentAdapters();
 		for(int i = 0; i <  methodArgumentAdapters.size(); i++) {
 			ObjectToTermAdapter methodArgumentAdapter = methodArgumentAdapters.get(i);
@@ -232,6 +230,8 @@ public abstract class LogicRoutine {
 			}
 		}
 	
+
+		
 		MethodArgumentsAdapter methodArgumentsAdapter = getMethodArgumentsArrayAdapter();
 		if(methodArgumentsAdapter != null)
 			adaptedMethodArguments = methodArgumentsAdapter.adapt(adaptedMethodArguments);

@@ -2,9 +2,9 @@ package org.logicobjects.adapter.objectadapters;
 
 import java.util.Calendar;
 
+import org.jpc.term.FloatTerm;
+import org.jpc.term.Term;
 import org.logicobjects.adapter.ObjectToTermAdapter;
-import org.logicobjects.term.FloatTerm;
-import org.logicobjects.term.Term;
 
 public class CalendarToTermAdapter extends ObjectToTermAdapter<Calendar> {
 

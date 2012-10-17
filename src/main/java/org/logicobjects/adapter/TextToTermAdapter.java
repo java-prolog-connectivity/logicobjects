@@ -1,6 +1,6 @@
 package org.logicobjects.adapter;
 
-import org.logicobjects.term.Term;
+import org.jpc.term.Term;
 
 public class TextToTermAdapter extends ObjectToTermAdapter<String> {
 	@Override

@@ -1,15 +1,15 @@
-package org.logicobjects.term;
+package org.jpc.term;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.logicobjects.logicengine.LogicEngine;
-import org.logicobjects.util.termvisitor.ChangeVariableNameVisitor;
-import org.logicobjects.util.termvisitor.CollectVariableNamesVisitor;
-import org.logicobjects.util.termvisitor.ReplaceVariableVisitor;
-import org.logicobjects.util.termvisitor.TermVisitor;
+import org.jpc.logicengine.LogicEngine;
+import org.jpc.termvisitor.ChangeVariableNameVisitor;
+import org.jpc.termvisitor.CollectVariableNamesVisitor;
+import org.jpc.termvisitor.ReplaceVariableVisitor;
+import org.jpc.termvisitor.TermVisitor;
 
 
 /**
@@ -32,7 +32,12 @@ public abstract class Term {
 	
 	public abstract List<Term> args();
 	
-	public abstract boolean hasFunctor(String name, int arity);
+	public boolean hasFunctor(String name, int arity) {
+		return hasFunctor(new Atom(name), arity);
+	}
+	
+	public abstract boolean hasFunctor(Term nameTerm, int arity);
+
 	
 	/**
 	 * whether this Term represents an atom

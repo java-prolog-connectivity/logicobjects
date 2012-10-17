@@ -5,17 +5,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jpc.LogicUtil;
+import org.jpc.logicengine.LogicEngine;
+import org.jpc.term.Variable;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
 import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
 import org.logicobjects.core.LogicObject;
 import org.logicobjects.core.LogicObjectClass;
-import org.logicobjects.logicengine.LogicEngine;
-import org.logicobjects.term.Variable;
-import org.logicobjects.util.LogicUtil;
 
 //TODO delete ?
-public class LogicObjectAdapter extends Adapter<Object, LogicObject> {
+public class LogicObjectAdapter extends LogicAdapter<Object, LogicObject> {
 
 	@Override
 	public LogicObject adapt(Object source) {

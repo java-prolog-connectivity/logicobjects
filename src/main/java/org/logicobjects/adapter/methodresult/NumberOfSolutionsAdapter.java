@@ -1,6 +1,6 @@
 package org.logicobjects.adapter.methodresult;
 
-import org.logicobjects.term.Query;
+import org.jpc.term.Query;
 
 public class NumberOfSolutionsAdapter extends MethodResultAdapter<Integer> {
 

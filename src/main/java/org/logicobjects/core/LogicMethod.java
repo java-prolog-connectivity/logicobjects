@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jpc.term.Term;
 import org.logicobjects.adapter.LogicObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.MethodInvokerAdaptationContext;
 import org.logicobjects.annotation.method.LExpression;
@@ -12,7 +13,6 @@ import org.logicobjects.annotation.method.LMethod.LMethodUtil;
 import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
-import org.logicobjects.term.Term;
 
 public class LogicMethod extends LogicRoutine {
 
@@ -36,9 +36,11 @@ public class LogicMethod extends LogicRoutine {
 	 */
 	@Override
 	public List<String> getLogicMethodArguments() {
-		if(aLMethod != null)
-			return Arrays.asList(LMethodUtil.getArgs(aLMethod));
-		return null;
+		List<String> lMethodArgs = null;
+		if(aLMethod != null) {
+			lMethodArgs = LMethodUtil.getArgs(aLMethod);
+		}
+		return lMethodArgs;
 	}
 
 	@Override

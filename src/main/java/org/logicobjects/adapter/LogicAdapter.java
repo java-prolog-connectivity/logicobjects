@@ -3,8 +3,8 @@ package org.logicobjects.adapter;
 import java.util.Collections;
 import java.util.List;
 
-import org.logicobjects.logicengine.LogicEngineConfiguration;
-import org.logicobjects.util.LogicUtil;
+import org.jpc.LogicUtil;
+import org.jpc.logicengine.LogicEngineConfiguration;
 
 /**
  * Parent of all logic adapters (adapters that convert to/from terms) in the system

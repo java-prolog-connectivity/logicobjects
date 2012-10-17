@@ -1,10 +1,10 @@
-package org.logicobjects.util.termvisitor;
+package org.jpc.termvisitor;
 
 import java.util.Collections;
 import java.util.List;
 
-import org.logicobjects.term.Compound;
-import org.logicobjects.term.Term;
+import org.jpc.term.Compound;
+import org.jpc.term.Term;
 
 public abstract class TermTransformationVisitor<To> extends AbstractTransformationVisitor<Term, To> implements TermVisitor {
 

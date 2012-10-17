@@ -3,9 +3,9 @@ package org.logicobjects.adapter.objectadapters;
 import java.util.Collections;
 import java.util.Iterator;
 
+import org.jpc.term.Term;
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
-import org.logicobjects.term.Term;
 
 import com.google.common.collect.Iterators;
 

@@ -1,8 +1,8 @@
-package org.logicobjects.logicengine.jpl;
+package org.jpc.logicengine.jpl;
 
-import org.logicobjects.logicengine.LogicEngine;
-import org.logicobjects.term.Query;
-import org.logicobjects.term.Term;
+import org.jpc.logicengine.LogicEngine;
+import org.jpc.term.Query;
+import org.jpc.term.Term;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -6,8 +6,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.jpc.term.Term;
 import org.logicobjects.adapter.TermToObjectAdapter;
-import org.logicobjects.term.Term;
 
 public class TermToXMLGregorianCalendarAdapter extends TermToObjectAdapter<XMLGregorianCalendar>{
 

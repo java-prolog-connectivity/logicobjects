@@ -3,8 +3,8 @@ package org.logicobjects;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.logicobjects.logicengine.LogicEngine;
-import org.logicobjects.logicengine.LogicEngineConfiguration;
+import org.jpc.logicengine.LogicEngine;
+import org.jpc.logicengine.LogicEngineConfiguration;
 
 //TODO delete ?
 public class EnginePool {

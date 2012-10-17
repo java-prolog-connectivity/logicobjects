@@ -33,7 +33,7 @@ public class TestWrapperAdapter extends LocalLogicTest {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		} 
-		System.out.println(methodType);
+		//System.out.println(methodType);
 		LogicMethod logicMethod = new LogicMethod(method);
 		ParsedLogicMethod parsedLogicMethod = new ParsedLogicMethod(logicMethod, null, null, null);
 		WrapperAdapter wrapperAdapter = new ListWrapperAdapter();
@@ -52,7 +52,7 @@ public class TestWrapperAdapter extends LocalLogicTest {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		} 
-		System.out.println(methodType);
+		//System.out.println(methodType);
 		LogicMethod logicMethod = new LogicMethod(method);
 		ParsedLogicMethod parsedLogicMethod = new ParsedLogicMethod(logicMethod, null, null, null);
 		WrapperAdapter wrapperAdapter = new ArrayWrapperAdapter();

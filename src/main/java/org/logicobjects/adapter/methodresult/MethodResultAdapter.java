@@ -3,9 +3,9 @@ package org.logicobjects.adapter.methodresult;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
+import org.jpc.term.Query;
 import org.logicobjects.adapter.LogicAdapter;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
-import org.logicobjects.term.Query;
 
 /*
  * Abstract base class for all the adapters that adapt a logic query as an object of type MethodResultType

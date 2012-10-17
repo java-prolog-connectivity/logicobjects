@@ -3,9 +3,9 @@ package org.logicobjects.core;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.jpc.term.Term;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
-import org.logicobjects.term.Term;
 
 public class MultiPredicateQuery extends RawLogicQuery {
 

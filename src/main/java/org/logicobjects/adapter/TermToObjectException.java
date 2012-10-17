@@ -2,7 +2,7 @@ package org.logicobjects.adapter;
 
 import java.lang.reflect.Type;
 
-import org.logicobjects.term.Term;
+import org.jpc.term.Term;
 
 public class TermToObjectException extends RuntimeException {
 

@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jpc.LogicUtil;
 import org.logicobjects.adapter.adaptingcontext.AbstractLogicObjectDescriptor;
 import org.logicobjects.annotation.LDelegationObject;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.instrumentation.LogicClassParsingData;
-import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.ReflectionUtil;
 import org.reflectiveutils.visitor.FindFirstTypeVisitor;
 import org.reflectiveutils.visitor.TypeVisitor.InterfaceMode;

@@ -3,8 +3,8 @@ package org.logicobjects.adapter.methodresult.solutioncomposition;
 
 import java.util.Set;
 
+import org.jpc.term.Query;
 import org.logicobjects.LogicObjects;
-import org.logicobjects.term.Query;
 import org.reflectiveutils.GenericsUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 

@@ -1,4 +1,4 @@
-package org.logicobjects.term;
+package org.jpc.term;
 
 import java.util.Collections;
 import java.util.List;
@@ -70,8 +70,27 @@ public class IntegerTerm extends Term {
 	}
 	
 	@Override
-	public boolean hasFunctor(String name, int arity) {
-		return false;
+	public boolean hasFunctor(Term nameTerm, int arity) {
+		return equals(nameTerm) && arity == 0;
 	}
 	
+	/**
+	 * Returns a Prolog source text representation of this IntegerTerm
+	 * 
+	 * @return  a Prolog source text representation of this IntegerTerm
+	 */
+	@Override
+	public String toString() {
+		return ""+value;
+	}
+	
+	/**
+	 * Two IntegerTerms are equal if they are the same object, or their values are equal
+	 * 
+	 * @param   obj  The Object to compare
+	 * @return  true if the Object satisfies the above condition
+	 */
+	public final boolean equals(Object obj) {
+		return this == obj || (obj instanceof IntegerTerm && value == ((IntegerTerm) obj).value);
+	}
 }

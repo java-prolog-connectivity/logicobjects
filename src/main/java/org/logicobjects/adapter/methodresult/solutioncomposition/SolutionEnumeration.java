@@ -6,9 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.jpc.term.Query;
+import org.jpc.term.Term;
 import org.logicobjects.adapter.methodresult.eachsolution.EachSolutionAdapter;
-import org.logicobjects.term.Query;
-import org.logicobjects.term.Term;
 
 /*
  * A convenient wrapper over a query using adapters.

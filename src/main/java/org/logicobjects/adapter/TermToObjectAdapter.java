@@ -16,6 +16,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.jpc.LogicUtil;
+import org.jpc.logicengine.LogicEngine;
+import org.jpc.term.Atom;
+import org.jpc.term.Compound;
+import org.jpc.term.Term;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.FieldAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.MethodAdaptationContext;
@@ -25,11 +30,6 @@ import org.logicobjects.adapter.objectadapters.TermToCollectionAdapter;
 import org.logicobjects.adapter.objectadapters.TermToMapAdapter;
 import org.logicobjects.adapter.objectadapters.TermToMapAdapter.TermToEntryAdapter;
 import org.logicobjects.adapter.objectadapters.TermToXMLGregorianCalendarAdapter;
-import org.logicobjects.logicengine.LogicEngine;
-import org.logicobjects.term.Atom;
-import org.logicobjects.term.Compound;
-import org.logicobjects.term.Term;
-import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.GenericsUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 import org.reflectiveutils.wrappertype.ArrayTypeWrapper;

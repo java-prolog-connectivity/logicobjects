@@ -2,7 +2,7 @@ package org.logicobjects.adapter.methodresult.solutioncomposition;
 
 import java.lang.reflect.Type;
 
-import org.logicobjects.term.Query;
+import org.jpc.term.Query;
 
 
 public class OneSolutionAdapter<LogicSolutionType> extends SolutionCompositionAdapter<LogicSolutionType, LogicSolutionType> {

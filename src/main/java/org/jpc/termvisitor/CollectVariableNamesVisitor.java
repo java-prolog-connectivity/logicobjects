@@ -1,12 +1,12 @@
-package org.logicobjects.util.termvisitor;
+package org.jpc.termvisitor;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.logicobjects.term.Term;
-import org.logicobjects.term.Variable;
+import org.jpc.term.Term;
+import org.jpc.term.Variable;
 
 public class CollectVariableNamesVisitor implements TermVisitor {
 	

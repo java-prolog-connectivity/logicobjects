@@ -3,7 +3,7 @@ package org.logicobjects.adapter.adaptingcontext;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 
-import org.logicobjects.util.LogicUtil;
+import org.jpc.LogicUtil;
 
 public class FieldAdaptationContext extends AnnotatedSingleElementAdaptationContext {
 	private Field field;

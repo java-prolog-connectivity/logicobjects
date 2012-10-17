@@ -4,17 +4,17 @@ package org.logicobjects.adapter;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jpc.LogicUtil;
+import org.jpc.term.Term;
 import org.logicobjects.adapter.adaptingcontext.AbstractLogicObjectDescriptor;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.AnnotatedElementAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.BeanPropertyAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.ClassAdaptationContext;
 import org.logicobjects.core.LogicObject;
-import org.logicobjects.term.Term;
-import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.BeansUtil;
 
-public class AnnotatedObjectToTermAdapter<From> extends Adapter<From, Term> {
+public class AnnotatedObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 
 	@Override
 	public Term adapt(From object) {

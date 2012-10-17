@@ -1,11 +1,11 @@
-package org.logicobjects.logicengine.jpl;
+package org.jpc.logicengine.jpl;
 
 import jpl.JPL;
 
+import org.jpc.logicengine.LogicEngine;
+import org.jpc.logicengine.LogicEngineConfiguration;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.LogicObjectsPreferences;
-import org.logicobjects.logicengine.LogicEngine;
-import org.logicobjects.logicengine.LogicEngineConfiguration;
 
 public class DefaultJplConfiguration extends LogicEngineConfiguration {
 

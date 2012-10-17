@@ -8,13 +8,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.jpc.term.Compound;
+import org.jpc.term.Term;
 import org.logicobjects.adapter.Adapter;
 import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.annotation.IgnoreLAdapter;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.logicengine.LogicEngineConfiguration;
-import org.logicobjects.term.Compound;
-import org.logicobjects.term.Term;
 import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
 import org.reflections.util.ClasspathHelper;
@@ -166,11 +166,12 @@ public class LContext {
     }
 	
 	
-	public Class findLogicClass(String logicName, int args) {
+	public Class findLogicClass(Term logicName, int args) {
 		Set<Class<?>> set = getLogicClasses();
 		for(Class clazz : set) {
 			LogicObjectClass logicClass = new LogicObjectClass(clazz);
-			if(logicClass.getLObjectName().equals(logicName) && logicClass.getLObjectArgs().size() == args)
+			if(logicClass.getLObjectName(). TODO CONVERT THIS TO TERM
+					equals(logicName) && logicClass.getLObjectArgs().size() == args)
 				return clazz;
 		}
 		return null;

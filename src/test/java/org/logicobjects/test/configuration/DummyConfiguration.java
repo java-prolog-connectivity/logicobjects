@@ -1,7 +1,7 @@
 package org.logicobjects.test.configuration;
 
-import org.logicobjects.logicengine.LogicEngine;
-import org.logicobjects.logicengine.LogicEngineConfiguration;
+import org.jpc.logicengine.LogicEngine;
+import org.jpc.logicengine.LogicEngineConfiguration;
 
 public class DummyConfiguration extends LogicEngineConfiguration {
 

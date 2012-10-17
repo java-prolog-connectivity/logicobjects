@@ -4,4 +4,4 @@
  * The objective of using this library instead of just using the JPL classes is providing a common model for expressing logic terms, 
  * that can be easily converted to alternative term models according to the requirements of the logic engine used
  */
-package org.logicobjects.term;
+package org.jpc.term;

@@ -1,4 +1,4 @@
-package org.logicobjects.term;
+package org.jpc.term;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.logicobjects.util.termvisitor.TermVisitor;
+import org.jpc.termvisitor.TermVisitor;
 
 /**
  * A class reifying a logic compound term
@@ -16,16 +16,11 @@ import org.logicobjects.util.termvisitor.TermVisitor;
  *
  */
 public class Compound extends Term {
-
-	public static Compound newCompound(String functor, Term... parameters) {
-		Compound term = parameters.length > 0 ? new Compound(functor, Arrays.asList(parameters)) : new Atom(functor);
-		return term;
-	}
 	
 	/**
 	 * the name of this Compound
 	 */
-	protected final String name;
+	protected final Term name;
 	/**
 	 * the arguments of this Compound
 	 */
@@ -39,20 +34,26 @@ public class Compound extends Term {
 	 * @param   name   the name of this Compound
 	 * @param   args   the arguments of this Compound
 	 */
+	/*
 	protected Compound(String name) {
 		checkNotNull(name);
 		checkArgument(!name.isEmpty(), "The name of a logic variable cannot be an empty string");
 		this.name = name;
 		this.args = new ArrayList<>();
 	}
-
+	*/
+	
+	public Compound(String name, List<Term> args) {
+		this(new Atom(name), args);
+	}
+	
 	/**
 	 * Creates a Compound with name and args.
 	 * 
 	 * @param   name   the name of this Compound
 	 * @param   args   the (one or more) arguments of this Compound
 	 */
-	public Compound(String name, List<Term> args) {
+	public Compound(Term name, List<Term> args) {
 		checkNotNull(name);
 		checkNotNull(args);
 		checkArgument(!args.isEmpty(), "A compound term must have at least one argument");
@@ -60,22 +61,29 @@ public class Compound extends Term {
 		this.args = args;
 	}
 	
+	public boolean hasFunctor(String name, int arity) {
+		return hasFunctor(new Atom(name), arity);
+	}
+
 	/**
 	 * Tests whether this Compound's functor has (String) 'name' and 'arity'.
 	 * 
 	 * @return whether this Compound's functor has (String) 'name' and 'arity'
 	 */
-	@Override
-	public boolean hasFunctor(String name, int arity) {
+	
+	//@Override
+	public boolean hasFunctor(Term name, int arity) {
 		return this.name.equals(name) && args.size() == arity;
 	}
+	
+	
 	
 	/**
 	 * Returns the name (unquoted) of this Compound.
 	 * 
 	 * @return the name (unquoted) of this Compound
 	 */
-	public String name() {
+	public Term name() {
 		return name;
 	}
 	

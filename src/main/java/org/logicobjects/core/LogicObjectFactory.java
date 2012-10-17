@@ -8,9 +8,9 @@ import java.util.List;
 
 import javassist.ClassPool;
 
+import org.jpc.logicengine.LogicEngineConfiguration;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.instrumentation.LogicObjectInstrumentation;
-import org.logicobjects.logicengine.LogicEngineConfiguration;
 import org.reflections.util.ClasspathHelper;
 import org.reflectiveutils.BeansUtil;
 import org.slf4j.Logger;

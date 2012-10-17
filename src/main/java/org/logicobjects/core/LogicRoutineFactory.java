@@ -2,8 +2,8 @@ package org.logicobjects.core;
 
 import java.lang.reflect.Method;
 
+import org.jpc.logicengine.LogicEngineConfiguration;
 import org.logicobjects.annotation.method.LQuery;
-import org.logicobjects.logicengine.LogicEngineConfiguration;
 //TODO delete
 public class LogicRoutineFactory {
 /*

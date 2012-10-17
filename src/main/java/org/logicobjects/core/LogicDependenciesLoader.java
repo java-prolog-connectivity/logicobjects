@@ -10,14 +10,14 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.jpc.LogicUtil;
+import org.jpc.logicengine.LogicEngineConfiguration;
+import org.jpc.term.Term;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.adapter.LogicResourcePathAdapter;
-import org.logicobjects.logicengine.LogicEngineConfiguration;
 import org.logicobjects.resource.LogicResource;
 import org.logicobjects.resource.LogtalkResource;
 import org.logicobjects.resource.PrologResource;
-import org.logicobjects.term.Term;
-import org.logicobjects.util.LogicUtil;
 import org.reflections.util.ClasspathHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

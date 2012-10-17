@@ -1,4 +1,4 @@
-package org.logicobjects.term;
+package org.jpc.term;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -62,8 +62,8 @@ public class Variable extends Term {
 	}
 	
 	@Override
-	public boolean hasFunctor(String name, int arity) {
-		return false;
+	public boolean hasFunctor(Term nameTerm, int arity) {
+		return equals(nameTerm) && arity == 0;
 	}
 	
 }

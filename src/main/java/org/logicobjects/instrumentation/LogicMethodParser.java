@@ -27,13 +27,13 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jpc.LogicUtil;
+import org.jpc.logicengine.LogicEngine;
+import org.jpc.logicengine.LogicEngineConfiguration;
+import org.jpc.term.Term;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.core.LogicRoutine;
-import org.logicobjects.logicengine.LogicEngine;
-import org.logicobjects.logicengine.LogicEngineConfiguration;
-import org.logicobjects.term.Term;
-import org.logicobjects.util.LogicUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

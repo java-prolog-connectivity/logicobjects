@@ -3,9 +3,9 @@ package org.logicobjects.adapter.objectadapters;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import org.jpc.LogicUtil;
+import org.jpc.term.Term;
 import org.logicobjects.adapter.TermToObjectAdapter;
-import org.logicobjects.term.Term;
-import org.logicobjects.util.LogicUtil;
 
 public class TermToCalendarAdapter extends TermToObjectAdapter<Calendar> {
 

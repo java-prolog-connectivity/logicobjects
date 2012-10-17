@@ -2,9 +2,9 @@ package org.logicobjects.adapter.methodresult.eachsolution;
 
 import java.util.Map;
 
+import org.jpc.term.Term;
+import org.jpc.termvisitor.ReplaceVariableVisitor;
 import org.logicobjects.adapter.TermToObjectAdapter;
-import org.logicobjects.term.Term;
-import org.logicobjects.util.termvisitor.ReplaceVariableVisitor;
 
 public class SolutionToLObjectAdapter extends
 		EachSolutionAdapter<Object> { /* The reason this is parameterized as Object and not as Term is that though the arguments are first converted to a term, afterwards they will be converted to the return type of the method if possible */

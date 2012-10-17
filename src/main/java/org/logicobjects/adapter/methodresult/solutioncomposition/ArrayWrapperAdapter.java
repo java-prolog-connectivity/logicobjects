@@ -3,7 +3,7 @@ package org.logicobjects.adapter.methodresult.solutioncomposition;
 import java.lang.reflect.Array;
 import java.util.List;
 
-import org.logicobjects.term.Query;
+import org.jpc.term.Query;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 import org.reflectiveutils.wrappertype.ArrayTypeWrapper;
 

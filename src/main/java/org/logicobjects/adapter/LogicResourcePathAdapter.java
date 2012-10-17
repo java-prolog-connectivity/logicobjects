@@ -3,12 +3,12 @@ package org.logicobjects.adapter;
 import java.net.URL;
 import java.util.Arrays;
 
+import org.jpc.logicengine.LogicEngineConfiguration;
+import org.jpc.term.Atom;
+import org.jpc.term.Compound;
+import org.jpc.term.Term;
 import org.logicobjects.core.ResourceManager;
-import org.logicobjects.logicengine.LogicEngineConfiguration;
 import org.logicobjects.resource.LogicResource;
-import org.logicobjects.term.Atom;
-import org.logicobjects.term.Compound;
-import org.logicobjects.term.Term;
 
 /*
  * Adapt a String path as a term representation

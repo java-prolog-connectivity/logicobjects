@@ -2,8 +2,8 @@ package org.logicobjects.instrumentation;
 
 import java.util.List;
 
+import org.jpc.term.Term;
 import org.logicobjects.core.LogicRoutine;
-import org.logicobjects.term.Term;
 
 /**
  * This class represents a fully parsed logic method

@@ -3,10 +3,10 @@ package org.logicobjects.test;
 import java.net.URL;
 import java.util.Set;
 
+import org.jpc.logicengine.LogicEngine;
 import org.junit.Test;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.annotation.LObject;
-import org.logicobjects.logicengine.LogicEngine;
 import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;

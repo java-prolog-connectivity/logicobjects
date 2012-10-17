@@ -8,9 +8,9 @@ import jpl.Term;
 import jpl.Util;
 import jpl.Variable;
 
+import org.jpc.logicengine.LogicEngine;
+import org.jpc.logicengine.jpl.DefaultJplConfiguration;
 import org.junit.Test;
-import org.logicobjects.logicengine.LogicEngine;
-import org.logicobjects.logicengine.jpl.DefaultJplConfiguration;
 import org.logicobjects.test.configuration.TestSuiteJPLConfiguration;
 
 /**
@@ -52,7 +52,16 @@ public class TestJpl extends LocalLogicTest {
 	
 	@Test
 	public void testConnection() {
-		Query testQuery = new Query("true");
+		//Atom atom = new Atom("%");
+		Atom atom = new Atom("'");
+		//Atom atom = new Atom("a b c");
+		//Atom atom = new Atom("a");
+		System.out.println(atom.toString());
+		Atom atom2 = (Atom) Util.textToTerm(atom.toString());
+		System.out.println(atom2.name());
+		Atom atom3 = (Atom) Util.textToTerm("'a'");
+		System.out.println(atom3.name());
+		Query testQuery = new Query(new Atom("true"));
 		assertTrue(testQuery.hasSolution());
 	}
 	
@@ -62,7 +71,7 @@ public class TestJpl extends LocalLogicTest {
 	}
 	
 
-	@Test
+	//@Test
 	public void testMultithread0() {
 		try {
 

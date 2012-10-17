@@ -1,11 +1,11 @@
-package org.logicobjects.logicengine.jpl;
+package org.jpc.logicengine.jpl;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.logicobjects.term.Query;
-import org.logicobjects.term.Term;
+import org.jpc.term.Query;
+import org.jpc.term.Term;
 
 public class JPLQueryAdapter extends Query {
 
@@ -13,7 +13,7 @@ public class JPLQueryAdapter extends Query {
 	
 	public JPLQueryAdapter(Term goal) {
 		super(goal);
-		LogicObjectsToJPLVisitor logicObjectsToJPLVisitor = new LogicObjectsToJPLVisitor();
+		JPCToJPLVisitor logicObjectsToJPLVisitor = new JPCToJPLVisitor();
 		jpl.Term jplGoal = (jpl.Term) logicObjectsToJPLVisitor.transform(goal);
 		jplQuery = new jpl.Query(jplGoal);
 	}

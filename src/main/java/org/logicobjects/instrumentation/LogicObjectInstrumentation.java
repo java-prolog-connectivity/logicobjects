@@ -29,12 +29,12 @@ import javassist.bytecode.SignatureAttribute.TypeParameter;
 import javassist.bytecode.SignatureAttribute.TypeVariable;
 import javassist.bytecode.SyntheticAttribute;
 
+import org.jpc.logicengine.LogicEngineConfiguration;
 import org.logicobjects.adapter.BadExpressionException;
 import org.logicobjects.core.LogicBeanProperty;
 import org.logicobjects.core.LogicObjectClass;
 import org.logicobjects.core.LogicRoutine;
 import org.logicobjects.core.NoLogicResultException;
-import org.logicobjects.logicengine.LogicEngineConfiguration;
 import org.logicobjects.util.javassist.CodeGenerationUtil;
 import org.logicobjects.util.javassist.JavassistUtil;
 import org.logicobjects.util.javassist.PrimitiveTypesWorkaround;

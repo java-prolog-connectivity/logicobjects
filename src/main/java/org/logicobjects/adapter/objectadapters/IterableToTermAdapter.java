@@ -1,8 +1,8 @@
 package org.logicobjects.adapter.objectadapters;
 
+import org.jpc.term.Term;
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
-import org.logicobjects.term.Term;
 
 public class IterableToTermAdapter extends ObjectToTermAdapter<Iterable> {
 

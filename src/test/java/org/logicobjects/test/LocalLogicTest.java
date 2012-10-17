@@ -1,12 +1,12 @@
 package org.logicobjects.test;
 
+import org.jpc.LogicUtil;
+import org.jpc.logicengine.LogicEngineConfiguration;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.core.LContext;
-import org.logicobjects.logicengine.LogicEngineConfiguration;
 import org.logicobjects.test.configuration.TestSuiteJPLConfiguration;
-import org.logicobjects.util.LogicUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

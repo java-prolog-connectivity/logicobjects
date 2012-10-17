@@ -4,6 +4,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Arrays;
+import java.util.List;
 
 import org.logicobjects.util.AnnotationConstants;
 
@@ -15,8 +17,9 @@ public @interface LQuery {
 	String[] args() default {AnnotationConstants.NULL};  //if no parameters are explicitly added, the logic query will have the same parameters than the Java method
 	
 	public static class LQueryUtil {
-		public static String[] getArgs(LQuery aLQuery) {
-			return AnnotationConstants.isNullArray(aLQuery.args())?null:aLQuery.args();
+		
+		public static List<String> getArgs(LQuery aLQuery) {
+			return AnnotationConstants.isNullArray(aLQuery.args())?null:Arrays.asList(aLQuery.args());
 		}
 	}
 }

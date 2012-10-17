@@ -4,11 +4,12 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jpc.term.Term;
 import org.logicobjects.annotation.method.LExpression;
+import org.logicobjects.annotation.method.LMethod.LMethodUtil;
 import org.logicobjects.annotation.method.LQuery.LQueryUtil;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
-import org.logicobjects.term.Term;
 
 public class SimplePredicateQuery extends RawLogicQuery {
 
@@ -32,9 +33,11 @@ public class SimplePredicateQuery extends RawLogicQuery {
 	 */
 	@Override
 	public List<String> getLogicMethodArguments() {
-		if(aLQuery != null)
-			return Arrays.asList(LQueryUtil.getArgs(aLQuery));
-		return null;
+		List<String> lMethodArgs = null;
+		if(aLQuery != null) {
+			lMethodArgs = LQueryUtil.getArgs(aLQuery);
+		}
+		return lMethodArgs;
 	}
 	
 	@Override

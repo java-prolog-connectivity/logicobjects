@@ -2,7 +2,7 @@ package org.logicobjects.adapter.adaptingcontext;
 
 import java.lang.reflect.Method;
 
-import org.logicobjects.util.LogicUtil;
+import org.jpc.LogicUtil;
 
 public class MethodAdaptationContext extends AnnotatedSingleElementAdaptationContext {
 	private Method method;

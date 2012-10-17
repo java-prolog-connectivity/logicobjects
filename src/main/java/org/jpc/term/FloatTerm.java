@@ -1,4 +1,4 @@
-package org.logicobjects.term;
+package org.jpc.term;
 
 import java.util.Collections;
 import java.util.List;
@@ -61,28 +61,19 @@ public class FloatTerm extends Term {
 	}
 	
 	/**
-	 * Returns a Prolog source text representation of this Float
+	 * Returns a Prolog source text representation of this FloatTerm
 	 * 
-	 * @return  a Prolog source text representation of this Float
+	 * @return  a Prolog source text representation of this FloatTerm
 	 */
+	@Override
 	public String toString() {
-		return "" + value + "";
-	}
-
-	/**
-	 * Two Floats are equal if they are the same object, or their values are equal
-	 * 
-	 * @param   obj  The Object to compare
-	 * @return  true if the Object satisfies the above condition
-	 */
-	public final boolean equals(Object obj) {
-		return this == obj || (obj instanceof FloatTerm && value == ((FloatTerm) obj).value);
+		return ""+value;
 	}
 
 
 	@Override
-	public boolean hasFunctor(String name, int arity) {
-		return false;
+	public boolean hasFunctor(Term nameTerm, int arity) {
+		return equals(nameTerm) && arity == 0;
 	}
 
 
@@ -90,5 +81,14 @@ public class FloatTerm extends Term {
 	public List<Term> args() {
 		return Collections.emptyList();
 	}
-	
+
+	/**
+	 * Two FloatTerms are equal if they are the same object, or their values are equal
+	 * 
+	 * @param   obj  The Object to compare
+	 * @return  true if the Object satisfies the above condition
+	 */
+	public final boolean equals(Object obj) {
+		return this == obj || (obj instanceof FloatTerm && value == ((FloatTerm) obj).value);
+	}
 }

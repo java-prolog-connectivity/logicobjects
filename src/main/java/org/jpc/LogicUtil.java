@@ -1,6 +1,4 @@
-package org.logicobjects.util;
-
-import static org.logicobjects.term.Compound.newCompound;
+package org.jpc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,18 +8,18 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jpc.logicengine.LogicEngine;
+import org.jpc.logicengine.LogicEngineConfiguration;
+import org.jpc.term.Atom;
+import org.jpc.term.Compound;
+import org.jpc.term.FloatTerm;
+import org.jpc.term.IntegerTerm;
+import org.jpc.term.LException;
+import org.jpc.term.Query;
+import org.jpc.term.Term;
+import org.jpc.term.Variable;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.core.flags.LogtalkFlag;
-import org.logicobjects.logicengine.LogicEngine;
-import org.logicobjects.logicengine.LogicEngineConfiguration;
-import org.logicobjects.term.Atom;
-import org.logicobjects.term.Compound;
-import org.logicobjects.term.FloatTerm;
-import org.logicobjects.term.IntegerTerm;
-import org.logicobjects.term.LException;
-import org.logicobjects.term.Query;
-import org.logicobjects.term.Term;
-import org.logicobjects.term.Variable;
 
 /**
  * An utility class for general purpose queries and term manipulation
@@ -334,7 +332,7 @@ public class LogicUtil {
 	}
 	
 	public boolean cd(String path) {
-		Compound compound = Compound.newCompound("cd", new Atom(path));
+		Compound compound = new Compound("cd", Arrays.<Term>asList(new Atom(path)));
 		return hasSolution(compound);
 	}
 
@@ -419,14 +417,14 @@ public class LogicUtil {
 	}
 	
 	public boolean setLogtalkFlag(LogtalkFlag flag, String value) {
-		return hasSolution(newCompound("set_logtalk_flag", new Atom(flag.toString()), new Atom(value)));
+		return hasSolution(new Compound("set_logtalk_flag", Arrays.<Term>asList(new Atom(flag.toString()), new Atom(value))));
 	}
 	
 	@LMethod(name="current_object", args = {"LogtalkObject"})
 	public List<Term> currentLogtalkObjects() {
 		List<Term> currentObjects = new ArrayList<>();
 		Variable logtalkObjectVar = new Variable("LogtalkObject");
-		Compound compound = Compound.newCompound("current_object", logtalkObjectVar);
+		Compound compound = new Compound("current_object", Arrays.<Term>asList(logtalkObjectVar));
 		for(Map<String, Term> solution : allSolutions(compound)) {
 			currentObjects.add(solution.get(logtalkObjectVar.name()));
 		}

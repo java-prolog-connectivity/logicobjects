@@ -2,7 +2,7 @@ package org.logicobjects.adapter.methodresult.solutioncomposition;
 
 import java.util.List;
 
-import org.logicobjects.term.Query;
+import org.jpc.term.Query;
 
 /*
  * Adapt a logic query as a List

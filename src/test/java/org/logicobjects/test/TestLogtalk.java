@@ -4,10 +4,10 @@ import static junit.framework.Assert.assertTrue;
 
 import java.util.List;
 
+import org.jpc.term.Atom;
+import org.jpc.term.Query;
+import org.jpc.term.Term;
 import org.junit.Test;
-import org.logicobjects.term.Atom;
-import org.logicobjects.term.Query;
-import org.logicobjects.term.Term;
 
 /**
  * This class test some Logtalk functionality (to be completed)

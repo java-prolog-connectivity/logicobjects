@@ -1,4 +1,4 @@
-package org.logicobjects.term;
+package org.jpc.term;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

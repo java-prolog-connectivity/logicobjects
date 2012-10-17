@@ -1,7 +1,7 @@
 package org.logicobjects.adapter;
 
-import org.logicobjects.term.Term;
-import org.logicobjects.term.Variable;
+import org.jpc.term.Term;
+import org.jpc.term.Variable;
 
 
 

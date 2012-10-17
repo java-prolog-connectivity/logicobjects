@@ -1,4 +1,4 @@
-package org.logicobjects.term;
+package org.jpc.term;
 
 public class LException extends RuntimeException {
 

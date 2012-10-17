@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.jpc.term.Compound;
+import org.jpc.term.Term;
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
-import org.logicobjects.term.Compound;
-import org.logicobjects.term.Term;
 
 public class MapToTermAdapter extends ObjectToTermAdapter<Map> {
 

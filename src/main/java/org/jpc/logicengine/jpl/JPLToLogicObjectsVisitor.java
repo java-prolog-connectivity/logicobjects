@@ -1,17 +1,18 @@
-package org.logicobjects.logicengine.jpl;
+package org.jpc.logicengine.jpl;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.logicobjects.term.Term;
-import org.logicobjects.term.Atom;
-import org.logicobjects.term.Compound;
-import org.logicobjects.term.FloatTerm;
-import org.logicobjects.term.IntegerTerm;
-import org.logicobjects.term.LException;
-import org.logicobjects.term.Variable;
-import org.logicobjects.util.termvisitor.AbstractTransformationVisitor;
+import org.jpc.JPCPreferences;
+import org.jpc.JPCTransformationException;
+import org.jpc.term.Atom;
+import org.jpc.term.Compound;
+import org.jpc.term.FloatTerm;
+import org.jpc.term.IntegerTerm;
+import org.jpc.term.Term;
+import org.jpc.term.Variable;
+import org.jpc.termvisitor.AbstractTransformationVisitor;
 
 public class JPLToLogicObjectsVisitor extends AbstractTransformationVisitor {
 
@@ -35,7 +36,9 @@ public class JPLToLogicObjectsVisitor extends AbstractTransformationVisitor {
 			jpl.Compound compound = (jpl.Compound) source;
 			transformed = new Compound(compound.name(), transformedChildren);
 		} else
-			throw new LException("The object " + source + " is not a JPL logic term");
+			throw new JPCTransformationException("JPL",
+				JPCPreferences.JPC_SHORT_NAME,
+				"The object " + source + " is not a JPL logic term");
 		return transformed;
 	}
 	

@@ -4,10 +4,10 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import org.jpc.LogicUtil;
+import org.jpc.term.Term;
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
-import org.logicobjects.term.Term;
-import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.ReflectionUtil;
 import org.reflectiveutils.wrappertype.ArrayTypeWrapper;
 

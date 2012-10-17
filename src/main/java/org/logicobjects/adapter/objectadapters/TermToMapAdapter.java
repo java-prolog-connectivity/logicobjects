@@ -5,11 +5,11 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.jpc.LogicUtil;
+import org.jpc.term.Compound;
+import org.jpc.term.Term;
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
-import org.logicobjects.term.Compound;
-import org.logicobjects.term.Term;
-import org.logicobjects.util.LogicUtil;
 import org.reflectiveutils.wrappertype.SingleTypeWrapper;
 
 public class TermToMapAdapter extends TermToObjectAdapter<Map> {

@@ -4,6 +4,7 @@ import static org.logicobjects.LogicObjects.newLogicObject;
 
 import java.lang.reflect.Type;
 
+import org.jpc.term.Term;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.adapter.adaptingcontext.AbstractLogicObjectDescriptor;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
@@ -11,10 +12,9 @@ import org.logicobjects.adapter.adaptingcontext.AnnotatedElementAdaptationContex
 import org.logicobjects.adapter.adaptingcontext.ClassAdaptationContext;
 import org.logicobjects.core.LogicObject;
 import org.logicobjects.core.LogicObjectClass;
-import org.logicobjects.term.Term;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
 
-public class TermToAnnotatedObjectAdapter<To> extends Adapter<Term, Object> {
+public class TermToAnnotatedObjectAdapter<To> extends LogicAdapter<Term, Object> {
 
 	@Override
 	public Object adapt(Term term) {

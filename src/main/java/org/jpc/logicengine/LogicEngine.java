@@ -1,20 +1,20 @@
-package org.logicobjects.logicengine;
+package org.jpc.logicengine;
 
-import static org.logicobjects.term.Atom.FALSE_TERM;
-import static org.logicobjects.term.Atom.TRUE_TERM;
-import static org.logicobjects.term.Variable.ANONYMOUS_VAR;
+import static org.jpc.term.Atom.FALSE_TERM;
+import static org.jpc.term.Atom.TRUE_TERM;
+import static org.jpc.term.Variable.ANONYMOUS_VAR;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.jpc.LogicUtil;
+import org.jpc.term.Atom;
+import org.jpc.term.Compound;
+import org.jpc.term.Query;
+import org.jpc.term.Term;
+import org.jpc.term.Variable;
 import org.logicobjects.core.flags.PrologFlag;
-import org.logicobjects.term.Atom;
-import org.logicobjects.term.Compound;
-import org.logicobjects.term.Query;
-import org.logicobjects.term.Term;
-import org.logicobjects.term.Variable;
-import org.logicobjects.util.LogicUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

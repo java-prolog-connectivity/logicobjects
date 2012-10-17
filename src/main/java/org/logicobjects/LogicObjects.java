@@ -5,12 +5,12 @@ import java.util.Set;
 
 import javassist.ClassPool;
 
+import org.jpc.LogicUtil;
+import org.jpc.logicengine.LogicEngineConfiguration;
+import org.jpc.term.Term;
 import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.core.LContext;
 import org.logicobjects.core.LogicObjectFactory;
-import org.logicobjects.logicengine.LogicEngineConfiguration;
-import org.logicobjects.term.Term;
-import org.logicobjects.util.LogicUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

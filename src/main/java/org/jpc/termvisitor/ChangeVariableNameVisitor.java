@@ -1,11 +1,11 @@
-package org.logicobjects.util.termvisitor;
+package org.jpc.termvisitor;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.logicobjects.term.Term;
-import org.logicobjects.term.Variable;
+import org.jpc.term.Term;
+import org.jpc.term.Variable;
 
 /**
  * This visitor replace variable names for another one
