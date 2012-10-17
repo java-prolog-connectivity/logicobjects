@@ -6,8 +6,7 @@ import java.util.Set;
 import javassist.ClassPool;
 
 import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
-import org.logicobjects.context.AbstractLContext;
-import org.logicobjects.context.GlobalLContext;
+import org.logicobjects.core.LContext;
 import org.logicobjects.core.LogicObjectFactory;
 import org.logicobjects.logicengine.LogicEngineConfiguration;
 import org.logicobjects.term.Term;
@@ -89,7 +88,11 @@ public class LogicObjects {
 		logicObjects.config.setClassPool(classPool);
 	}
 	
-	public static void setContext(AbstractLContext context) {
+	public static LContext getContext() {
+		return logicObjects.config.getContext();
+	}
+	
+	public static void setContext(LContext context) {
 		logicObjects.config.setContext(context);
 	}
 	
@@ -119,7 +122,7 @@ public class LogicObjects {
 	
 	public static class Configuration {
 		private LogicObjectFactory logicObjectFactory;
-		private AbstractLContext context;
+		private LContext context;
 		private ClassPool classPool;
 		
 		public void addSearchFilter(String packageName) {
@@ -156,14 +159,14 @@ public class LogicObjects {
 				logicObjectFactory = new LogicObjectFactory(classPool);
 		}
 
-		private AbstractLContext getContext() {
+		private LContext getContext() {
 			if(context == null) {
-				context = new GlobalLContext();
+				context = new LContext(true);
 			}
 			return context;
 		}
 
-		public void setContext(AbstractLContext context) {
+		public void setContext(LContext context) {
 			this.context = context;
 		}
 	}

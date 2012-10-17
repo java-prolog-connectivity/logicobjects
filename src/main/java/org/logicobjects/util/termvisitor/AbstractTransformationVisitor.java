@@ -4,22 +4,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class AbstractTransformationVisitor {
+import org.logicobjects.term.Term;
 
-	public Object transform(Object source) {
-		List sourceChildren = getChildren(source);
-		List targetChildren = new ArrayList();
-		for(Object sourceChild : sourceChildren)
+public abstract class AbstractTransformationVisitor<From, To> {
+
+
+	
+	public To transform(From source) {
+		List<From> sourceChildren = getChildren(source);
+		List<To> targetChildren = new ArrayList();
+		for(From sourceChild : sourceChildren)
 			targetChildren.add(transform(sourceChild));
 		return doTransform(source, targetChildren);
 	}
 
-	protected abstract  Object doTransform(Object source, List transformedChildren);
+	protected abstract To doTransform(From source, List<To> transformedChildren);
 	
-	protected List getChildren(Object source) {
+	protected List<From> getChildren(From source) {
 		return Collections.emptyList();
 	}
-
 
 
 }

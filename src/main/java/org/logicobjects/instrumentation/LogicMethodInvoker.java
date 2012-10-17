@@ -13,10 +13,11 @@ import org.logicobjects.util.LogicUtil;
 public class LogicMethodInvoker {
 
 	private LogicEngineConfiguration logicEngineConfig;
-	private LogicUtil logicUtil = new LogicUtil(logicEngineConfig.getEngine());
+	private LogicUtil logicUtil;
 	
 	public LogicMethodInvoker(LogicEngineConfiguration logicEngineConfig) {
 		this.logicEngineConfig = logicEngineConfig;
+		this.logicUtil = new LogicUtil(logicEngineConfig.getEngine());
 	}
 	
 	public Object invoke(Object targetObject, Method method, Object[] argumentsArray) {

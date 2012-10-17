@@ -201,6 +201,7 @@ public class LogicObjectInstrumentation {
 		CtClass ctFieldClass = JavassistUtil.asCtClass(LogicEngineConfiguration.class, classPool);
 		CodeGenerationUtil.createField(ctFieldClass, LogicEngineConfiguration.class, LOGIC_ENGINE_CONFIG_FIELD_NAME, son);
 		CodeGenerationUtil.createGetter(LogicEngineConfiguration.class, LOGIC_ENGINE_CONFIG_FIELD_NAME, null, son);
+		CodeGenerationUtil.createSetter(LogicEngineConfiguration.class, LOGIC_ENGINE_CONFIG_FIELD_NAME, null, son);
 	}
 	
 	private void createGettersAndSetters(CtClass son) {

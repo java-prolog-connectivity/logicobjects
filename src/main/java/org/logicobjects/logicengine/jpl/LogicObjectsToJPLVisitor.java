@@ -1,8 +1,6 @@
 package org.logicobjects.logicengine.jpl;
 
-import java.util.Collections;
 import java.util.List;
-
 import org.logicobjects.term.Term;
 import org.logicobjects.term.Atom;
 import org.logicobjects.term.Compound;
@@ -10,12 +8,12 @@ import org.logicobjects.term.FloatTerm;
 import org.logicobjects.term.IntegerTerm;
 import org.logicobjects.term.LException;
 import org.logicobjects.term.Variable;
-import org.logicobjects.util.termvisitor.AbstractTransformationVisitor;
+import org.logicobjects.util.termvisitor.TermTransformationVisitor;
 
-public class LogicObjectsToJPLVisitor extends AbstractTransformationVisitor {
+public class LogicObjectsToJPLVisitor extends TermTransformationVisitor<jpl.Term> {
 
 	@Override
-	protected jpl.Term doTransform(Object source, List transformedChildren) {
+	protected jpl.Term doTransform(Term source, List<jpl.Term> transformedChildren) {
 		Class logicObjectClass = source.getClass();
 		jpl.Term transformed = null;
 		if(logicObjectClass.equals(Variable.class)) {
@@ -38,13 +36,5 @@ public class LogicObjectsToJPLVisitor extends AbstractTransformationVisitor {
 		return transformed;
 	}
 
-	@Override
-	protected List getChildren(Object source) {
-		if(source.getClass().equals(Compound.class)) {
-			Compound compound = (Compound) source;
-			return compound.args();
-		} else
-			return Collections.emptyList();
-	}
 
 }

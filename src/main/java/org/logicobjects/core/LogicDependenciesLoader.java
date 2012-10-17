@@ -88,6 +88,8 @@ public class LogicDependenciesLoader {
 		boolean prologResult;
 		boolean logtalkResult;
 		LogicEngineConfiguration engineConfig = LogicObjects.getLogicEngineConfiguration(pakkage);
+		if(engineConfig == null)
+			throw new RuntimeException();
 		LogicUtil logicUtil = new LogicUtil(engineConfig);
 		LogicResourcePathAdapter resourceAdapter = new LogicResourcePathAdapter(engineConfig, url, resourceManager);
 		

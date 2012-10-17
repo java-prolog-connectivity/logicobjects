@@ -4,8 +4,8 @@ import java.net.URL;
 import java.util.Set;
 
 import org.junit.Test;
+import org.logicobjects.LogicObjects;
 import org.logicobjects.annotation.LObject;
-import org.logicobjects.context.GlobalLContext;
 import org.logicobjects.logicengine.LogicEngine;
 import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
@@ -98,7 +98,7 @@ public class TestReflections extends LocalLogicTest {
 	@Test
 	public void testFindLogicObjectsWithFramework() {
 		//Set<Class<?>> classes = LogicObjectFactory.getDefault().getContext().getLogicClasses(); //this does not include logic classes in the test packages
-		Set<Class<?>> classes = new GlobalLContext().getLogicClasses();
+		Set<Class<?>> classes = LogicObjects.getContext().getLogicClasses();
 		System.out.println("printing logic classes: ");
 		System.out.println("Number of classes: " + classes.size());
 		for(Class clazz : classes) {

@@ -2,6 +2,7 @@ package org.logicobjects.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.logicobjects.LogicObjects.newLogicObject;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -14,50 +15,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.logicobjects.annotation.LObject;
-import org.logicobjects.core.LogicObjectFactory;
 import org.reflectiveutils.BeansUtil;
 import org.reflectiveutils.ReflectionUtil;
 import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
-import static org.logicobjects.LogicObjects.*;
 
 @RunWith(value = Parameterized.class)
 public class TestMutatorsAndAccessorsGeneration {
 
-	
-	
-	
-	
-	
-	public static class A extends org.logicobjects.test.TestMutatorsAndAccessorsGeneration.PrimitiveProperty {
-		private int f = 1;
-	}
-	
-	public static class B extends A{
-		
-		private int f = 2;
-		
-		int getF() {
-			return ((A)this).f;
-		}
-		
-	}
-	
-	public static void main(String[] args) {
-		A a = new A();
-		System.out.println(a.f);
-		A a2 = new B();
-		System.out.println(a2.f);
-		System.out.println(((B)a2).f);
-		System.out.println(new B().getF());
-	}
-	
-	
-	
-	
-	
-	
-	
-	
 	@LObject(args = {"p"})
 	public static class PrimitiveProperty {
 		int p;

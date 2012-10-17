@@ -33,14 +33,18 @@ public class LContext {
 	private Set<Class<? extends LogicEngineConfiguration>> engineConfigurations;
 	private PackagePropertiesTree packagePropertiesTree;
 	private Map<Class, LogicEngineConfiguration> engineConfigurationPool;
+	private URL systemUrl;
 	
 	public LContext(Reflections reflections) {
 		engineConfigurationPool = new HashMap<>();
+		systemUrl = ClasspathHelper.forClass(this.getClass());
 		this.reflections = reflections;
 		refresh();
 	}
 	
 	public LContext(boolean addCallerUrl) {
+		engineConfigurationPool = new HashMap<>();
+		systemUrl = ClasspathHelper.forClass(this.getClass());
 		reflections = getSystemReflections();
 		if(addCallerUrl)
 			reflections.merge(getCallerReflections());
@@ -48,7 +52,7 @@ public class LContext {
 	}
 	
 	private Reflections getSystemReflections() {
-		return getReflections(ClasspathHelper.forClass(this.getClass()));
+		return getReflections(systemUrl);
 	}
 	
 	private Reflections getCallerReflections() {
@@ -93,6 +97,15 @@ public class LContext {
 	
 	public LogicEngineConfiguration getLogicEngineConfiguration(String packageName) {
 		return (LogicEngineConfiguration) packagePropertiesTree.findProperty(packageName, LogicEngineConfiguration.class);
+	}
+	
+	private <T> Set<Class<? extends T>> filterSystemClasses(Set<Class<? extends T>> unfilteredClasses) {
+		Predicate predicate = new Predicate<Class>() {
+			  public boolean apply(Class clazz) {
+			    return !ClasspathHelper.forClass(clazz).equals(systemUrl);
+			  }
+		};
+		return ReflectionUtils.getAll(unfilteredClasses, predicate);
 	}
 	
 	private Set<Class<?>> filterInterfaces(Set<Class<?>> unfilteredClasses) {
@@ -212,7 +225,8 @@ public class LContext {
 	private void refresh() {
 		logicClasses = filterInterfaces(reflections.getTypesAnnotatedWith(LObject.class));
 		compositionAdapters = filterAdapters(reflections.getSubTypesOf(Adapter.class));
-		engineConfigurations = filterAbstractClasses(reflections.getSubTypesOf(LogicEngineConfiguration.class));
+		engineConfigurations = filterAbstractClasses(reflections.getSubTypesOf(LogicEngineConfiguration.class));//remember that getSubTypesOf will work only if all the classes in the hierarchy are in the filtered urls
+		engineConfigurations = filterSystemClasses(engineConfigurations); //this check can be deleted if LogicObjects does not include any non-abstract logic engine configuration
 		packagePropertiesTree = new PackagePropertiesTree();
 		for(Class<? extends LogicEngineConfiguration> clazz : engineConfigurations) {
 			if(!ReflectionUtil.isAbstract(clazz)) {

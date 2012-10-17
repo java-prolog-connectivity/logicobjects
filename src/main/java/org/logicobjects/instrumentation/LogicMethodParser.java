@@ -447,7 +447,7 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 					replacementValue = "";
 				else {
 					Method helperMethod = targetObject.getClass().getMethod(methodName,logicMethod.getWrappedMethod().getParameterTypes());
-					Object expressionResult = helperMethod.invoke(targetObject, oldArguments); //result contains the value of the java expression
+					Object expressionResult = helperMethod.invoke(targetObject, (Object[])oldArguments.toArray()); //result contains the value of the java expression
 					Term expressionAsTerm = ObjectToTermAdapter.asTerm(expressionResult);
 					replacementValue = expressionAsTerm.toString();
 				}

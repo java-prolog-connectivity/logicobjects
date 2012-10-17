@@ -8,7 +8,7 @@ import java.util.Set;
 import org.logicobjects.term.Term;
 import org.logicobjects.term.Variable;
 
-public class CollectVariableNamesVisitor extends TermVisitor {
+public class CollectVariableNamesVisitor implements TermVisitor {
 	
 	Set<String> variableNames;
 	

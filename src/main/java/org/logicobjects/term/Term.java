@@ -180,13 +180,13 @@ public abstract class Term {
 	public Term replaceVariables(Map<String, Term> map) {
 		ReplaceVariableVisitor visitor = new ReplaceVariableVisitor(map);
 		accept(visitor);
-		return visitor.getTransformedTerm();
+		return visitor.getTransformed();
 	}
 	
 	public Term changeVariablesNames(Map<String, String> map) {
 		ChangeVariableNameVisitor visitor = new ChangeVariableNameVisitor(map);
 		accept(visitor);
-		return visitor.getTransformedTerm();
+		return visitor.getTransformed();
 	}
 	
 	public List<String> getVariablesNames() {

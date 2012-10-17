@@ -3,7 +3,7 @@ package org.logicobjects.test;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.logicobjects.LogicObjects;
-import org.logicobjects.context.SystemLContext;
+import org.logicobjects.core.LContext;
 import org.logicobjects.logicengine.LogicEngineConfiguration;
 import org.logicobjects.test.configuration.TestSuiteJPLConfiguration;
 import org.logicobjects.util.LogicUtil;
@@ -25,7 +25,7 @@ public class LocalLogicTest /*extends TestCase*/ {
 	@BeforeClass
     public static void oneTimeSetUp() {
 		logger.info("*** Setting LogicObjects search context to System");
-		LogicObjects.setContext(new SystemLContext()); //the search context is limited to the LogicObjects library
+		//LogicObjects.setContext(new LContext(false)); //the search context is limited to the LogicObjects library
 		logicEngineConfig = new TestSuiteJPLConfiguration(); 
 		logicEngineConfig.getEngine();//this will trigger the configuration of JPL and the loading of Logtalk
 		logicUtil = new LogicUtil(logicEngineConfig);

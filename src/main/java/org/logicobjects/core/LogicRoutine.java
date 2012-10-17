@@ -190,9 +190,9 @@ public abstract class LogicRoutine {
 	public List<ObjectToTermAdapter> getEachMethodArgumentAdapters() {
 		Annotation[][] parameterAnnotationsTable = getWrappedMethod().getParameterAnnotations(); //a bidimensional array with all the annotations in the method parameters
 		List<ObjectToTermAdapter> allMethodArgumentAdapters = new ArrayList<>();
-		for(int i = 0; i < parameterAnnotationsTable.length; i++) {
+		
+		for(Annotation[] parameterAnnotations : parameterAnnotationsTable) {
 			ObjectToTermAdapter methodArgumentAdapter = null;
-			Annotation[] parameterAnnotations = parameterAnnotationsTable[i];
 			for(Annotation parameterAnnotation : parameterAnnotations) {
 				LTermAdapter aLTermAdapter =  null;
 				try {
@@ -211,8 +211,9 @@ public abstract class LogicRoutine {
 					
 				}
 			}
-			allMethodArgumentAdapters.set(i, methodArgumentAdapter);
+			allMethodArgumentAdapters.add(methodArgumentAdapter);
 		}
+		
 		return allMethodArgumentAdapters;
 	}
 	
