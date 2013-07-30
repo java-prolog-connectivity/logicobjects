@@ -1,75 +1,76 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project>
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.ucl.released</groupId>
+	
+    <parent>
+		<groupId>com.github.java-prolog-connectivity</groupId>
+		<artifactId>jpc-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
 	<artifactId>logicobjects</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1-alpha-SNAPSHOT</version>
+	
+	<name>LogicObjects</name>
+	<description>A Linguistic Symbiosis Framework for Java and Prolog</description>
+	<packaging>jar</packaging>
+	<url>https://github.com/sergio-castro/logicobjects</url>
+	
+	<licenses>
+	    <license>
+	      <name>GNU General Public License</name>
+	      <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+	    </license>
+    </licenses>
+  
+	<scm>
+		<connection>scm:git:git@github.com:sergio-castro/logicobjects.git</connection>
+		<developerConnection>scm:git:git@github.com:sergio-castro/logicobjects.git</developerConnection>
+		<url>git@github.com:sergio-castro/logicobjects.git</url>
+	</scm>
+    
+    <developers>
+      <developer>
+        <name>Sergio Castro</name>
+      </developer>
+    </developers>
 
 	<repositories>
-	    <repository>
-	      <id>logicobjects-repository</id>
-	      <url>file://${basedir}/maven/repository</url>
-	    </repository>
+		<repository>
+			<id>local-project-repository</id>
+			<url>file://${basedir}/maven/repository</url>
+		</repository>
 	</repositories>
-	
-	<dependencies>
 
+	<dependencies>
 		<dependency>
-			<groupId>jpl</groupId>
-			<artifactId>jpl</artifactId>
-			<version>3.1.4-alpha</version>
+			<groupId>com.github.java-prolog-connectivity</groupId>
+			<artifactId>jpc</artifactId>
+			<version>0.0.1-alpha-SNAPSHOT</version>
 		</dependency>
 
-
- 		<dependency>
+		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
-			<version>3.17.0-GA</version> <!-- this version currently does not exist in the central Maven repository. It is provided as part of the included local repository. It includes an important improvement from Chiba -->
-			<!-- 
-			    <version>3.16.1-GA</version>
-				<version>3.15.0-GA</version>
-			 -->
+			<version>3.18.0-GA</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>14.0.1</version>
+		</dependency>
+		<!-- <dependency> <groupId>com.google.code</groupId> <artifactId>guava-reflection</artifactId> 
+			<version>0.1.3-SNAPSHOT</version> </dependency> -->
 
-		<dependency>
-    		<groupId>com.google.guava</groupId>
-    		<artifactId>guava</artifactId>
-    		<version>13.0</version>
-		</dependency>
-<!-- 
-		<dependency>
-			<groupId>com.google.code</groupId>
-			<artifactId>guava-reflection</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
-		</dependency>
- -->
- 
- <!-- 
- <dependency>
-    <groupId>commons-beanutils</groupId>
-    <artifactId>commons-beanutils-core</artifactId>
-    <version>1.8.3</version>
-</dependency>
- -->
-  
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>[1.6.4,]</version>
-		</dependency>
-		
+		<!-- <dependency> <groupId>commons-beanutils</groupId> <artifactId>commons-beanutils-core</artifactId> 
+			<version>1.8.3</version> </dependency> -->
+
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
 			<version>0.9.8</version>
-			<!-- 
-			<version>0.9.5</version>
-			 -->
-			
-			
-			
+
 			<exclusions>
 				<exclusion>
 					<groupId>javassist</groupId>
@@ -81,24 +82,7 @@
 					<artifactId>guava</artifactId>
 				</exclusion>
 			</exclusions>
-			
 		</dependency>
-		
-<!--
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>[1.6.4,]</version>
-			<optional>true</optional>
-		</dependency>
-  -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>[1.6.4,]</version>
-			<optional>true</optional>
-		</dependency>
-
 
 		<dependency>
 			<groupId>org.jibx.config.3rdparty.org.eclipse</groupId>
@@ -120,120 +104,6 @@
 			<version>[3.7,]</version>
 			<scope>provided</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.0</version>
-			<scope>test</scope>
-		</dependency>
-
 	</dependencies>
 
-
-
-
-	<build>
-		<plugins>
-
-			<plugin>
-			  <groupId>org.apache.maven.plugins</groupId>
-			  <artifactId>maven-compiler-plugin</artifactId>
-			  <version>2.1</version>
-			  <configuration>
-			    <source>1.7</source>
-			    <target>1.7</target>
-			  </configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.1.2</version> 
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.4</version>
-				
-				<configuration>
-							<includeScope>runtime</includeScope>
-							<outputDirectory>${project.build.directory}/lib</outputDirectory>	
-				</configuration>
-						
-				<executions>
-					<execution> 
-						<id>copy-dependencies</id>
-						<phase>process-resources</phase>
-						<!-- <phase>package</phase>  -->
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						
-					</execution>
-				</executions>
-			</plugin>
-
-      		<plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>jar-test-classes</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-		</plugins>
-
-
-
-		<pluginManagement>
-		    <plugins>
-		      <plugin>
-		        <groupId>org.eclipse.m2e</groupId>
-		        <artifactId>lifecycle-mapping</artifactId>
-		        <version>1.0.0</version>
-		        <configuration>
-		          <lifecycleMappingMetadata>
-		            <pluginExecutions>
-		              <pluginExecution>
-		                <pluginExecutionFilter>
-		                  <groupId>org.apache.maven.plugins</groupId>
-		                  <artifactId>maven-dependency-plugin</artifactId>
-		                  <versionRange>[1.0.0,)</versionRange>
-		                  <goals>
-		                    <goal>copy-dependencies</goal>
-		                  </goals>
-		                </pluginExecutionFilter>
-		                <action>
-		                  <ignore />
-		                </action>
-		              </pluginExecution>
-		            </pluginExecutions>
-		          </lifecycleMappingMetadata>
-		        </configuration>
-		      </plugin>
-		    </plugins>
-		  </pluginManagement>
-
-
-	</build>
-
 </project>
-

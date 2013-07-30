@@ -4,22 +4,24 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 
-import org.jpc.LogicUtil;
+import org.jpc.converter.instantiation.InstantiationManager;
+import org.jpc.term.AbstractTerm;
 import org.jpc.term.Term;
+import org.jpc.util.PrologUtil;
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
-import org.reflectiveutils.GenericsUtil;
+import org.minitoolbox.reflection.TypeUtil;
 
 public class TermToCollectionAdapter extends TermToObjectAdapter<Collection> {
 
-	public Collection adapt(Term listTerm) {
-		return adapt(listTerm, ImplementationMap.getDefault().implementationFor(Collection.class));
+	public Collection adapt(AbstractTerm listTerm) {
+		return adapt(listTerm, InstantiationManager.getDefault().implementationFor(Collection.class));
 	}
 	
 	
-	public Collection adapt(Term listTerm, Type type, AdaptationContext adaptingContext) {
+	public Collection adapt(AbstractTerm listTerm, Type type, AdaptationContext adaptingContext) {
 		Collection collection;
-		collection = (Collection) ImplementationMap.getDefault().instantiateObject(type);
+		collection = (Collection) InstantiationManager.getDefault().instantiate(type);
 		//Collection collection = new ArrayList();
 		fillCollection(listTerm, type, adaptingContext, collection);
 		return collection;
@@ -32,11 +34,11 @@ public class TermToCollectionAdapter extends TermToObjectAdapter<Collection> {
 		 * However, we need a Collection instance in order to be able to fill in its elements
 		 * (there are not "add" methods in an Iterable)
 		 */
-		List<Term> terms = LogicUtil.listToTerms(listTerm);
+		List<AbstractTerm> terms = PrologUtil.listToTerms(listTerm);
 		if(terms.size() > 0) {
-			Type[] collectionTypeParameters = new GenericsUtil().findAncestorTypeParameters(Iterable.class, type);
+			Type[] collectionTypeParameters = new TypeUtil().findAncestorTypeParameters(Iterable.class, type);
 			//Type[] typeParameters = typeWrapper.getParameters();
-			for(Term termItem : terms) {
+			for(AbstractTerm termItem : terms) {
 				collection.add(new TermToObjectAdapter().adapt(termItem, collectionTypeParameters[0], adaptingContext));
 			}
 		}

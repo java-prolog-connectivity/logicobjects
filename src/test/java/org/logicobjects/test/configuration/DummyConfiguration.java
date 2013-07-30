@@ -1,12 +1,12 @@
 package org.logicobjects.test.configuration;
 
-import org.jpc.logicengine.LogicEngine;
-import org.jpc.logicengine.LogicEngineConfiguration;
+import org.jpc.engine.prolog.PrologEngine;
+import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
 
-public class DummyConfiguration extends LogicEngineConfiguration {
+public class DummyConfiguration extends AbstractPrologEngineDriver {
 
 	@Override
-	protected LogicEngine createLogicEngine() {
+	protected PrologEngine createLogicEngine() {
 		// TODO Auto-generated method stub
 		return null;
 	}

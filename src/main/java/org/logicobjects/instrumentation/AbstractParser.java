@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jpc.term.Term;
+import org.jpc.term.AbstractTerm;
 import org.logicobjects.core.LogicObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,7 +111,7 @@ public abstract class AbstractParser {
 		for(String symbol : symbols) {
 			if(LogicMethodParser.isInstancePropertySymbol(symbol)) {
 				String property = LogicMethodParser.getPropertyName(symbol);
-				Term propertyAsTerm = null;
+				AbstractTerm propertyAsTerm = null;
 				propertyAsTerm = propertyAsTerm = LogicObject.propertyAsTerm(targetObject, property);//TODO the current implementation is rather inefficient !
 				dictionary.put(symbol, propertyAsTerm.toString());
 			}

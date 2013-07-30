@@ -10,14 +10,15 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.jpc.LogicUtil;
-import org.jpc.logicengine.LogicEngineConfiguration;
-import org.jpc.term.Term;
+import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
+import org.jpc.resource.LogicResource;
+import org.jpc.resource.LogtalkResource;
+import org.jpc.resource.PrologResource;
+import org.jpc.term.AbstractTerm;
+import org.jpc.util.PrologUtil;
+import org.jpc.util.ResourceManager;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.adapter.LogicResourcePathAdapter;
-import org.logicobjects.resource.LogicResource;
-import org.logicobjects.resource.LogtalkResource;
-import org.logicobjects.resource.PrologResource;
 import org.reflections.util.ClasspathHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,10 +88,10 @@ public class LogicDependenciesLoader {
 	public boolean simpleLoadPackage(Package pakkage, URL url) {
 		boolean prologResult;
 		boolean logtalkResult;
-		LogicEngineConfiguration engineConfig = LogicObjects.getLogicEngineConfiguration(pakkage);
+		AbstractPrologEngineDriver engineConfig = LogicObjects.getLogicEngineConfiguration(pakkage);
 		if(engineConfig == null)
 			throw new RuntimeException();
-		LogicUtil logicUtil = new LogicUtil(engineConfig);
+		PrologUtil logicUtil = new PrologUtil(engineConfig);
 		LogicResourcePathAdapter resourceAdapter = new LogicResourcePathAdapter(engineConfig, url, resourceManager);
 		
 		//LOADING PROLOG MODULES
@@ -103,7 +104,7 @@ public class LogicDependenciesLoader {
 		allModulesNames.addAll(packageModules);
 		List<LogicResource> allModules = PrologResource.asPrologResources(allModulesNames);
 
-		List<Term> moduleTerms = new ArrayList<Term>();
+		List<AbstractTerm> moduleTerms = new ArrayList<AbstractTerm>();
 		resourceAdapter.adapt(allModules, moduleTerms);
 		prologResult = logicUtil.ensureLoaded(moduleTerms); //loading prolog modules
 		if(!prologResult)
@@ -121,7 +122,7 @@ public class LogicDependenciesLoader {
 		allImportsNames.addAll(packageImports);
 		List<LogicResource> allImports = LogtalkResource.asLogtalkResources(allImportsNames);
 
-		List<Term> importTerms = new ArrayList<Term>();
+		List<AbstractTerm> importTerms = new ArrayList<AbstractTerm>();
 		resourceAdapter.adapt(allImports, importTerms);
 		
 		logtalkResult = logicUtil.logtalkLoad(importTerms); //loading Logtalk objects
@@ -143,8 +144,8 @@ public class LogicDependenciesLoader {
 	public boolean simpleLoadClass(LogicObjectClass logicObjectClass) {
 		boolean prologResult;
 		boolean logtalkResult;
-		LogicEngineConfiguration engineConfig = LogicObjects.getLogicEngineConfiguration(logicObjectClass.getWrappedClass());
-		LogicUtil logicUtil = new LogicUtil(engineConfig);
+		AbstractPrologEngineDriver engineConfig = LogicObjects.getLogicEngineConfiguration(logicObjectClass.getWrappedClass());
+		PrologUtil logicUtil = new PrologUtil(engineConfig);
 		LogicResourcePathAdapter resourceAdapter = new LogicResourcePathAdapter(engineConfig, ClasspathHelper.forClass(logicObjectClass.getWrappedClass()), resourceManager);
 		
 		//LOADING PROLOG MODULES
@@ -159,7 +160,7 @@ public class LogicDependenciesLoader {
 		
 		List<LogicResource> allModules = PrologResource.asPrologResources(allModulesNames);
 
-		List<Term> moduleTerms = new ArrayList<Term>();
+		List<AbstractTerm> moduleTerms = new ArrayList<AbstractTerm>();
 		resourceAdapter.adapt(allModules, moduleTerms);
 		
 		prologResult = logicUtil.ensureLoaded(moduleTerms); //loading prolog modules
@@ -179,7 +180,7 @@ public class LogicDependenciesLoader {
 		
 		List<LogicResource> allImports = LogtalkResource.asLogtalkResources(allImportsNames);
 		
-		List<Term> importTerms = new ArrayList<Term>();
+		List<AbstractTerm> importTerms = new ArrayList<AbstractTerm>();
 		resourceAdapter.adapt(allImports, importTerms);
 		
 		
@@ -264,7 +265,7 @@ public class LogicDependenciesLoader {
 	
 	public List<String> getDefaultPrologResources(LogicObjectClass logicObjectClass) {
 		List<String> resources = new ArrayList<>();
-		for(String ext : PrologResource.getFileExtensions()) {
+		for(String ext : PrologResource.getPrologExtensions()) {
 			getDefaultResources(logicObjectClass, ext, resources);
 		}
 		return resources;
@@ -272,7 +273,7 @@ public class LogicDependenciesLoader {
 	
 	public List<String> getDefaultLogtalkResources(LogicObjectClass logicObjectClass) {
 		List<String> resources = new ArrayList<>();
-		for(String ext : LogtalkResource.getFileExtensions()) {
+		for(String ext : LogtalkResource.getLogtalkExtensions()) {
 			getDefaultResources(logicObjectClass, ext, resources);
 		}
 		return resources;
@@ -280,7 +281,7 @@ public class LogicDependenciesLoader {
 	
 	public List<String> getDefaultResources(LogicObjectClass logicObjectClass, String fileExtension, List<String> resources) {
 		addIfResourceExists(logicObjectClass.getSimpleName(), logicObjectClass, fileExtension, resources);
-		String prologName = LogicUtil.javaClassNameToProlog(logicObjectClass.getSimpleName());
+		String prologName = PrologUtil.javaClassNameToProlog(logicObjectClass.getSimpleName());
 		if(!prologName.toUpperCase().equals(logicObjectClass.getSimpleName().toUpperCase()))
 			addIfResourceExists(prologName, logicObjectClass, fileExtension, resources);
 		String descriptorName = logicObjectClass.getLogicObjectDescriptor().name();
@@ -305,7 +306,7 @@ public class LogicDependenciesLoader {
 			String packageName = logicObjectClass.getPackage().getName();
 			String resourceName = packageName.replaceAll("\\.", "/");
 			resourceName += "/" + fileWithExtension;
-			resources.add(LogicResource.normalizeFileName(resourceName));
+			resources.add(LogicResource.suppressLogicExtension(resourceName));
 			//String urlFileName = url.getFile();
 	//		System.out.println("**************************************************************");
 	//		System.out.println(urlFileName);

@@ -5,9 +5,9 @@ import java.util.Set;
 
 import javassist.ClassPool;
 
-import org.jpc.LogicUtil;
-import org.jpc.logicengine.LogicEngineConfiguration;
+import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
 import org.jpc.term.Term;
+import org.jpc.util.PrologUtil;
 import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.core.LContext;
 import org.logicobjects.core.LogicObjectFactory;
@@ -21,8 +21,6 @@ import org.slf4j.LoggerFactory;
  */
 public class LogicObjects {
 	private static Logger logger = LoggerFactory.getLogger(LogicObjects.class);
-	
-	public static final String LOGTALK_OPERATOR = "::";
 	
 	private static LogicObjects logicObjects = bootstrapLogicObjects();
 
@@ -59,29 +57,29 @@ public class LogicObjects {
 		return logicObjects.config.getLogicObjectFactory().create(declaringObject, clazz, params);
 	}
 	
-	public static LogicEngineConfiguration getLogicEngineConfiguration(String packageName) {
-		LogicEngineConfiguration logicEngineConfig = logicObjects.config.getContext().getLogicEngineConfiguration(packageName);
+	public static AbstractPrologEngineDriver getLogicEngineConfiguration(String packageName) {
+		AbstractPrologEngineDriver logicEngineConfig = logicObjects.config.getContext().getLogicEngineConfiguration(packageName);
 		return logicEngineConfig;
 	}
 	
-	public static LogicEngineConfiguration getLogicEngineConfiguration(Package pakkage) {
+	public static AbstractPrologEngineDriver getLogicEngineConfiguration(Package pakkage) {
 		return getLogicEngineConfiguration(pakkage.getName());
 	}
 	
-	public static LogicEngineConfiguration getLogicEngineConfiguration(Class clazz) {
+	public static AbstractPrologEngineDriver getLogicEngineConfiguration(Class clazz) {
 		return getLogicEngineConfiguration(clazz.getPackage());
 	}
 	
-	public static LogicUtil getLogicUtilFor(String packageName) {
-		return new LogicUtil(getLogicEngineConfiguration(packageName).getEngine());
+	public static PrologUtil getLogicUtilFor(String packageName) {
+		return new PrologUtil(getLogicEngineConfiguration(packageName).getEngine());
 	}
 	
-	public static LogicUtil getLogicUtilFor(Package pakkage) {
-		return new LogicUtil(getLogicEngineConfiguration(pakkage).getEngine());
+	public static PrologUtil getLogicUtilFor(Package pakkage) {
+		return new PrologUtil(getLogicEngineConfiguration(pakkage).getEngine());
 	}
 	
-	public static LogicUtil getLogicUtilFor(Class clazz) {
-		return new LogicUtil(getLogicEngineConfiguration(clazz).getEngine());
+	public static PrologUtil getLogicUtilFor(Class clazz) {
+		return new PrologUtil(getLogicEngineConfiguration(clazz).getEngine());
 	}
 	
 	public static void setClassPool(ClassPool classPool) {

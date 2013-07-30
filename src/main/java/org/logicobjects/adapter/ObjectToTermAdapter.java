@@ -14,27 +14,28 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.jpc.LogicUtil;
+import org.jpc.converter.TermConvertable;
+import org.jpc.converter.instantiation.InstantiationManager;
 import org.jpc.term.Atom;
 import org.jpc.term.FloatTerm;
-import org.jpc.term.IntegerTerm;
 import org.jpc.term.Term;
+import org.jpc.term.IntegerTerm;
+import org.jpc.term.AbstractTerm;
+import org.jpc.util.PrologUtil;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.FieldAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.MethodAdaptationContext;
 import org.logicobjects.adapter.objectadapters.AnyCollectionToTermAdapter;
 import org.logicobjects.adapter.objectadapters.CalendarToTermAdapter;
-import org.logicobjects.adapter.objectadapters.ImplementationMap;
 import org.logicobjects.adapter.objectadapters.MapToTermAdapter.EntryToTermAdapter;
 import org.logicobjects.adapter.objectadapters.XMLGregorianCalendarToTermAdapter;
-import org.logicobjects.core.ITermObject;
 import org.logicobjects.core.LogicObject;
 import org.logicobjects.core.LogicObjectClass;
-import org.reflectiveutils.ReflectionUtil;
+import org.minitoolbox.reflection.ReflectionUtil;
 
 import com.google.common.primitives.Primitives;
 
-public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
+public class ObjectToTermAdapter<From> extends LogicAdapter<From, AbstractTerm> {
 	
 	@Override
 	public Term adapt(From object) {
@@ -45,7 +46,7 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 		return adapt(object, new FieldAdaptationContext(field));
 	}
 	
-	public List<Term> adaptField(List<From> objects, Field field) {
+	public List<AbstractTerm> adaptField(List<From> objects, Field field) {
 		return adaptObjects(objects, new FieldAdaptationContext(field));
 	}
 	
@@ -53,16 +54,16 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 		return adapt(object, new MethodAdaptationContext(method));
 	}
 	
-	public List<Term> adaptMethod(List<From> objects, Method method) {
+	public List<AbstractTerm> adaptMethod(List<From> objects, Method method) {
 		return adaptObjects(objects, new MethodAdaptationContext(method));
 	}
 	
-	public List<Term> adaptObjects(List<From> objects) {
+	public List<AbstractTerm> adaptObjects(List<From> objects) {
 		return adaptObjects(objects, null);
 	}
 	
-	public List<Term> adaptObjects(List<From> objects, AdaptationContext adaptingContext) {
-		List<Term> terms = new ArrayList<>();
+	public List<AbstractTerm> adaptObjects(List<From> objects, AdaptationContext adaptingContext) {
+		List<AbstractTerm> terms = new ArrayList<>();
 		for(From object : objects) {
 			terms.add(adapt(object, adaptingContext));
 		}
@@ -79,40 +80,17 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 			errorMappingFromAnnotations = true;
 			//catch the exception and do nothing if it is a collection object.
 			//that could mean that the adapting context is targeting the individual components of the collection instead of the entire collection itself
-			if(!ImplementationMap.isCollectionObject(object))  //TODO verify this...
+			if(!InstantiationManager.isCollectionObject(object))  //TODO verify this...
 				throw e;
 		}
 		if(!errorMappingFromAnnotations) {
-			if(object.getClass().equals(String.class)){
-				String text = object.toString();
-				/*
-				//check if the string represents a variable (the first character a '?', after a capital letter and some printable characters later
-				if(text.matches("\\"+VARIABLE_PREFIX+"[A-Z][\\w]*"))  //TODO verify if VARIABLE_PREFIX needs escaping with '\\'or not (this -weak- code assumes than yes)
-					return new Variable(text.substring(1, text.length()));
-				*/
-				return new Atom(text);
-			} else if(object.getClass().equals(java.lang.Byte.class)) {
-				return new IntegerTerm(java.lang.Byte.class.cast(object).byteValue());
-			} else if(object.getClass().equals(java.lang.Short.class)) {
-				return new IntegerTerm(java.lang.Short.class.cast(object).shortValue());
-			} else if(object.getClass().equals(java.lang.Integer.class)) { //better full class name to avoid confusions here
-				return new IntegerTerm(java.lang.Integer.class.cast(object).intValue());
-			}  else if(object.getClass().equals(AtomicInteger.class)) { 
-				return new IntegerTerm(AtomicInteger.class.cast(object).intValue());
-			}  else if(object.getClass().equals(java.lang.Long.class)) { //better full class name to avoid confusions here 
-				return new IntegerTerm(java.lang.Long.class.cast(object).longValue());
-			} else if(object.getClass().equals(AtomicLong.class)) { 
-				return new IntegerTerm(AtomicLong.class.cast(object).longValue());
-			} else if(object.getClass().equals(BigInteger.class)) {
-				return new IntegerTerm(BigInteger.class.cast(object).longValue());
-			} else if(object.getClass().equals(java.lang.Float.class)) { 
-				return new FloatTerm(java.lang.Float.class.cast(object).floatValue());
-			} else if(object.getClass().equals(java.lang.Double.class)) { 
-				return new FloatTerm(java.lang.Double.class.cast(object).doubleValue());
-			} else if(object.getClass().equals(BigDecimal.class)) { 
-				return new FloatTerm(BigDecimal.class.cast(object).doubleValue());
-			} else if(Primitives.isWrapperType(object.getClass())) {  //any other primitive
-				return new Atom(object.toString());
+			if(ReflectionUtil.instanceOfOne(object, 
+					String.class,
+					StringBuilder.class,
+					StringBuffer.class,
+					Boolean.class,
+					Number.class)) {
+				return AbstractTerm.newTerm(object); //default conversion
 			} else if(Calendar.class.isAssignableFrom(object.getClass())) {
 				return new CalendarToTermAdapter().adapt((Calendar) object);
 			} else if(XMLGregorianCalendar.class.isAssignableFrom(object.getClass())) {
@@ -123,16 +101,16 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 			Class guidingClass = LogicObjectClass.findGuidingClass(object.getClass());
 			if(guidingClass != null) {
 				if(LogicObjectClass.isTermObjectClass(guidingClass))
-					return ((ITermObject)object).asTerm();
+					return ((TermConvertable)object).asTerm();
 				throw new ObjectToTermException(object);  //if we arrive here something went wrong
-			} else if(object instanceof Term) {
+			} else if(object instanceof AbstractTerm) {
 				return (Term)object;
-			} else if(object instanceof ITermObject) {
-				return ((ITermObject)object).asTerm();
+			} else if(object instanceof TermConvertable) {
+				return ((TermConvertable)object).asTerm();
 			} 
 		}
 
-		if(ImplementationMap.isCollectionObject(object)) 
+		if(InstantiationManager.isCollectionObject(object)) 
 			return new AnyCollectionToTermAdapter().adapt(object, adaptingContext);
 		
 		return adaptToTermFromClass(ReflectionUtil.findFirstNonSyntheticClass(object.getClass()));
@@ -145,7 +123,7 @@ public class ObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
 	}
 	
 	protected Term adaptToTermFromClass(Class clazz) {
-		String logicObjectName = LogicUtil.javaClassNameToProlog(clazz.getSimpleName());
+		String logicObjectName = PrologUtil.javaClassNameToProlog(clazz.getSimpleName());
 		return new LogicObject(logicObjectName, Collections.emptyList()).asTerm();
 	}
 

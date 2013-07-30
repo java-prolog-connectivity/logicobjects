@@ -3,7 +3,7 @@ package org.logicobjects.test;
 import java.net.URL;
 import java.util.Set;
 
-import org.jpc.logicengine.LogicEngine;
+import org.jpc.engine.prolog.PrologEngine;
 import org.junit.Test;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.annotation.LObject;
@@ -127,7 +127,7 @@ public class TestReflections extends LocalLogicTest {
 	
 	@Test
 	public void testFindResources() {
-		URL urlLogicObjects = ClasspathHelper.forClass(LogicEngine.class);
+		URL urlLogicObjects = ClasspathHelper.forClass(PrologEngine.class);
 		Reflections reflections = new Reflections(new ConfigurationBuilder()
         //.setUrls(ClasspathHelper.forPackage("org.logicobjects"))
 		.setUrls(urlLogicObjects)
@@ -162,7 +162,7 @@ public class TestReflections extends LocalLogicTest {
 		
 		//Dir dir = Vfs.fromURL(urlLogicObjects);
 		try {
-			URL url = new URL(urlLogicObjects, "logic_lib/examples/metro/line.lgt");
+			URL url = new URL(urlLogicObjects, "org/jpc/examples/metro/line.lgt");
 			System.out.println("URL:" + url);
 			System.out.println(url.openStream().available());
 			

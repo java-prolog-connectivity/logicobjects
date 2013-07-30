@@ -9,9 +9,9 @@ import javassist.LoaderClassPath;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Plugin;
 import org.logicobjects.LogicObjects;
+import org.minitoolbox.reflection.googlereflections.eclipse.BundleUrlType;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.vfs.Vfs;
-import org.reflectiveutils.reflections4eclipse.BundleUrlType;
 
 
 public abstract class EclipsePluginConfigurator {

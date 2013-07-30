@@ -4,20 +4,20 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jpc.LogicUtil;
-import org.jpc.logicengine.LogicEngineConfiguration;
-import org.jpc.term.Query;
+import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
+import org.jpc.query.Query;
+import org.jpc.util.PrologUtil;
 import org.logicobjects.adapter.methodresult.MethodResultAdapter;
 import org.logicobjects.core.LogicRoutine;
 
 public class LogicMethodInvoker {
 
-	private LogicEngineConfiguration logicEngineConfig;
-	private LogicUtil logicUtil;
+	private AbstractPrologEngineDriver logicEngineConfig;
+	private PrologUtil logicUtil;
 	
-	public LogicMethodInvoker(LogicEngineConfiguration logicEngineConfig) {
+	public LogicMethodInvoker(AbstractPrologEngineDriver logicEngineConfig) {
 		this.logicEngineConfig = logicEngineConfig;
-		this.logicUtil = new LogicUtil(logicEngineConfig.getEngine());
+		this.logicUtil = new PrologUtil(logicEngineConfig.getEngine());
 	}
 	
 	public Object invoke(Object targetObject, Method method, Object[] argumentsArray) {
@@ -26,7 +26,7 @@ public class LogicMethodInvoker {
 			List arguments = Arrays.asList(argumentsArray);
 			ParsedLogicMethod parsedLogicMethod = logicMethod.parse(
 					targetObject, arguments);
-			Query query = logicUtil.createQuery(parsedLogicMethod.asGoal());
+			Query query = logicUtil.query(parsedLogicMethod.asGoal());
 			MethodResultAdapter resultAdapter = logicMethod
 					.getMethodAdapter(parsedLogicMethod);
 			Object result = resultAdapter.adapt(query);

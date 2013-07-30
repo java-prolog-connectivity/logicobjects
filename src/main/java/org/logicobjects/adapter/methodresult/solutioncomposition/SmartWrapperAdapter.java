@@ -3,10 +3,10 @@ package org.logicobjects.adapter.methodresult.solutioncomposition;
 
 import java.util.Set;
 
-import org.jpc.term.Query;
+import org.jpc.query.Query;
 import org.logicobjects.LogicObjects;
-import org.reflectiveutils.GenericsUtil;
-import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
+import org.minitoolbox.reflection.TypeUtil;
+import org.minitoolbox.reflection.typewrapper.TypeWrapper;
 
 public class SmartWrapperAdapter extends WrapperAdapter<Object, Object>  {
 
@@ -31,11 +31,11 @@ public class SmartWrapperAdapter extends WrapperAdapter<Object, Object>  {
 	
 	public Class findWrapperAdapterClass() {
 		Set<Class<? extends WrapperAdapter>> wrapperAdaptersClasses = LogicObjects.getWrapperAdapters();
-		AbstractTypeWrapper methodTypeWrapper = AbstractTypeWrapper.wrap(getConcreteMethodResultType());
+		TypeWrapper methodTypeWrapper = TypeWrapper.wrap(getConcreteMethodResultType());
 		
 		for(Class wrapperAdaptersClass : wrapperAdaptersClasses) {
-			AbstractTypeWrapper wrapperAdapterReturnType = AbstractTypeWrapper.wrap(new GenericsUtil().findAncestorTypeParameters(WrapperAdapter.class, wrapperAdaptersClass)[0]);
-			if(methodTypeWrapper.isAssignableFrom(wrapperAdapterReturnType.getWrappedType()))
+			TypeWrapper wrapperAdapterReturnType = TypeWrapper.wrap(new TypeUtil().findAncestorTypeParameters(WrapperAdapter.class, wrapperAdaptersClass)[0]);
+			if(methodTypeWrapper.isRawClassAssignableFrom(wrapperAdapterReturnType.getWrappedType()))
 				return wrapperAdaptersClass;
 		}
 		return null;

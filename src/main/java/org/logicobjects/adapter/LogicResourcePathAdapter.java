@@ -3,12 +3,13 @@ package org.logicobjects.adapter;
 import java.net.URL;
 import java.util.Arrays;
 
-import org.jpc.logicengine.LogicEngineConfiguration;
+import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
+import org.jpc.resource.LogicResource;
 import org.jpc.term.Atom;
 import org.jpc.term.Compound;
+import org.jpc.term.AbstractTerm;
 import org.jpc.term.Term;
-import org.logicobjects.core.ResourceManager;
-import org.logicobjects.resource.LogicResource;
+import org.jpc.util.ResourceManager;
 
 /*
  * Adapt a String path as a term representation
@@ -16,12 +17,12 @@ import org.logicobjects.resource.LogicResource;
  * or in Prolog style dir1(dir2(dir3))
  */
 
-public class LogicResourcePathAdapter extends LogicAdapter<LogicResource, Term> {
+public class LogicResourcePathAdapter extends LogicAdapter<LogicResource, AbstractTerm> {
 
 	private URL url;
 	private ResourceManager resourceManager;
 	
-	public LogicResourcePathAdapter(LogicEngineConfiguration logicEngineConfig, URL url, ResourceManager resourceManager) {
+	public LogicResourcePathAdapter(AbstractPrologEngineDriver logicEngineConfig, URL url, ResourceManager resourceManager) {
 		super(logicEngineConfig);
 		this.url = url;
 		this.resourceManager = resourceManager;
@@ -34,7 +35,7 @@ public class LogicResourcePathAdapter extends LogicAdapter<LogicResource, Term> 
 		
 		//String[] atoms = classPathFileName.split("\\."); //escaping the dot
 		
-		String resourceName = resource.normalizedFileName();
+		String resourceName = resource.getNameWithoutLogicExtension();
 		String[] tokens = resourceName.split("/");
 		
 		if(tokens.length > 1) {
@@ -46,7 +47,7 @@ public class LogicResourcePathAdapter extends LogicAdapter<LogicResource, Term> 
 			//URL url = getClass().getClassLoader().getResource(classPathFileName);
 			Term term = getLogicUtil().asTerm(tokens[0]);
 			if(term.isAtom()) {
-				String resourcePath = resourceManager.getResourcePath(((Atom)term).name(), url);
+				String resourcePath = resourceManager.getResourcePath(((Atom)term).getName(), url);
 				term = new Atom(resourcePath);
 			}
 			return term;
@@ -64,7 +65,7 @@ public class LogicResourcePathAdapter extends LogicAdapter<LogicResource, Term> 
 		return makeCompound(symbols, 0);
 	}
 	
-	private static Term makeCompound(String[] symbols, int next) {
+	private static AbstractTerm makeCompound(String[] symbols, int next) {
 		if(symbols.length == 0) //in case the original array is empty
 			return null;
 		if(next == symbols.length-1) //no more symbols to process

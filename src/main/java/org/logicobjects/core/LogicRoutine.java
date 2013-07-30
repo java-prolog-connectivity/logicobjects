@@ -7,11 +7,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.jpc.LogicUtil;
+import org.jpc.query.Query;
 import org.jpc.term.Compound;
-import org.jpc.term.Query;
+import org.jpc.term.AbstractTerm;
 import org.jpc.term.Term;
 import org.jpc.term.Variable;
+import org.jpc.util.PrologUtil;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.LogicObjectsPreferences;
 import org.logicobjects.adapter.ObjectToTermAdapter;
@@ -36,7 +37,7 @@ import org.logicobjects.annotation.method.LSolution;
 import org.logicobjects.instrumentation.LogicMethodParser;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
-import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
+import org.minitoolbox.reflection.typewrapper.TypeWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,7 @@ public abstract class LogicRoutine {
 	private Logger logger = LoggerFactory.getLogger(LogicRoutine.class);
 	private Method method;
 	//protected LogicEngineConfiguration logicEngineConfig;
-	protected LogicUtil logicUtil;
+	protected PrologUtil logicUtil;
 	
 	//private String queryString;
 	
@@ -154,7 +155,7 @@ public abstract class LogicRoutine {
 		try {
 			LSolution aLSolution = (LSolution)getAnnotation(LSolution.class);
 			if(aLSolution == null) {
-				if(Map.class.isAssignableFrom(AbstractTypeWrapper.wrap(compositionAdapter.getEachSolutionType()).asClass())) {
+				if(Map.class.isAssignableFrom(TypeWrapper.wrap(compositionAdapter.getEachSolutionType()).getRawClass())) {
 					eachSolutionAdapter = EachSolutionAdapter.EachSolutionMapAdapter.class.newInstance(); //will answer a map of logic variable bindings
 					return eachSolutionAdapter;
 				} else {
@@ -265,13 +266,13 @@ public abstract class LogicRoutine {
 		if(hasCustomMethodName()) {  //test if a method name has been indicated at the annotation
 			logicMethodName = customMethodName();
 		} else {
-			logicMethodName = LogicUtil.javaNameToProlog(getWrappedMethod().getName()); //if no name is provided in the annotation, it will be the method name after converting it to prolog naming conventions
+			logicMethodName = PrologUtil.javaNameToProlog(getWrappedMethod().getName()); //if no name is provided in the annotation, it will be the method name after converting it to prolog naming conventions
 		}
 		return logicMethodName;
 	}
 	
-	public Term getEachSolutionTerm(ParsedLogicMethod parsedLogicMethod) {
-		Term eachSolutionTerm = null;
+	public AbstractTerm getEachSolutionTerm(ParsedLogicMethod parsedLogicMethod) {
+		AbstractTerm eachSolutionTerm = null;
 		LSolution aLSolution = getAnnotation(LSolution.class);
 		if(aLSolution != null) {
 			String solutionString = parsedLogicMethod.getParsedData().getSolutionString();
@@ -295,7 +296,7 @@ public abstract class LogicRoutine {
 	 * @param parsedLogicMethod
 	 * @return
 	 */
-	public Term asTerm(ParsedLogicMethod parsedLogicMethod) {
+	public AbstractTerm asTerm(ParsedLogicMethod parsedLogicMethod) {
 		return new Compound(parsedLogicMethod.getComputedMethodName(), new ObjectToTermAdapter().adaptObjects(parsedLogicMethod.getComputedMethodArguments()));
 	}
 	
@@ -311,7 +312,7 @@ public abstract class LogicRoutine {
 		
 		//we convert the string representation of every argument in a term
 		if(hasLogicMethodArguments()) {
-			List<Term> newTermArgs = new ArrayList<Term>();
+			List<AbstractTerm> newTermArgs = new ArrayList<AbstractTerm>();
 			for(Object stringTerm : parsedLogicMethod.getParsedData().getMethodArguments()) {
 				newTermArgs.add(logicUtil.asTerm(stringTerm.toString()));
 			}

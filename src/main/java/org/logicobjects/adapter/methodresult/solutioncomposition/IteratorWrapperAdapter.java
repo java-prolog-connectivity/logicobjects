@@ -1,6 +1,6 @@
 package org.logicobjects.adapter.methodresult.solutioncomposition;
 
-import org.jpc.term.Query;
+import org.jpc.query.Query;
 
 /*
  * Adapt a logic query as an Iterator object (or any interface implemented by SolutionEnumeration, such as Enumeration)

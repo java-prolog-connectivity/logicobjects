@@ -5,22 +5,24 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.jpc.LogicUtil;
+import org.jpc.converter.instantiation.InstantiationManager;
 import org.jpc.term.Compound;
+import org.jpc.term.AbstractTerm;
 import org.jpc.term.Term;
+import org.jpc.util.PrologUtil;
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
-import org.reflectiveutils.wrappertype.SingleTypeWrapper;
+import org.minitoolbox.reflection.typewrapper.SingleTypeWrapper;
 
 public class TermToMapAdapter extends TermToObjectAdapter<Map> {
 
-	public Map adapt(Term listTerm) {
-		return adapt(listTerm, ImplementationMap.getDefault().implementationFor(Map.class));
+	public Map adapt(AbstractTerm listTerm) {
+		return adapt(listTerm, InstantiationManager.getDefault().implementationFor(Map.class));
 	}
 	
 	@Override
-	public Map adapt(Term listTerm, Type type, AdaptationContext adaptingContext) {
-		Map map = (Map) ImplementationMap.getDefault().instantiateObject(type);
+	public Map adapt(AbstractTerm listTerm, Type type, AdaptationContext adaptingContext) {
+		Map map = (Map) InstantiationManager.getDefault().instantiate(type);
 		fillMap(listTerm, type, adaptingContext, map);//this does not seem to be the right type
 		return map;
 	}
@@ -30,7 +32,7 @@ public class TermToMapAdapter extends TermToObjectAdapter<Map> {
 		//SingleTypeWrapper typeWrapper = (SingleTypeWrapper) AbstractTypeWrapper.wrap(type);
 		Type entryType = getEntryType(map);
 		//Type[] mapTypeParameters = AbstractTypeWrapper.unwrap(new GenericsUtil().findParametersInstantiations(Map.class, type));
-		for(Term termItem : LogicUtil.listToTerms(listTerm)) {
+		for(AbstractTerm termItem : PrologUtil.listToTerms(listTerm)) {
 			Entry entry = (Entry) new TermToObjectAdapter().adapt(termItem, entryType, adaptingContext);
 			map.put(entry.getKey(), entry.getValue());
 		}

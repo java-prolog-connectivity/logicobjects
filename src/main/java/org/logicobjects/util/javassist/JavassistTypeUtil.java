@@ -12,10 +12,10 @@ import javassist.bytecode.SignatureAttribute.ObjectType;
 import javassist.bytecode.SignatureAttribute.TypeArgument;
 import javassist.bytecode.SignatureAttribute.TypeVariable;
 
-import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
-import org.reflectiveutils.wrappertype.ArrayTypeWrapper;
-import org.reflectiveutils.wrappertype.SingleTypeWrapper;
-import org.reflectiveutils.wrappertype.VariableTypeWrapper;
+import org.minitoolbox.reflection.typewrapper.ArrayTypeWrapper;
+import org.minitoolbox.reflection.typewrapper.SingleTypeWrapper;
+import org.minitoolbox.reflection.typewrapper.TypeWrapper;
+import org.minitoolbox.reflection.typewrapper.VariableTypeWrapper;
 
 public class JavassistTypeUtil {
 
@@ -44,10 +44,10 @@ public class JavassistTypeUtil {
 	/////////////////instantiating a Javassist TypeVariable
 	
 	public static TypeVariable asJavassistTypeVariable(Type type) {
-		return asJavassistTypeVariable(AbstractTypeWrapper.wrap(type));
+		return asJavassistTypeVariable(TypeWrapper.wrap(type));
 	}
 	
-	public static TypeVariable asJavassistTypeVariable(AbstractTypeWrapper typeWrapper) {
+	public static TypeVariable asJavassistTypeVariable(TypeWrapper typeWrapper) {
 		VariableTypeWrapper variableTypeWrapper = (VariableTypeWrapper) typeWrapper;
 		return new TypeVariable(variableTypeWrapper.getName());
 	}
@@ -64,7 +64,7 @@ public class JavassistTypeUtil {
 	/////////////////instantiating a Javassist TypeArgument
 	
 	public static TypeArgument asJavassistTypeArgument(Type type) {
-		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
+		TypeWrapper typeWrapper = TypeWrapper.wrap(type);
 		if(typeWrapper instanceof VariableTypeWrapper && VariableTypeWrapper.class.cast(typeWrapper).isWildcard())
 			return new TypeArgument();
 		else
@@ -83,29 +83,29 @@ public class JavassistTypeUtil {
 	/////////////////instantiating a Javassist BaseType
 	
 	public static BaseType asJavassistBaseType(Type type) {
-		return asJavassistBaseType(AbstractTypeWrapper.wrap(type));
+		return asJavassistBaseType(TypeWrapper.wrap(type));
 	}
 	
-	public static BaseType asJavassistBaseType(AbstractTypeWrapper typeWrapper) {
-		return new BaseType(typeWrapper.asClass().getCanonicalName());
+	public static BaseType asJavassistBaseType(TypeWrapper typeWrapper) {
+		return new BaseType(typeWrapper.getRawClass().getCanonicalName());
 	}
 	
 	
 	/////////////////instantiating a Javassist ClassType
 	
 	public static ClassType asJavassistClassType(Type type) {
-		return asJavassistClassType(AbstractTypeWrapper.wrap(type));
+		return asJavassistClassType(TypeWrapper.wrap(type));
 	}
 	
-	public static ClassType asJavassistClassType(AbstractTypeWrapper typeWrapper) {
+	public static ClassType asJavassistClassType(TypeWrapper typeWrapper) {
 		TypeArgument[] typeArguments = null;
 		if(typeWrapper.getActualTypeArguments().length > 0)
 			typeArguments = asJavassistTypeArguments(typeWrapper.getActualTypeArguments());
 		if(typeWrapper.isMemberClass()) {
 			ClassType parent = (ClassType) asJavassistType(typeWrapper.getEnclosingClass());
-				return new NestedClassType(parent, typeWrapper.asClass().getCanonicalName(), typeArguments);
+				return new NestedClassType(parent, typeWrapper.getRawClass().getCanonicalName(), typeArguments);
 		} else {
-				return new ClassType(typeWrapper.asClass().getCanonicalName(), typeArguments); //REMEMBER: typeArguments cannot be an empty list, if there are no arguments it should be null instead !! (learned the hard way ... )
+				return new ClassType(typeWrapper.getRawClass().getCanonicalName(), typeArguments); //REMEMBER: typeArguments cannot be an empty list, if there are no arguments it should be null instead !! (learned the hard way ... )
 		}
 	}
 	
@@ -113,10 +113,10 @@ public class JavassistTypeUtil {
 	/////////////////instantiating a Javassist TypeVariable
 	
 	public static javassist.bytecode.SignatureAttribute.ArrayType asJavassistArrayType(Type type) {
-		return asJavassistArrayType(AbstractTypeWrapper.wrap(type));
+		return asJavassistArrayType(TypeWrapper.wrap(type));
 	}
 	
-	public static javassist.bytecode.SignatureAttribute.ArrayType asJavassistArrayType(AbstractTypeWrapper typeWrapper) {
+	public static javassist.bytecode.SignatureAttribute.ArrayType asJavassistArrayType(TypeWrapper typeWrapper) {
 		ArrayTypeWrapper arrayTypeWrapper = (ArrayTypeWrapper)typeWrapper;
 		return new javassist.bytecode.SignatureAttribute.ArrayType(arrayTypeWrapper.getDimension(), asJavassistType(arrayTypeWrapper.getBaseType()));
 	}
@@ -125,10 +125,10 @@ public class JavassistTypeUtil {
 	/////////////////instantiating a Javassist Type
 	
 	public static javassist.bytecode.SignatureAttribute.Type asJavassistType(Type type) {
-		return asJavassistType(AbstractTypeWrapper.wrap(type));
+		return asJavassistType(TypeWrapper.wrap(type));
 	}
 	
-	public static javassist.bytecode.SignatureAttribute.Type asJavassistType(AbstractTypeWrapper typeWrapper) {
+	public static javassist.bytecode.SignatureAttribute.Type asJavassistType(TypeWrapper typeWrapper) {
 		javassist.bytecode.SignatureAttribute.Type javassistType = null;
 		if(typeWrapper.isPrimitive()) {
 			javassistType = asJavassistBaseType(typeWrapper);

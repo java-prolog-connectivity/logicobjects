@@ -1,40 +1,18 @@
 package org.logicobjects.test;
 
-import static junit.framework.TestCase.*;
+import org.jpc.JpcPreferences;
 import org.junit.Test;
-import org.logicobjects.LogicObjectsPreferences;
 
-public class TestEnvironment extends LocalLogicTest {
+public class TestEnvironment {
 	
 	@Test
-	public void testLOGTALKHOME() {
-		verifyEnvironmentVar(LogicObjectsPreferences.LOGTALKHOME_ENV);
+	public void testLogtalkEnvVars() {
+		new JpcPreferences().getVarOrThrow(JpcPreferences.LOGTALK_HOME_ENV_VAR);
+		new JpcPreferences().getVarOrThrow(JpcPreferences.LOGTALK_HOME_ENV_VAR);
 	}
+
+
 	
-	@Test
-	public void testLOGTALKUSER() {
-		verifyEnvironmentVar(LogicObjectsPreferences.LOGTALKUSER_ENV);
-	}
-	
-	/*
-	@Test
-	public void testJPLPATH() {
-		verifyEnvironmentVar(LogicObjectsPreferences.JPLPATH);
-	}
-	*/
-	
-	/*
-	@Test
-	public void testPL() {
-		verifyEnvironmentVar(LogicObjectsPreferences.PROLOG_DIALECT);
-	}
-	*/
-	private void verifyEnvironmentVar(String var) {
-		LogicObjectsPreferences preferences = new LogicObjectsPreferences();
-		String value = preferences.getPreferenceOrEnvironment(var);
-		assertNotNull(value);
-		assertNotSame(value, "");
-		System.out.println(var+": "+value);
-	}
+
 	
 }

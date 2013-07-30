@@ -1,6 +1,6 @@
 package org.logicobjects.instrumentation;
 
-import static org.reflectiveutils.ReflectionUtil.isAbstract;
+import static org.minitoolbox.reflection.ReflectionUtil.isAbstract;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -29,7 +29,7 @@ import javassist.bytecode.SignatureAttribute.TypeParameter;
 import javassist.bytecode.SignatureAttribute.TypeVariable;
 import javassist.bytecode.SyntheticAttribute;
 
-import org.jpc.logicengine.LogicEngineConfiguration;
+import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
 import org.logicobjects.adapter.BadExpressionException;
 import org.logicobjects.core.LogicBeanProperty;
 import org.logicobjects.core.LogicObjectClass;
@@ -38,9 +38,9 @@ import org.logicobjects.core.NoLogicResultException;
 import org.logicobjects.util.javassist.CodeGenerationUtil;
 import org.logicobjects.util.javassist.JavassistUtil;
 import org.logicobjects.util.javassist.PrimitiveTypesWorkaround;
-import org.reflectiveutils.BeansUtil;
-import org.reflectiveutils.ReflectionUtil;
-import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
+import org.minitoolbox.reflection.BeansUtil;
+import org.minitoolbox.reflection.ReflectionUtil;
+import org.minitoolbox.reflection.typewrapper.TypeWrapper;
 
 public class LogicObjectInstrumentation {
 	
@@ -198,10 +198,10 @@ public class LogicObjectInstrumentation {
 	}
 
 	private void addLogicEngineProperty(CtClass son) {
-		CtClass ctFieldClass = JavassistUtil.asCtClass(LogicEngineConfiguration.class, classPool);
-		CodeGenerationUtil.createField(ctFieldClass, LogicEngineConfiguration.class, LOGIC_ENGINE_CONFIG_FIELD_NAME, son);
-		CodeGenerationUtil.createGetter(LogicEngineConfiguration.class, LOGIC_ENGINE_CONFIG_FIELD_NAME, null, son);
-		CodeGenerationUtil.createSetter(LogicEngineConfiguration.class, LOGIC_ENGINE_CONFIG_FIELD_NAME, null, son);
+		CtClass ctFieldClass = JavassistUtil.asCtClass(AbstractPrologEngineDriver.class, classPool);
+		CodeGenerationUtil.createField(ctFieldClass, AbstractPrologEngineDriver.class, LOGIC_ENGINE_CONFIG_FIELD_NAME, son);
+		CodeGenerationUtil.createGetter(AbstractPrologEngineDriver.class, LOGIC_ENGINE_CONFIG_FIELD_NAME, null, son);
+		CodeGenerationUtil.createSetter(AbstractPrologEngineDriver.class, LOGIC_ENGINE_CONFIG_FIELD_NAME, null, son);
 	}
 	
 	private void createGettersAndSetters(CtClass son) {
@@ -218,7 +218,7 @@ public class LogicObjectInstrumentation {
 			Type beanPropertyType = beanProperty.getPropertyType();
 			Class beanPropertyClass;
 			if(beanPropertyType != null)
-				beanPropertyClass = AbstractTypeWrapper.wrap(beanPropertyType).asClass();
+				beanPropertyClass = TypeWrapper.wrap(beanPropertyType).getRawClass();
 			else {//there is no property (no field, getter, or setter) with the given name in the bean, assuming the desired type of the field is Object.class
 				beanPropertyType = Object.class;
 				beanPropertyClass = Object.class;

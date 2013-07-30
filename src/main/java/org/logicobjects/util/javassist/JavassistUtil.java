@@ -22,8 +22,8 @@ import javassist.bytecode.ClassFile;
 import javassist.bytecode.MethodInfo;
 import javassist.bytecode.ParameterAnnotationsAttribute;
 
-import org.reflectiveutils.ReflectionUtil;
-import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
+import org.minitoolbox.reflection.ReflectionUtil;
+import org.minitoolbox.reflection.typewrapper.TypeWrapper;
 
 public class JavassistUtil {
 	
@@ -63,8 +63,8 @@ public class JavassistUtil {
 */
 	
 	public static CtClass asCtClass(Type type, ClassPool pool) {
-		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
-		CtClass ctClass = asCtClass(typeWrapper.asClass(), pool);
+		TypeWrapper typeWrapper = TypeWrapper.wrap(type);
+		CtClass ctClass = asCtClass(typeWrapper.getRawClass(), pool);
 		return ctClass;
 	}
 	

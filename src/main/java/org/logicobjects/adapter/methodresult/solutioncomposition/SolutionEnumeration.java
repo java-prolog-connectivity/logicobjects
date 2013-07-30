@@ -6,8 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.jpc.term.Query;
-import org.jpc.term.Term;
+import org.jpc.query.Query;
+import org.jpc.term.AbstractTerm;
 import org.logicobjects.adapter.methodresult.eachsolution.EachSolutionAdapter;
 
 /*
@@ -46,9 +46,9 @@ public class SolutionEnumeration<EachSolutionType> implements Enumeration<EachSo
 			return null;
 	}
 	
-	private List<EachSolutionType> asList(List<Map<String, Term>> solutions) {
+	private List<EachSolutionType> asList(List<Map<String, AbstractTerm>> solutions) {
 		List<EachSolutionType> answers = new ArrayList<EachSolutionType>();
-		for(Map<String, Term> aSolution : solutions) {
+		for(Map<String, AbstractTerm> aSolution : solutions) {
 			answers.add(adapter.adapt(aSolution));
 		}
 		return answers;

@@ -2,6 +2,7 @@ package org.logicobjects.instrumentation;
 
 import java.util.List;
 
+import org.jpc.term.AbstractTerm;
 import org.jpc.term.Term;
 import org.logicobjects.core.LogicRoutine;
 
@@ -83,7 +84,7 @@ public class ParsedLogicMethod {
 		return logicMethod.asGoal(this);
 	}
 	
-	public Term getEachSolutionTerm() {
+	public AbstractTerm getEachSolutionTerm() {
 		return logicMethod.getEachSolutionTerm(this);
 	}
 	

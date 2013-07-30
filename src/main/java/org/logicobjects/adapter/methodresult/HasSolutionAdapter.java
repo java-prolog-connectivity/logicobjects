@@ -1,6 +1,6 @@
 package org.logicobjects.adapter.methodresult;
 
-import org.jpc.term.Query;
+import org.jpc.query.Query;
 
 
 /*

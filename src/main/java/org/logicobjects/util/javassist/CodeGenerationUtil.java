@@ -11,13 +11,13 @@ import javassist.bytecode.SignatureAttribute.BaseType;
 import javassist.bytecode.SignatureAttribute.MethodSignature;
 import javassist.bytecode.SignatureAttribute.ObjectType;
 
-import org.reflectiveutils.BeansUtil;
-import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
+import org.minitoolbox.reflection.BeansUtil;
+import org.minitoolbox.reflection.typewrapper.TypeWrapper;
 
 public class CodeGenerationUtil {
 
 	public static CtField createField(CtClass ctFieldClass, Type fieldType, String fieldName, CtClass ctDeclaringClass) {
-		AbstractTypeWrapper wrappedType = AbstractTypeWrapper.wrap(fieldType);
+		TypeWrapper wrappedType = TypeWrapper.wrap(fieldType);
 		try {
 			CtField ctField = new CtField(ctFieldClass, fieldName, ctDeclaringClass);
 			if(wrappedType.isGenericType()) {
@@ -41,9 +41,9 @@ public class CodeGenerationUtil {
 	 */
 	public static CtMethod createGetter(Type propertyType, String propertyName, CtClass ctClassDeclaringProperty, CtClass ctClass) {
 		CtMethod ctMethod = null; 
-		AbstractTypeWrapper wrappedType = AbstractTypeWrapper.wrap(propertyType);
-		String methodName = BeansUtil.getterName(propertyName, wrappedType.asClass());
-		String returnType = wrappedType.asClass().getCanonicalName();
+		TypeWrapper wrappedType = TypeWrapper.wrap(propertyType);
+		String methodName = BeansUtil.getterName(propertyName, wrappedType.getRawClass());
+		String returnType = wrappedType.getRawClass().getCanonicalName();
 		String thiz = ctClassDeclaringProperty != null ? "((" + ctClassDeclaringProperty.getName() + ")this)." : "this.";
 		try {
 			String code = "public " + returnType + " " + methodName + "() { return " + thiz + propertyName+"; }";
@@ -64,9 +64,9 @@ public class CodeGenerationUtil {
 	
 	public static CtMethod createOverriddingGetter(Type propertyType, String propertyName, CtClass ctClass) {
 		CtMethod ctMethod = null; 
-		AbstractTypeWrapper wrappedType = AbstractTypeWrapper.wrap(propertyType);
-		String methodName = BeansUtil.getterName(propertyName, wrappedType.asClass());
-		String returnType = wrappedType.asClass().getCanonicalName();
+		TypeWrapper wrappedType = TypeWrapper.wrap(propertyType);
+		String methodName = BeansUtil.getterName(propertyName, wrappedType.getRawClass());
+		String returnType = wrappedType.getRawClass().getCanonicalName();
 		try {
 			String code = "public " + returnType + " " + methodName + "() { return super." + methodName+"(); }";
 			ctMethod = CtNewMethod.make(code, ctClass);
@@ -87,9 +87,9 @@ public class CodeGenerationUtil {
 	
 	public static CtMethod createSetter(Type propertyType, String propertyName, CtClass ctClassDeclaringProperty, CtClass ctClass) {
 		CtMethod ctMethod = null; 
-		AbstractTypeWrapper wrappedType = AbstractTypeWrapper.wrap(propertyType);
+		TypeWrapper wrappedType = TypeWrapper.wrap(propertyType);
 		String methodName = BeansUtil.setterName(propertyName);
-		String parameterType = wrappedType.asClass().getCanonicalName();
+		String parameterType = wrappedType.getRawClass().getCanonicalName();
 		String thiz = ctClassDeclaringProperty != null ? "((" + ctClassDeclaringProperty.getName() + ")this)." : "this.";
 		try {
 			String code = "public void " + methodName + "(" + parameterType + " " + propertyName + ") { " + thiz + propertyName +"=" + propertyName + "; }";
@@ -110,9 +110,9 @@ public class CodeGenerationUtil {
 	
 	public static CtMethod createOverriddingSetter(Type propertyType, String propertyName, CtClass ctClass) {
 		CtMethod ctMethod = null; 
-		AbstractTypeWrapper wrappedType = AbstractTypeWrapper.wrap(propertyType);
+		TypeWrapper wrappedType = TypeWrapper.wrap(propertyType);
 		String methodName = BeansUtil.setterName(propertyName);
-		String parameterType = wrappedType.asClass().getCanonicalName();
+		String parameterType = wrappedType.getRawClass().getCanonicalName();
 		try {
 			String code = "public void " + methodName + "(" + parameterType + " " + propertyName + ") { super." + methodName + "(" + propertyName + "); }";
 			ctMethod = CtNewMethod.make(code, ctClass);

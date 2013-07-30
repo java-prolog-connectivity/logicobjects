@@ -16,11 +16,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.jpc.LogicUtil;
-import org.jpc.logicengine.LogicEngine;
+import org.jpc.engine.prolog.PrologEngine;
+import org.jpc.term.AbstractTerm;
 import org.jpc.term.Atom;
 import org.jpc.term.Compound;
-import org.jpc.term.Term;
+import org.jpc.util.PrologUtil;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.FieldAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.MethodAdaptationContext;
@@ -30,21 +30,21 @@ import org.logicobjects.adapter.objectadapters.TermToCollectionAdapter;
 import org.logicobjects.adapter.objectadapters.TermToMapAdapter;
 import org.logicobjects.adapter.objectadapters.TermToMapAdapter.TermToEntryAdapter;
 import org.logicobjects.adapter.objectadapters.TermToXMLGregorianCalendarAdapter;
-import org.reflectiveutils.GenericsUtil;
-import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
-import org.reflectiveutils.wrappertype.ArrayTypeWrapper;
-import org.reflectiveutils.wrappertype.SingleTypeWrapper;
-import org.reflectiveutils.wrappertype.VariableTypeWrapper;
+import org.minitoolbox.reflection.TypeUtil;
+import org.minitoolbox.reflection.typewrapper.ArrayTypeWrapper;
+import org.minitoolbox.reflection.typewrapper.SingleTypeWrapper;
+import org.minitoolbox.reflection.typewrapper.TypeWrapper;
+import org.minitoolbox.reflection.typewrapper.VariableTypeWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.primitives.Primitives;
 
-public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
+public class TermToObjectAdapter<To> extends LogicAdapter<AbstractTerm, To> {
 	
 	private static Logger logger = LoggerFactory.getLogger(TermToObjectAdapter.class);
 
-	private LogicEngine engine;
+	private PrologEngine engine;
 	public TermToObjectAdapter() {
 		//engine = LogicEngine.getDefault();
 	}
@@ -56,44 +56,44 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 	 */
 	
 	@Override
-	public To adapt(Term term) {
+	public To adapt(AbstractTerm term) {
 		return adapt(term, Object.class);
 	}
 
-	public To adapt(Term term, Type type) {
+	public To adapt(AbstractTerm term, Type type) {
 		return adapt(term, type, null);
 	}
 
-	public To adaptField(Term term, Field field) {
+	public To adaptField(AbstractTerm term, Field field) {
 		return adapt(term, field.getGenericType(), new FieldAdaptationContext(field));
 	}
 	
-	public List<To> adaptField(List<Term> terms, Field field) {
+	public List<To> adaptField(List<AbstractTerm> terms, Field field) {
 		return adaptTerms(terms, field.getGenericType(), new FieldAdaptationContext(field));
 	}
 	
-	public To adaptMethod(Term term, Method method) {
+	public To adaptMethod(AbstractTerm term, Method method) {
 		return adapt(term, method.getGenericReturnType(), new MethodAdaptationContext(method));
 	}
 	
-	public List<To> adaptMethod(List<Term> terms, Method method) {
+	public List<To> adaptMethod(List<AbstractTerm> terms, Method method) {
 		return adaptTerms(terms, method.getGenericReturnType(), new MethodAdaptationContext(method));
 	}
 	
-	public List<To> adaptTerms(List<Term> terms) {
+	public List<To> adaptTerms(List<AbstractTerm> terms) {
 		return adaptTerms(terms, Object.class, null);
 	}
 	
-	public List<To> adaptTerms(List<Term> terms, Type type, AdaptationContext adaptingContext) {
+	public List<To> adaptTerms(List<AbstractTerm> terms, Type type, AdaptationContext adaptingContext) {
 		List<To> objects = new ArrayList<>();
-		for(Term term : terms) {
+		for(AbstractTerm term : terms) {
 			objects.add(adapt(term, type, adaptingContext));
 		}
 		return objects;
 	}
 	
-	public To adapt(Term term, Type type, AdaptationContext adaptingContext) {
-		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
+	public To adapt(AbstractTerm term, Type type, AdaptationContext adaptingContext) {
+		TypeWrapper typeWrapper = TypeWrapper.wrap(type);
 		boolean errorMappingFromAnnotations = false;
 		if( (typeWrapper instanceof VariableTypeWrapper) ) //the type is erased
 			return adapt(term, Object.class, adaptingContext);
@@ -110,55 +110,55 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 			try {
 				if( typeWrapper instanceof SingleTypeWrapper ) { //the type is not an array and not an erased type (but still it can be a collection)
 					SingleTypeWrapper singleTypeWrapper = SingleTypeWrapper.class.cast(typeWrapper);
-					if(term.isVariable() && !Term.class.isAssignableFrom(singleTypeWrapper.asClass())) {//found a variable, and the method is not explicitly returning terms
-						logger.warn("Attempting to transform the variable term " + term + " to an object of class " + singleTypeWrapper.asClass() + ". Transformed as null.");
+					if(term.isVariable() && !AbstractTerm.class.isAssignableFrom(singleTypeWrapper.getRawClass())) {//found a variable, and the method is not explicitly returning terms
+						logger.warn("Attempting to transform the variable term " + term + " to an object of class " + singleTypeWrapper.getRawClass() + ". Transformed as null.");
 						return null;
 					}
-					if(Entry.class.equals(singleTypeWrapper.asClass())) {
-						Type entryParameters[] = new GenericsUtil().findAncestorTypeParameters(Entry.class, singleTypeWrapper.getWrappedType());
+					if(Entry.class.equals(singleTypeWrapper.getRawClass())) {
+						Type entryParameters[] = new TypeUtil().findAncestorTypeParameters(Entry.class, singleTypeWrapper.getWrappedType());
 						return (To) new TermToEntryAdapter().adapt((Compound)term, entryParameters[0], entryParameters[1], adaptingContext);
 					}
-					if(Calendar.class.isAssignableFrom(singleTypeWrapper.asClass())) {
+					if(Calendar.class.isAssignableFrom(singleTypeWrapper.getRawClass())) {
 						return (To)new TermToCalendarAdapter().adapt(term);
 					}
-					if(XMLGregorianCalendar.class.isAssignableFrom(singleTypeWrapper.asClass())) {
+					if(XMLGregorianCalendar.class.isAssignableFrom(singleTypeWrapper.getRawClass())) {
 						return (To)new TermToXMLGregorianCalendarAdapter().adapt(term);
 					}
-					if(Number.class.isAssignableFrom(Primitives.wrap(singleTypeWrapper.asClass()))  ||  term.isNumber()) { //either the required type is a number or the term is a number
-						if( Number.class.isAssignableFrom(Primitives.wrap(singleTypeWrapper.asClass())) ) { //the required type is a number
+					if(Number.class.isAssignableFrom(Primitives.wrap(singleTypeWrapper.getRawClass()))  ||  term.isNumber()) { //either the required type is a number or the term is a number
+						if( Number.class.isAssignableFrom(Primitives.wrap(singleTypeWrapper.getRawClass())) ) { //the required type is a number
 							if(term.isAtom() || term.isNumber()) { //check if indeed the term can be converted to a number
-								if(singleTypeWrapper.asClass().isPrimitive() || Primitives.isWrapperType(singleTypeWrapper.asClass())) {
-									return (To) valueOf(singleTypeWrapper.asClass(), LogicUtil.toString(term));
+								if(singleTypeWrapper.getRawClass().isPrimitive() || Primitives.isWrapperType(singleTypeWrapper.getRawClass())) {
+									return (To) valueOf(singleTypeWrapper.getRawClass(), PrologUtil.toString(term));
 								} else { //try to convert to a numeric type that is not a primitive nor a wrapper type
-									if(singleTypeWrapper.asClass().equals(BigInteger.class))
-										return (To) BigInteger.valueOf(LogicUtil.toLong(term));
-									else if(singleTypeWrapper.asClass().equals(AtomicInteger.class))
-										return (To) new AtomicInteger(LogicUtil.toInt(term));
-									else if(singleTypeWrapper.asClass().equals(AtomicLong.class))
-										return (To) new AtomicLong((long)LogicUtil.toLong(term));
-									else if(singleTypeWrapper.asClass().equals(BigDecimal.class))
-										return (To) BigDecimal.valueOf(LogicUtil.toDouble(term));
+									if(singleTypeWrapper.getRawClass().equals(BigInteger.class))
+										return (To) BigInteger.valueOf(PrologUtil.toLong(term));
+									else if(singleTypeWrapper.getRawClass().equals(AtomicInteger.class))
+										return (To) new AtomicInteger(PrologUtil.toInt(term));
+									else if(singleTypeWrapper.getRawClass().equals(AtomicLong.class))
+										return (To) new AtomicLong((long)PrologUtil.toLong(term));
+									else if(singleTypeWrapper.getRawClass().equals(BigDecimal.class))
+										return (To) BigDecimal.valueOf(PrologUtil.toDouble(term));
 									else
 										throw new RuntimeException(); //it should never arrive here !
 								}
 							}
 						} else {
-							if(singleTypeWrapper.asClass().equals(Object.class)) //if we arrive here the term should be a number (jpl.Integer or jpl.Float)
-								return (To) LogicUtil.toNumber(term);
+							if(singleTypeWrapper.getRawClass().equals(Object.class)) //if we arrive here the term should be a number (jpl.Integer or jpl.Float)
+								return (To) PrologUtil.toNumber(term);
 						}
-					} else if (Primitives.isWrapperType( Primitives.wrap(singleTypeWrapper.asClass()))) { //checks if the class corresponds to a primitive or its wrapper. e.g., boolean, Boolean (at this point it is not a number)
-						if(Primitives.wrap(singleTypeWrapper.asClass()).equals(Character.class)) {
-							String termString = LogicUtil.toString(term);
+					} else if (Primitives.isWrapperType( Primitives.wrap(singleTypeWrapper.getRawClass()))) { //checks if the class corresponds to a primitive or its wrapper. e.g., boolean, Boolean (at this point it is not a number)
+						if(Primitives.wrap(singleTypeWrapper.getRawClass()).equals(Character.class)) {
+							String termString = PrologUtil.toString(term);
 							if(termString.length() == 1)
 								return (To) Character.valueOf(termString.charAt(0));
 							else
 								throw new RuntimeException("Impossible to transform the string " + termString + "to a single character");
 						} else
-							return (To) valueOf(singleTypeWrapper.asClass(), LogicUtil.toString(term));
-					} else if( (term.isAtom() && singleTypeWrapper.asClass().isAssignableFrom(String.class))
-							|| singleTypeWrapper.asClass().equals(String.class)) {
+							return (To) valueOf(singleTypeWrapper.getRawClass(), PrologUtil.toString(term));
+					} else if( (term.isAtom() && singleTypeWrapper.getRawClass().isAssignableFrom(String.class))
+							|| singleTypeWrapper.getRawClass().equals(String.class)) {
 						if(term.isAtom())
-							return (To) ((Atom)term).name();
+							return (To) ((Atom)term).getName();
 						else /*if(term.isVariable())
 							return (VARIABLE_PREFIX+term.name());
 						else*/
@@ -170,7 +170,7 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 							return (To) term;
 					}*/
 					
-					if(singleTypeWrapper.isAssignableFrom(Term.class))
+					if(singleTypeWrapper.isRawClassAssignableFrom(AbstractTerm.class))
 						return (To) term;
 				}
 			} catch(Exception e) {
@@ -202,15 +202,15 @@ public class TermToObjectAdapter<To> extends LogicAdapter<Term, To> {
 	}
 	
 	
-	private To adaptListTerm(Term term, Type type, AdaptationContext adaptingContext) {
-		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(type);
+	private To adaptListTerm(AbstractTerm term, Type type, AdaptationContext adaptingContext) {
+		TypeWrapper typeWrapper = TypeWrapper.wrap(type);
 		if(typeWrapper instanceof ArrayTypeWrapper) {
 			return (To) new TermToArrayAdapter().adapt(term, type, adaptingContext);
 		}
-		if(Collection.class.isAssignableFrom(typeWrapper.asClass())) {
+		if(Collection.class.isAssignableFrom(typeWrapper.getRawClass())) {
 			return (To) new TermToCollectionAdapter().adapt(term, type, adaptingContext);
 		}
-		if(Map.class.isAssignableFrom(typeWrapper.asClass())) {
+		if(Map.class.isAssignableFrom(typeWrapper.getRawClass())) {
 			return (To) new TermToMapAdapter().adapt(term, type, adaptingContext);
 		}
 		throw new TermToObjectException(term, type);

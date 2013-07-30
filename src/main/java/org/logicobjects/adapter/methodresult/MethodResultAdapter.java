@@ -3,7 +3,7 @@ package org.logicobjects.adapter.methodresult;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-import org.jpc.term.Query;
+import org.jpc.query.Query;
 import org.logicobjects.adapter.LogicAdapter;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
 

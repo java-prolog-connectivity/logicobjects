@@ -4,17 +4,18 @@ package org.logicobjects.adapter;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jpc.LogicUtil;
+import org.jpc.term.AbstractTerm;
 import org.jpc.term.Term;
+import org.jpc.util.PrologUtil;
 import org.logicobjects.adapter.adaptingcontext.AbstractLogicObjectDescriptor;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.AnnotatedElementAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.BeanPropertyAdaptationContext;
 import org.logicobjects.adapter.adaptingcontext.ClassAdaptationContext;
 import org.logicobjects.core.LogicObject;
-import org.reflectiveutils.BeansUtil;
+import org.minitoolbox.reflection.BeansUtil;
 
-public class AnnotatedObjectToTermAdapter<From> extends LogicAdapter<From, Term> {
+public class AnnotatedObjectToTermAdapter<From> extends LogicAdapter<From, AbstractTerm> {
 
 	@Override
 	public Term adapt(From object) {
@@ -54,7 +55,7 @@ public class AnnotatedObjectToTermAdapter<From> extends LogicAdapter<From, Term>
 		
 		
 
-		List<Term> arguments;
+		List<AbstractTerm> arguments;
 		String argsListPropertyName = logicObjectDescription.argsList();
 		if(argsListPropertyName != null && !argsListPropertyName.isEmpty()) {
 			BeanPropertyAdaptationContext adaptationContext = new BeanPropertyAdaptationContext(object.getClass(), argsListPropertyName);
@@ -89,7 +90,7 @@ public class AnnotatedObjectToTermAdapter<From> extends LogicAdapter<From, Term>
 	 * @return
 	 */
 	public String infereLogicObjectName(AnnotatedElementAdaptationContext annotatedContext) {
-		return LogicUtil.javaClassNameToProlog(annotatedContext.getGuidingClass().getSimpleName());
+		return PrologUtil.javaClassNameToProlog(annotatedContext.getGuidingClass().getSimpleName());
 	}
 	
 	

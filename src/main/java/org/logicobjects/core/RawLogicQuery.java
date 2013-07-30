@@ -2,7 +2,7 @@ package org.logicobjects.core;
 
 import java.lang.reflect.Method;
 
-import org.jpc.logicengine.LogicEngineConfiguration;
+import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
 import org.logicobjects.annotation.method.LExpression;
 import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.annotation.method.LSolution;

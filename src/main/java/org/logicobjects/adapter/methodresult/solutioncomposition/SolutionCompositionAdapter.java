@@ -6,9 +6,9 @@ import java.util.Map;
 
 import org.logicobjects.adapter.methodresult.MethodResultAdapter;
 import org.logicobjects.adapter.methodresult.eachsolution.EachSolutionAdapter;
-import org.reflectiveutils.GenericsUtil;
-import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
-import org.reflectiveutils.wrappertype.VariableTypeWrapper;
+import org.minitoolbox.reflection.TypeUtil;
+import org.minitoolbox.reflection.typewrapper.TypeWrapper;
+import org.minitoolbox.reflection.typewrapper.VariableTypeWrapper;
 
 /*
  * This adapter adapts one or more answers of type EachSolutionType as an object of type MethodResultType.
@@ -52,12 +52,12 @@ public abstract class SolutionCompositionAdapter<MethodResultType, EachSolutionT
 
 	
 	public Type getEachSolutionType() {
-		GenericsUtil util = new GenericsUtil();
+		TypeUtil util = new TypeUtil();
 		Type adapterWithBoundVariableTypes = util.bindTypeGivenDescendant(SolutionCompositionAdapter.class, getClass());
-		AbstractTypeWrapper wrappedAdapterType = AbstractTypeWrapper.wrap(adapterWithBoundVariableTypes);
+		TypeWrapper wrappedAdapterType = TypeWrapper.wrap(adapterWithBoundVariableTypes);
 		Type declaredMethodResultType = wrappedAdapterType.getActualTypeArguments()[0];
 		Type eachSolutionType = wrappedAdapterType.getActualTypeArguments()[1];
-		if(! (AbstractTypeWrapper.wrap(eachSolutionType) instanceof VariableTypeWrapper) )
+		if(! (TypeWrapper.wrap(eachSolutionType) instanceof VariableTypeWrapper) )
 			return eachSolutionType;
 		
 		Map<TypeVariable, Type> map = util.unifyWithDescendant(declaredMethodResultType, getConcreteMethodResultType());

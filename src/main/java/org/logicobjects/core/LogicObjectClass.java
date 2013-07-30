@@ -8,15 +8,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jpc.LogicUtil;
+import org.jpc.converter.TermConvertable;
+import org.jpc.util.PrologUtil;
 import org.logicobjects.adapter.adaptingcontext.AbstractLogicObjectDescriptor;
 import org.logicobjects.annotation.LDelegationObject;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.instrumentation.LogicClassParsingData;
-import org.reflectiveutils.ReflectionUtil;
-import org.reflectiveutils.visitor.FindFirstTypeVisitor;
-import org.reflectiveutils.visitor.TypeVisitor.InterfaceMode;
+import org.minitoolbox.reflection.ReflectionUtil;
+import org.minitoolbox.reflection.typevisitor.FindFirstTypeVisitor;
+import org.minitoolbox.reflection.typevisitor.TypeVisitor.InterfaceMode;
 
 /**
  * A class providing a description (i.e., mapping information) for instantiating logic objects
@@ -103,7 +104,7 @@ public class LogicObjectClass {
 		if(!name.isEmpty())
 			return name;
 		else
-			return LogicUtil.javaClassNameToProlog(logicClass.getSimpleName());
+			return PrologUtil.javaClassNameToProlog(logicClass.getSimpleName());
 	}
 	
 	public List<String> getLObjectArgs() {
@@ -138,7 +139,7 @@ public class LogicObjectClass {
 	}
 	
 	public static boolean isTermObjectClass(Class clazz) {
-		return ITermObject.class.isAssignableFrom(clazz);
+		return TermConvertable.class.isAssignableFrom(clazz);
 	}
 	
 	public static boolean isLogicClass(Class clazz) {

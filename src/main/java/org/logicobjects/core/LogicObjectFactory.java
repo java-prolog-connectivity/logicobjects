@@ -8,11 +8,12 @@ import java.util.List;
 
 import javassist.ClassPool;
 
-import org.jpc.logicengine.LogicEngineConfiguration;
+import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
+import org.jpc.util.ResourceManager;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.instrumentation.LogicObjectInstrumentation;
+import org.minitoolbox.reflection.BeansUtil;
 import org.reflections.util.ClasspathHelper;
-import org.reflectiveutils.BeansUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,7 +123,7 @@ public class LogicObjectFactory {
 				}
 				*/
 			}
-			LogicEngineConfiguration logicEngineConfig = LogicObjects.getLogicEngineConfiguration(clazz);
+			AbstractPrologEngineDriver logicEngineConfig = LogicObjects.getLogicEngineConfiguration(clazz);
 			BeansUtil.setProperty(logicClassInstance, LogicObjectInstrumentation.LOGIC_ENGINE_CONFIG_FIELD_NAME, logicEngineConfig);
 			return logicClassInstance;
 		} catch (Exception e) {

@@ -5,8 +5,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 
-import org.reflectiveutils.BeansUtil;
-import org.reflectiveutils.ReflectionUtil;
+import org.minitoolbox.reflection.BeansUtil;
+import org.minitoolbox.reflection.ReflectionUtil;
 
 /**
  * This class provides information about the field, getter or setter that could contain mapping information for a logic property in a class

@@ -2,8 +2,8 @@ package org.logicobjects.adapter.methodresult.eachsolution;
 
 import java.util.Map;
 
-import org.jpc.term.Term;
-import org.jpc.termvisitor.ReplaceVariableVisitor;
+import org.jpc.term.AbstractTerm;
+import org.jpc.term.visitor.deprecated.ReplaceVariableVisitor;
 import org.logicobjects.adapter.TermToObjectAdapter;
 
 public class SolutionToLObjectAdapter extends
@@ -21,7 +21,7 @@ public class SolutionToLObjectAdapter extends
 		String arg = getParsedLogicMethod().parsedResult; //the result of the logic method after replacing symbols and expressions
 		Term term = engine.textToTerm(arg);
 		*/
-		Term term = getParsedLogicMethod().getEachSolutionTerm();
+		AbstractTerm term = getParsedLogicMethod().getEachSolutionTerm();
 		term = term.replaceVariables(bindings);
 		//System.out.println("after replacing variables: "+term);
 		//Type methodType = compositionAdapter.getMethod().getGenericReturnType();

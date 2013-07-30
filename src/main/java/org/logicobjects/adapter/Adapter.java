@@ -3,7 +3,7 @@ package org.logicobjects.adapter;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
-import org.reflectiveutils.GenericsUtil;
+import org.minitoolbox.reflection.TypeUtil;
 
 /**
  * An abstract adapter
@@ -27,15 +27,15 @@ public abstract class Adapter<From, To> {
 	 * @return
 	 */
 	public static <A extends Adapter> Type[] types(Class <A> descendantAdapter) {
-		return new GenericsUtil().findAncestorTypeParameters(Adapter.class, descendantAdapter);
+		return new TypeUtil().findAncestorTypeParameters(Adapter.class, descendantAdapter);
 	}
 	
 	public static <A extends Adapter> Type fromType(Class <A> descendantAdapter) {
-		return new GenericsUtil().findAncestorTypeParameters(Adapter.class, descendantAdapter)[0];
+		return new TypeUtil().findAncestorTypeParameters(Adapter.class, descendantAdapter)[0];
 	}
 	
 	public static <A extends Adapter> Type toType(Class <A> descendantAdapter) {
-		return new GenericsUtil().findAncestorTypeParameters(Adapter.class, descendantAdapter)[1];
+		return new TypeUtil().findAncestorTypeParameters(Adapter.class, descendantAdapter)[1];
 	}
 	
 

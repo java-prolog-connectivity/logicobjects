@@ -27,10 +27,10 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jpc.LogicUtil;
-import org.jpc.logicengine.LogicEngine;
-import org.jpc.logicengine.LogicEngineConfiguration;
-import org.jpc.term.Term;
+import org.jpc.engine.prolog.AbstractPrologEngine;
+import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
+import org.jpc.term.AbstractTerm;
+import org.jpc.util.PrologUtil;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.core.LogicRoutine;
@@ -90,7 +90,7 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 	private Map<String, String> expressionsReplacementMap;
 
 	//protected LogicEngineConfiguration logicEngineConfig;
-	protected LogicUtil logicUtil;
+	protected PrologUtil logicUtil;
 	
 	//TODO the idea of the factory is to be able to look in a cache if a method has already been parsed, to do some day when having time ...
 	public static LogicMethodParser create(Method method) {
@@ -448,7 +448,7 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 				else {
 					Method helperMethod = targetObject.getClass().getMethod(methodName,logicMethod.getWrappedMethod().getParameterTypes());
 					Object expressionResult = helperMethod.invoke(targetObject, (Object[])oldArguments.toArray()); //result contains the value of the java expression
-					Term expressionAsTerm = ObjectToTermAdapter.asTerm(expressionResult);
+					AbstractTerm expressionAsTerm = ObjectToTermAdapter.asTerm(expressionResult);
 					replacementValue = expressionAsTerm.toString();
 				}
 				String delimitedJavaExpression = Pattern.quote(entry.getKey());
@@ -470,20 +470,20 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 	private Map<String, String> symbolsReplacementMap(Object targetObject, List args, List<String> symbols) {
 		Map<String, String> dictionary = propertiesSymbolsReplacementMap(targetObject, symbols);
 		if(!args.isEmpty()) {
-			List<Term> listTerms = new ArrayList<Term>();
+			List<AbstractTerm> listTerms = new ArrayList<AbstractTerm>();
 			boolean allArgumentsRequired = symbols.contains(LogicMethodParser.ALL_ARGUMENTS_SYMBOL);
 			for(int i = 0; i<args.size(); i++) {
 				String paramName = LogicMethodParser.methodArgumentSymbol(i+1);
 				if(allArgumentsRequired || symbols.contains(paramName)) {
-					Term termArgument = ObjectToTermAdapter.asTerm(args.get(i));
-					if(!termArgument.nonAnonymousVariablesNames().isEmpty())
+					AbstractTerm termArgument = ObjectToTermAdapter.asTerm(args.get(i));
+					if(!termArgument.getNamedVariablesNames().isEmpty())
 						throw new RuntimeException("Argument objects cannot contain free non-anonymous variables: "+termArgument);//in order to avoid name collisions
 					dictionary.put(paramName, termArgument.toString());
 					listTerms.add(termArgument);
 				}
 			}
 			if(allArgumentsRequired)
-				dictionary.put(LogicMethodParser.ALL_ARGUMENTS_SYMBOL, logicUtil.termsToTextSequence(listTerms));
+				dictionary.put(LogicMethodParser.ALL_ARGUMENTS_SYMBOL, logicUtil.termSequenceToString(listTerms));
 		}
 		if(symbols.contains(LogicMethodParser.THIS_METHOD_ARGUMENT_SYMBOL)) { //the symbol $0 was found
 			String thisAsTermString = dictionary.get(THIS_INSTANCE_PROPERTY_SYMBOL); //find if the synonym @this has already been translated

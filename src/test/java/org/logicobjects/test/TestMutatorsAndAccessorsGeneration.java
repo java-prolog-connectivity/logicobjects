@@ -15,9 +15,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.logicobjects.annotation.LObject;
-import org.reflectiveutils.BeansUtil;
-import org.reflectiveutils.ReflectionUtil;
-import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
+import org.minitoolbox.reflection.BeansUtil;
+import org.minitoolbox.reflection.ReflectionUtil;
+import org.minitoolbox.reflection.typewrapper.TypeWrapper;
 
 @RunWith(value = Parameterized.class)
 public class TestMutatorsAndAccessorsGeneration {
@@ -109,18 +109,18 @@ public class TestMutatorsAndAccessorsGeneration {
 			field = ReflectionUtil.getVisibleField(lo.getClass(), TESTED_FIELD);
 			assertNotNull(field);
 			Type fieldType = field.getGenericType();
-			AbstractTypeWrapper fieldTypeWrapper = AbstractTypeWrapper.wrap(fieldType);
+			TypeWrapper fieldTypeWrapper = TypeWrapper.wrap(fieldType);
 			
-			Method getterMethod = lo.getClass().getMethod(BeansUtil.getterName(TESTED_FIELD, fieldTypeWrapper.asClass()));
+			Method getterMethod = lo.getClass().getMethod(BeansUtil.getterName(TESTED_FIELD, fieldTypeWrapper.getRawClass()));
 			assertNotNull(getterMethod);
 			Type getterType = getterMethod.getGenericReturnType();
-			AbstractTypeWrapper getterTypeWrapper = AbstractTypeWrapper.wrap(getterType);
+			TypeWrapper getterTypeWrapper = TypeWrapper.wrap(getterType);
 			assertEquals(fieldTypeWrapper, getterTypeWrapper);
 			
-			Method setterMethod = lo.getClass().getMethod(BeansUtil.setterName(TESTED_FIELD), fieldTypeWrapper.asClass());
+			Method setterMethod = lo.getClass().getMethod(BeansUtil.setterName(TESTED_FIELD), fieldTypeWrapper.getRawClass());
 			assertNotNull(setterMethod);
 			Type setterParameterType = setterMethod.getGenericParameterTypes()[0];
-			AbstractTypeWrapper setterParameterTypeWrapper = AbstractTypeWrapper.wrap(setterParameterType);
+			TypeWrapper setterParameterTypeWrapper = TypeWrapper.wrap(setterParameterType);
 			assertEquals(fieldTypeWrapper, setterParameterTypeWrapper);
 			
 		} catch (SecurityException | NoSuchMethodException e) {

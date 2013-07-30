@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jpc.LogicUtil;
-import org.jpc.logicengine.LogicEngine;
+import org.jpc.engine.prolog.AbstractPrologEngine;
 import org.jpc.term.Variable;
+import org.jpc.util.PrologUtil;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.adapter.adaptingcontext.AdaptationContext;
 import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;

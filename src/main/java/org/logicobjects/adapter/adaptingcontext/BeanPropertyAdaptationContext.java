@@ -12,8 +12,8 @@ import org.logicobjects.annotation.LObjectAdapter;
 import org.logicobjects.annotation.LTermAdapter;
 import org.logicobjects.core.LogicBeanProperty;
 import org.logicobjects.core.LogicObjectClass;
-import org.reflectiveutils.ReflectionUtil;
-import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
+import org.minitoolbox.reflection.ReflectionUtil;
+import org.minitoolbox.reflection.typewrapper.TypeWrapper;
 
 public class BeanPropertyAdaptationContext extends AnnotatedElementAdaptationContext {
 

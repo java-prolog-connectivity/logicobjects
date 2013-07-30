@@ -8,24 +8,28 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.jpc.LogicUtil;
+import org.jpc.converter.TermConvertable;
+import org.jpc.engine.logtalk.LogtalkObject.LOGTALK_OPERATOR;
+import org.jpc.engine.prolog.PrologConstants;
 import org.jpc.term.Atom;
 import org.jpc.term.Compound;
 import org.jpc.term.Term;
+import org.jpc.term.AbstractTerm;
+import org.jpc.util.PrologUtil;
 import org.logicobjects.adapter.ObjectToTermAdapter;
 import org.logicobjects.adapter.TermToObjectAdapter;
 import org.logicobjects.adapter.adaptingcontext.BeanPropertyAdaptationContext;
 import org.logicobjects.adapter.objectadapters.ArrayToTermAdapter;
 import org.logicobjects.adapter.objectadapters.TermToArrayAdapter;
-import org.reflectiveutils.BeansUtil;
-import org.reflectiveutils.wrappertype.AbstractTypeWrapper;
-import org.reflectiveutils.wrappertype.ArrayTypeWrapper;
+import org.minitoolbox.reflection.BeansUtil;
+import org.minitoolbox.reflection.typewrapper.ArrayTypeWrapper;
+import org.minitoolbox.reflection.typewrapper.TypeWrapper;
 
 
-public class LogicObject implements ITermObject {
+public class LogicObject implements TermConvertable {
 
-	public static Compound logtalkMessage(Term object, String messageName, List<Term> messageArguments) {
-		return new Compound(LOGTALK_OPERATOR, Arrays.asList(object, new Compound(messageName, messageArguments)) );
+	public static Compound logtalkMessage(AbstractTerm object, String messageName, List<AbstractTerm> messageArguments) {
+		return new Compound(PrologConstants.LOGTALK_OPERATOR, Arrays.asList(object, new Compound(messageName, messageArguments)) );
 	}
 	
 	private String name;
@@ -41,11 +45,11 @@ public class LogicObject implements ITermObject {
 	}
 	
 	public LogicObject(String name, int arity) {
-		this(name, LogicUtil.anonymousVariables(arity));
+		this(name, PrologUtil.anonymousVariables(arity));
 	}
 
 	public LogicObject(Term term) {
-		this(((Compound)term).name(), new TermToObjectAdapter().adaptTerms(term.args()));
+		this(((Compound)term).getName(), new TermToObjectAdapter().adaptTerms(term.getArgs()));
 	}
 	
 	public String getName() {
@@ -66,7 +70,7 @@ public class LogicObject implements ITermObject {
 	}
 
 	@Override
-	public Term asTerm() {
+	public AbstractTerm asTerm() {
 		if( isParametrizedObject() )
 			return new Compound(getName(), new ObjectToTermAdapter().adaptObjects(getArguments()));
 		else
@@ -98,7 +102,7 @@ public class LogicObject implements ITermObject {
 	
 	
 	
-	public static void setProperty(Object lObject, String propertyName, Term term) {
+	public static void setProperty(Object lObject, String propertyName, AbstractTerm term) {
 		BeanPropertyAdaptationContext adaptationContext = new BeanPropertyAdaptationContext(lObject.getClass(), propertyName);
 		Object value = new TermToObjectAdapter().adapt(term, adaptationContext.getPropertyType(), adaptationContext);
 		BeansUtil.setProperty(lObject, propertyName, value, adaptationContext.getGuidingClass());
@@ -107,10 +111,10 @@ public class LogicObject implements ITermObject {
 	public static void setPropertiesArray(Object lObject, String argsList, Term term) {
 		BeanPropertyAdaptationContext adaptationContext = new BeanPropertyAdaptationContext(lObject.getClass(), argsList);
 		Field field = adaptationContext.getPropertyField();
-		AbstractTypeWrapper typeWrapper = AbstractTypeWrapper.wrap(field.getGenericType());
+		TypeWrapper typeWrapper = TypeWrapper.wrap(field.getGenericType());
 		if(!(typeWrapper instanceof ArrayTypeWrapper))
 			throw new RuntimeException("The property " + argsList + " is not an array instance variable in object " + lObject);
-		List<Term> termArguments = term.args();
+		List<AbstractTerm> termArguments = term.getArgs();
 		Object adaptedArgs = new TermToObjectAdapter().adaptTerms(termArguments, adaptationContext.getPropertyType(), adaptationContext);
 		BeansUtil.setProperty(lObject, argsList, adaptedArgs, adaptationContext.getGuidingClass());
 	}
@@ -121,11 +125,11 @@ public class LogicObject implements ITermObject {
 		}
 	}
 
-	public static List<Term> propertiesAsTerms(Object object, List<String> propertyNames) {
-		List<Term> arguments = new ArrayList<Term>();
+	public static List<AbstractTerm> propertiesAsTerms(Object object, List<String> propertyNames) {
+		List<AbstractTerm> arguments = new ArrayList<AbstractTerm>();
 		for(String propertyName : propertyNames) {
 			try {
-				Term term = propertyAsTerm(object, propertyName);
+				AbstractTerm term = propertyAsTerm(object, propertyName);
 				arguments.add(term);
 			} catch(Exception e) {
 				throw new RuntimeException(e);
@@ -134,8 +138,8 @@ public class LogicObject implements ITermObject {
 		return arguments;
 	}
 	
-	public static Term propertyAsTerm(Object lObject, String propertyName) {
-		Term propertyAsTerm = null;
+	public static AbstractTerm propertyAsTerm(Object lObject, String propertyName) {
+		AbstractTerm propertyAsTerm = null;
 		if(propertyName.equals("this"))
 			propertyAsTerm = new ObjectToTermAdapter().adapt(lObject);
 		else {

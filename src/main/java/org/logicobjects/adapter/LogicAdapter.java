@@ -3,8 +3,8 @@ package org.logicobjects.adapter;
 import java.util.Collections;
 import java.util.List;
 
-import org.jpc.LogicUtil;
-import org.jpc.logicengine.LogicEngineConfiguration;
+import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
+import org.jpc.util.PrologUtil;
 
 /**
  * Parent of all logic adapters (adapters that convert to/from terms) in the system
@@ -12,14 +12,14 @@ import org.jpc.logicengine.LogicEngineConfiguration;
  */
 public abstract class LogicAdapter<From, To> extends Adapter<From, To> {
 	private List parameters;
-	private LogicEngineConfiguration logicEngineConfiguration;
-	private LogicUtil logicUtil;
+	private AbstractPrologEngineDriver logicEngineConfiguration;
+	private PrologUtil logicUtil;
 	
 	public LogicAdapter() {
 		setParameters(Collections.emptyList());
 	}
 
-	public LogicAdapter(LogicEngineConfiguration logicEngineConfiguration) {
+	public LogicAdapter(AbstractPrologEngineDriver logicEngineConfiguration) {
 		setParameters(Collections.emptyList());
 		setLogicEngineConfiguration(logicEngineConfiguration);
 	}
@@ -28,16 +28,16 @@ public abstract class LogicAdapter<From, To> extends Adapter<From, To> {
 		this.parameters = parameters;
 	}
 
-	public LogicEngineConfiguration getLogicEngineConfiguration() {
+	public AbstractPrologEngineDriver getLogicEngineConfiguration() {
 		return logicEngineConfiguration;
 	}
 
-	public void setLogicEngineConfiguration(LogicEngineConfiguration logicEngineConfiguration) {
+	public void setLogicEngineConfiguration(AbstractPrologEngineDriver logicEngineConfiguration) {
 		this.logicEngineConfiguration = logicEngineConfiguration;
-		logicUtil = new LogicUtil(logicEngineConfiguration.getEngine());
+		logicUtil = new PrologUtil(logicEngineConfiguration.getEngine());
 	}
 
-	public LogicUtil getLogicUtil() {
+	public PrologUtil getLogicUtil() {
 		return logicUtil;
 	}
 

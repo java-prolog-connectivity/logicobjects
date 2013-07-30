@@ -1,7 +1,7 @@
 package org.logicobjects.test;
 
-import org.jpc.LogicUtil;
-import org.jpc.logicengine.LogicEngineConfiguration;
+import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
+import org.jpc.util.PrologUtil;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.logicobjects.LogicObjects;
@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 public class LocalLogicTest /*extends TestCase*/ {
 
 	private static Logger logger = LoggerFactory.getLogger(LocalLogicTest.class);
-	public static LogicEngineConfiguration logicEngineConfig;
-	public static LogicUtil logicUtil;
+	public static AbstractPrologEngineDriver logicEngineConfig;
+	public static PrologUtil logicUtil;
 	
 	@BeforeClass
     public static void oneTimeSetUp() {
@@ -28,7 +28,7 @@ public class LocalLogicTest /*extends TestCase*/ {
 		//LogicObjects.setContext(new LContext(false)); //the search context is limited to the LogicObjects library
 		logicEngineConfig = new TestSuiteJPLConfiguration(); 
 		logicEngineConfig.getEngine();//this will trigger the configuration of JPL and the loading of Logtalk
-		logicUtil = new LogicUtil(logicEngineConfig);
+		logicUtil = new PrologUtil(logicEngineConfig);
     }
 	
 	@Before

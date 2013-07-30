@@ -1,6 +1,6 @@
 package org.logicobjects.test.configuration;
 
-import org.jpc.logicengine.jpl.DefaultJplConfiguration;
+import org.jpc.engine.jpl.DefaultJplConfiguration;
 
 public class TestSuiteJPLConfiguration extends DefaultJplConfiguration {
 

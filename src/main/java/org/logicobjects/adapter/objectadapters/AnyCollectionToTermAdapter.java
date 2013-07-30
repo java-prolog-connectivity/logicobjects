@@ -27,7 +27,7 @@ public class AnyCollectionToTermAdapter extends ObjectToTermAdapter<Object> {
 		} 
 		throw new ObjectToTermException(object);
 	}
-
+	
 }
 
 

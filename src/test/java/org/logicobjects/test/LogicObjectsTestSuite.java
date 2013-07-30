@@ -1,9 +1,9 @@
 package org.logicobjects.test;
 
+import org.jpc.term.examples.metro.MetroTestSuite;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import org.logicobjects.test.lib.examples.metro.MetroTestSuite;
-import org.reflectiveutils.test.ReflectiveUtilsTestSuite;
+import org.minitoolbox.test.ReflectiveUtilsTestSuite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
