@@ -18,7 +18,7 @@ import org.jpc.term.AbstractTerm;
 import org.jpc.util.PrologUtil;
 import org.jpc.util.ResourceManager;
 import org.logicobjects.LogicObjects;
-import org.logicobjects.adapter.LogicResourcePathAdapter;
+import org.logicobjects.converter.old.LogicResourcePathAdapter;
 import org.reflections.util.ClasspathHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,9 +61,9 @@ public class LogicDependenciesLoader {
 	public boolean loadDependencies(Class clazz) {
 		boolean result = true;
 		if(!isClassLoaded(clazz)) {
-			List<LogicObjectClass> logicObjectClasses = LogicObjectClass.findAllLogicObjectClasses(clazz);
+			List<LogicClass> logicObjectClasses = LogicClass.findAllLogicObjectClasses(clazz);
 			Collections.reverse(logicObjectClasses); //load top down
-			for(LogicObjectClass logicObjectClass : logicObjectClasses) {
+			for(LogicClass logicObjectClass : logicObjectClasses) {
 				if(!loadDependencies(logicObjectClass))
 					result = false;
 			}
@@ -72,7 +72,7 @@ public class LogicDependenciesLoader {
 	}
 	
 	
-	public boolean loadDependencies(LogicObjectClass logicObjectClass) {
+	public boolean loadDependencies(LogicClass logicObjectClass) {
 		if(isClassLoaded(logicObjectClass.getWrappedClass()))
 			return true;
 		Package pakkage = logicObjectClass.getWrappedClass().getPackage();
@@ -141,7 +141,7 @@ public class LogicDependenciesLoader {
 	
 	
 	
-	public boolean simpleLoadClass(LogicObjectClass logicObjectClass) {
+	public boolean simpleLoadClass(LogicClass logicObjectClass) {
 		boolean prologResult;
 		boolean logtalkResult;
 		AbstractPrologEngineDriver engineConfig = LogicObjects.getLogicEngineConfiguration(logicObjectClass.getWrappedClass());
@@ -263,7 +263,7 @@ public class LogicDependenciesLoader {
 	
 	
 	
-	public List<String> getDefaultPrologResources(LogicObjectClass logicObjectClass) {
+	public List<String> getDefaultPrologResources(LogicClass logicObjectClass) {
 		List<String> resources = new ArrayList<>();
 		for(String ext : PrologResource.getPrologExtensions()) {
 			getDefaultResources(logicObjectClass, ext, resources);
@@ -271,7 +271,7 @@ public class LogicDependenciesLoader {
 		return resources;
 	}
 	
-	public List<String> getDefaultLogtalkResources(LogicObjectClass logicObjectClass) {
+	public List<String> getDefaultLogtalkResources(LogicClass logicObjectClass) {
 		List<String> resources = new ArrayList<>();
 		for(String ext : LogtalkResource.getLogtalkExtensions()) {
 			getDefaultResources(logicObjectClass, ext, resources);
@@ -279,7 +279,7 @@ public class LogicDependenciesLoader {
 		return resources;
 	}
 	
-	public List<String> getDefaultResources(LogicObjectClass logicObjectClass, String fileExtension, List<String> resources) {
+	public List<String> getDefaultResources(LogicClass logicObjectClass, String fileExtension, List<String> resources) {
 		addIfResourceExists(logicObjectClass.getSimpleName(), logicObjectClass, fileExtension, resources);
 		String prologName = PrologUtil.javaClassNameToProlog(logicObjectClass.getSimpleName());
 		if(!prologName.toUpperCase().equals(logicObjectClass.getSimpleName().toUpperCase()))
@@ -293,7 +293,7 @@ public class LogicDependenciesLoader {
 	}
 	
 	
-	private boolean addIfResourceExists(String fileName, LogicObjectClass logicObjectClass, String fileExtension, List<String> resources) {
+	private boolean addIfResourceExists(String fileName, LogicClass logicObjectClass, String fileExtension, List<String> resources) {
 		if(fileName == null || fileName.equals(""))
 			return false;
 		/**

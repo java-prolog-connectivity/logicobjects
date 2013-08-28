@@ -9,10 +9,9 @@ import java.util.Set;
 
 import org.jpc.term.Compound;
 import org.jpc.term.Term;
-import org.logicobjects.adapter.Adapter;
-import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.annotation.IgnoreLAdapter;
 import org.logicobjects.annotation.LObject;
+import org.logicobjects.methodadapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.minitoolbox.PackagePropertiesTree;
 import org.minitoolbox.reflection.ReflectionUtil;
 import org.minitoolbox.reflection.googlereflections.GoogleReflectionsUtil;
@@ -178,7 +177,6 @@ public class LContext {
 			if(!ReflectionUtil.isAbstract(clazz)) {
 				LogicEngineConfiguration logicEngineConfiguration = getLogicEngineConfigInstance(clazz);
 				if(logicEngineConfiguration.isEnabled()) {
-					
 					for(String packageName : logicEngineConfiguration.getScope()) {
 						packagePropertiesTree.addProperty(packageName, LogicEngineConfiguration.class, logicEngineConfiguration, false);
 					}

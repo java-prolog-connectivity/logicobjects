@@ -14,12 +14,12 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.TYPE, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-//TODO Maybe choose a better name ? LMethodDispatcher, LMethodInvoker, LProxyObject, LPseudoObject ...
+//TODO Maybe choose a better name ? e.g. LMethodDispatcher, LMethodInvoker, LProxyObject, LPseudoObject ...
 public @interface LDelegationObject {
 	String name() default "";  //the name of the logic object
 	String[] args() default {}; //the properties of the Java object acting as arguments of the logic object
-	String argsList() default "";
 	String[] imports() default {};
 	String[] modules() default {};
 	boolean automaticImport() default true;
+	String id() default "";
 }

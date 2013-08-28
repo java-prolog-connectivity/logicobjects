@@ -1,7 +1,7 @@
 package org.logicobjects.test.configuration;
 
-import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.annotation.LObject;
+import org.logicobjects.methodadapter.methodresult.solutioncomposition.WrapperAdapter;
 
 @LObject
 public class TestAdapter extends WrapperAdapter {

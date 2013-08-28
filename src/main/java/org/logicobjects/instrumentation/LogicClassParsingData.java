@@ -11,7 +11,7 @@ public class LogicClassParsingData {
 
 	private String name;
 	private List<String> classArguments;
-	private String argumentsAsListProperty;
+	private String argumentsAsListProperty;//delete
 	public String getName() {
 		return name;
 	}

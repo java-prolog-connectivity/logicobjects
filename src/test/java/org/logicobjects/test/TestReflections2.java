@@ -4,8 +4,8 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.logicobjects.LogicObjects;
-import org.logicobjects.adapter.Adapter;
 import org.logicobjects.annotation.LObject;
+import org.logicobjects.converter.Adapter;
 import org.logicobjects.util.LogicObjectsSubTypesScanner;
 import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;

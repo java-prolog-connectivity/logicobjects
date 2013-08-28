@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.logicobjects.adapter.methodresult.solutioncomposition.SmartWrapperAdapter;
+import org.logicobjects.methodadapter.methodresult.solutioncomposition.SmartWrapperAdapter;
 import org.logicobjects.util.AnnotationConstants.NULL;
 
 @Target(ElementType.METHOD)

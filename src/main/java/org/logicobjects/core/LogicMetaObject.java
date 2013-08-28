@@ -8,15 +8,15 @@ package org.logicobjects.core;
  */
 public class LogicMetaObject {
 	
-	private LogicObjectClass logicObjectClass;
+	private LogicClass logicObjectClass;
 	private Object object;
 	private LogicObject logicObject;
 	
 	public LogicMetaObject(Class logicClazz) {
-		this(new LogicObjectClass(logicClazz));
+		this(new LogicClass(logicClazz));
 	}
 	
-	public LogicMetaObject(LogicObjectClass logicObjectClass) {
+	public LogicMetaObject(LogicClass logicObjectClass) {
 		this.logicObjectClass = logicObjectClass;
 	}
 

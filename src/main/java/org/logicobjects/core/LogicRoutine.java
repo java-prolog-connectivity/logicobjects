@@ -15,18 +15,8 @@ import org.jpc.term.Variable;
 import org.jpc.util.PrologUtil;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.LogicObjectsPreferences;
-import org.logicobjects.adapter.ObjectToTermAdapter;
-import org.logicobjects.adapter.methodparameters.MethodArgumentsAdapter;
-import org.logicobjects.adapter.methodresult.HasSolutionAdapter;
-import org.logicobjects.adapter.methodresult.MethodResultAdapter;
-import org.logicobjects.adapter.methodresult.NumberOfSolutionsAdapter;
-import org.logicobjects.adapter.methodresult.eachsolution.EachSolutionAdapter;
-import org.logicobjects.adapter.methodresult.eachsolution.SolutionToLObjectAdapter;
-import org.logicobjects.adapter.methodresult.solutioncomposition.OneSolutionAdapter;
-import org.logicobjects.adapter.methodresult.solutioncomposition.SolutionCompositionAdapter;
-import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
-import org.logicobjects.annotation.LTermAdapter;
-import org.logicobjects.annotation.LTermAdapter.LTermAdapterUtil;
+import org.logicobjects.annotation.LTermConverter;
+import org.logicobjects.annotation.LTermConverter.LTermConverterUtil;
 import org.logicobjects.annotation.method.LArgumentsAdapter;
 import org.logicobjects.annotation.method.LArgumentsAdapter.LArgsAdapterUtil;
 import org.logicobjects.annotation.method.LComposition;
@@ -34,9 +24,19 @@ import org.logicobjects.annotation.method.LExpression;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LQuery;
 import org.logicobjects.annotation.method.LSolution;
+import org.logicobjects.converter.methodresult.HasSolutionAdapter;
+import org.logicobjects.converter.methodresult.MethodResultAdapter;
+import org.logicobjects.converter.methodresult.NumberOfSolutionsAdapter;
+import org.logicobjects.converter.old.ObjectToTermConverter;
 import org.logicobjects.instrumentation.LogicMethodParser;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
+import org.logicobjects.methodadapter.methodparameters.MethodArgumentsAdapter;
+import org.logicobjects.methodadapter.methodresult.eachsolution.EachSolutionAdapter;
+import org.logicobjects.methodadapter.methodresult.eachsolution.SolutionToLObjectAdapter;
+import org.logicobjects.methodadapter.methodresult.solutioncomposition.OneSolutionAdapter;
+import org.logicobjects.methodadapter.methodresult.solutioncomposition.SolutionCompositionAdapter;
+import org.logicobjects.methodadapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.minitoolbox.reflection.typewrapper.TypeWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -186,22 +186,22 @@ public abstract class LogicRoutine {
 		}
 	}
 	
-	public List<ObjectToTermAdapter> getEachMethodArgumentAdapters() {
+	public List<ObjectToTermConverter> getEachMethodArgumentAdapters() {
 		Annotation[][] parameterAnnotationsTable = getWrappedMethod().getParameterAnnotations(); //a bidimensional array with all the annotations in the method parameters
-		List<ObjectToTermAdapter> allMethodArgumentAdapters = new ArrayList<>();
+		List<ObjectToTermConverter> allMethodArgumentAdapters = new ArrayList<>();
 		
 		for(Annotation[] parameterAnnotations : parameterAnnotationsTable) {
-			ObjectToTermAdapter methodArgumentAdapter = null;
+			ObjectToTermConverter methodArgumentAdapter = null;
 			for(Annotation parameterAnnotation : parameterAnnotations) {
-				LTermAdapter aLTermAdapter =  null;
+				LTermConverter aLTermAdapter =  null;
 				try {
-					aLTermAdapter = LTermAdapter.class.cast(parameterAnnotation);
+					aLTermAdapter = LTermConverter.class.cast(parameterAnnotation);
 				} catch (ClassCastException e) {} //annotations others than LParameter will be ignored here
 				if(aLTermAdapter != null) {
-					Class methodArgumentAdapterClass = LTermAdapterUtil.getAdapterClass(aLTermAdapter);
+					Class methodArgumentAdapterClass = LTermConverterUtil.getConverterClass(aLTermAdapter);
 					if(methodArgumentAdapterClass != null) {
 						try {
-							methodArgumentAdapter = (ObjectToTermAdapter)methodArgumentAdapterClass.newInstance(); //the method arguments should be transformed using an instance of the MethodArgumentsAdapterClass
+							methodArgumentAdapter = (ObjectToTermConverter)methodArgumentAdapterClass.newInstance(); //the method arguments should be transformed using an instance of the MethodArgumentsAdapterClass
 						} catch(Exception e) {
 							throw new RuntimeException(e);
 						}
@@ -223,9 +223,9 @@ public abstract class LogicRoutine {
 	
 	public List adaptOriginalMethodArguments(List originalMethodArguments) {
 		List adaptedMethodArguments = new ArrayList(originalMethodArguments);
-		List<ObjectToTermAdapter> methodArgumentAdapters = getEachMethodArgumentAdapters();
+		List<ObjectToTermConverter> methodArgumentAdapters = getEachMethodArgumentAdapters();
 		for(int i = 0; i <  methodArgumentAdapters.size(); i++) {
-			ObjectToTermAdapter methodArgumentAdapter = methodArgumentAdapters.get(i);
+			ObjectToTermConverter methodArgumentAdapter = methodArgumentAdapters.get(i);
 			if(methodArgumentAdapter != null) {
 				adaptedMethodArguments.set(i, methodArgumentAdapter.adapt(adaptedMethodArguments.get(i)));
 			}
@@ -297,7 +297,7 @@ public abstract class LogicRoutine {
 	 * @return
 	 */
 	public AbstractTerm asTerm(ParsedLogicMethod parsedLogicMethod) {
-		return new Compound(parsedLogicMethod.getComputedMethodName(), new ObjectToTermAdapter().adaptObjects(parsedLogicMethod.getComputedMethodArguments()));
+		return new Compound(parsedLogicMethod.getComputedMethodName(), new ObjectToTermConverter().adaptObjects(parsedLogicMethod.getComputedMethodArguments()));
 	}
 	
 	

@@ -30,16 +30,16 @@ import javassist.bytecode.SignatureAttribute.TypeVariable;
 import javassist.bytecode.SyntheticAttribute;
 
 import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
-import org.logicobjects.adapter.BadExpressionException;
-import org.logicobjects.core.LogicBeanProperty;
-import org.logicobjects.core.LogicObjectClass;
+import org.logicobjects.converter.BadExpressionException;
+import org.logicobjects.converter.context.LogicBeanProperty;
+import org.logicobjects.core.LogicClass;
 import org.logicobjects.core.LogicRoutine;
 import org.logicobjects.core.NoLogicResultException;
-import org.logicobjects.util.javassist.CodeGenerationUtil;
-import org.logicobjects.util.javassist.JavassistUtil;
-import org.logicobjects.util.javassist.PrimitiveTypesWorkaround;
 import org.minitoolbox.reflection.BeansUtil;
 import org.minitoolbox.reflection.ReflectionUtil;
+import org.minitoolbox.reflection.javassist.CodeGenerationUtil;
+import org.minitoolbox.reflection.javassist.JavassistUtil;
+import org.minitoolbox.reflection.javassist.PrimitiveTypesWorkaround;
 import org.minitoolbox.reflection.typewrapper.TypeWrapper;
 
 public class LogicObjectInstrumentation {
@@ -207,7 +207,7 @@ public class LogicObjectInstrumentation {
 	private void createGettersAndSetters(CtClass son) {
 		ClassMap classMap = JavassistUtil.fixedClassMap(classToExtend, classPool);
 
-		LogicObjectClass parentLogicObjectClass = LogicObjectClass.findLogicObjectClass(classToExtend);
+		LogicClass parentLogicObjectClass = LogicClass.findLogicClass(classToExtend);
 		//Map<String, Field> visibleFields = ReflectionUtil.visibleFields(classToExtend);
 		for(String arg : parentLogicObjectClass.getLObjectArgs()) {
 			

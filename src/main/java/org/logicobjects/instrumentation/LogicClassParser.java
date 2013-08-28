@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.logicobjects.core.LogicObjectClass;
+import org.logicobjects.core.LogicClass;
 
 public class LogicClassParser extends AbstractParser {
 
@@ -15,7 +15,7 @@ public class LogicClassParser extends AbstractParser {
 	
 	public static final String CLASS_LIST_ARGUMENTS_TAG = "~CLASS_LIST_ARGUMENTS~";
 	
-	private LogicObjectClass logicObjectClass;
+	private LogicClass logicObjectClass;
 
 	
 	private String unparsedClassName;
@@ -23,16 +23,16 @@ public class LogicClassParser extends AbstractParser {
 	private String unparsedListArguments; //the term expression matching with all the arguments as a list
 	
 	public LogicClassParser(Class clazz) {
-		this(LogicObjectClass.findLogicObjectClass(clazz));
+		this(LogicClass.findLogicClass(clazz));
 	}
 
-	public LogicClassParser(LogicObjectClass logicObjectClass) {
+	public LogicClassParser(LogicClass logicObjectClass) {
 		this.logicObjectClass = logicObjectClass;
 	}
 
 	@Override
 	public LogicClassParser parse() {
-		LogicClassParsingData unparsedData = logicObjectClass.getDataToParse();
+		LogicClassParsingData unparsedData = logicObjectClass.getParsingData();
 		unparsedClassName = unparsedData.getName();
 		unparsedLogicArgumentsString = concatenateTokens(asNotNullStringList(unparsedData.getClassArguments()));
 		unparsedListArguments = unparsedData.getArgumentsAsListProperty();

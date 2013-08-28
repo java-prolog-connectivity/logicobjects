@@ -8,5 +8,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LExpression {
-	//String value() default ""; //the value of a term expression
+	String value() default ""; //the value of a term expression
 }

@@ -4,7 +4,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.List;
 
 @Target({ElementType.TYPE, ElementType.FIELD}) //TODO, add compile time support for ElementType.LOCAL_VARIABLE (this annotations are not available at runtime)
 @Retention(RetentionPolicy.RUNTIME)
@@ -15,11 +14,11 @@ public @interface LObject {
 	 * if set, the properties are not given by different instance variables (one per property) but for an array keeping all of them.
 	 * Still properties names can be declared and used as macros, but they will refer (according to their declaration order) to positions on this array
 	 */
-	String argsList() default "";
+	String argsList() default ""; //TODO delete:
 	String[] imports() default {};
 	String[] modules() default {};
 	boolean automaticImport() default true;
-
+	String id() default "";
  	//Class adapter() default NO_ADAPTER.class;
 	//String[] adapterParameters() default {};
 }

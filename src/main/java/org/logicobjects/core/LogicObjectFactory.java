@@ -21,13 +21,11 @@ public class LogicObjectFactory {
 	
 	private static Logger logger = LoggerFactory.getLogger(LogicObjectFactory.class);
 	
-	
-	
-	
+
 	private LogicDependenciesLoader logicDependenciesLoader;
 	private ResourceManager resourceManager;
 	private ClassPool classPool;
-
+	//private 
 
 	
 	/**
@@ -111,7 +109,7 @@ public class LogicObjectFactory {
 				} else
 					logicClassInstance = (T)instantiatingClass.newInstance();
 				
-				BeansUtil.setProperties(logicClassInstance, LogicObjectClass.findLogicObjectClass(instantiatingClass).getLObjectArgs(), logicObjectsParamsConstructor);
+				BeansUtil.setProperties(logicClassInstance, LogicClass.findLogicClass(instantiatingClass).getLObjectArgs(), logicObjectsParamsConstructor);
 
 				/*
 				if(LogicObjectClass.hasNoArgsConstructor(clazz)) {

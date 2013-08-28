@@ -7,7 +7,7 @@ import java.util.List;
 import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
 import org.jpc.query.Query;
 import org.jpc.util.PrologUtil;
-import org.logicobjects.adapter.methodresult.MethodResultAdapter;
+import org.logicobjects.converter.methodresult.MethodResultAdapter;
 import org.logicobjects.core.LogicRoutine;
 
 public class LogicMethodInvoker {

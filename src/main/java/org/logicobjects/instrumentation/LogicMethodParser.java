@@ -32,7 +32,7 @@ import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
 import org.jpc.term.AbstractTerm;
 import org.jpc.util.PrologUtil;
 import org.logicobjects.LogicObjects;
-import org.logicobjects.adapter.ObjectToTermAdapter;
+import org.logicobjects.converter.old.ObjectToTermConverter;
 import org.logicobjects.core.LogicRoutine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +51,8 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 	public static final String VALUE_EXP_EVALUATION_SYMBOL = "$";
 	public static final String DEFERRED_EXP_EVALUATION_SYMBOL = "#";
 	
-	public static final String BEGIN_JAVA_EXPRESSION_BLOCK = "{";
-	public static final String END_JAVA_EXPRESSION_BLOCK = "}";
+	public static final String BEGIN_JAVA_EXPRESSION_BLOCK = "{|";
+	public static final String END_JAVA_EXPRESSION_BLOCK = "|}";
 	
 	public static final String BEGIN_JAVA_VALUE_EXP = VALUE_EXP_EVALUATION_SYMBOL + BEGIN_JAVA_EXPRESSION_BLOCK;
 	public static final String BEGIN_JAVA_DEFERRED_EXP = DEFERRED_EXP_EVALUATION_SYMBOL + BEGIN_JAVA_EXPRESSION_BLOCK;
@@ -448,7 +448,7 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 				else {
 					Method helperMethod = targetObject.getClass().getMethod(methodName,logicMethod.getWrappedMethod().getParameterTypes());
 					Object expressionResult = helperMethod.invoke(targetObject, (Object[])oldArguments.toArray()); //result contains the value of the java expression
-					AbstractTerm expressionAsTerm = ObjectToTermAdapter.asTerm(expressionResult);
+					AbstractTerm expressionAsTerm = ObjectToTermConverter.asTerm(expressionResult);
 					replacementValue = expressionAsTerm.toString();
 				}
 				String delimitedJavaExpression = Pattern.quote(entry.getKey());
@@ -475,7 +475,7 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 			for(int i = 0; i<args.size(); i++) {
 				String paramName = LogicMethodParser.methodArgumentSymbol(i+1);
 				if(allArgumentsRequired || symbols.contains(paramName)) {
-					AbstractTerm termArgument = ObjectToTermAdapter.asTerm(args.get(i));
+					AbstractTerm termArgument = ObjectToTermConverter.asTerm(args.get(i));
 					if(!termArgument.getNamedVariablesNames().isEmpty())
 						throw new RuntimeException("Argument objects cannot contain free non-anonymous variables: "+termArgument);//in order to avoid name collisions
 					dictionary.put(paramName, termArgument.toString());
@@ -488,7 +488,7 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 		if(symbols.contains(LogicMethodParser.THIS_METHOD_ARGUMENT_SYMBOL)) { //the symbol $0 was found
 			String thisAsTermString = dictionary.get(THIS_INSTANCE_PROPERTY_SYMBOL); //find if the synonym @this has already been translated
 			if(thisAsTermString == null) //if the synonym does not exist, calculate the translation as term of this, otherwise reuse the existing translation
-				thisAsTermString = new ObjectToTermAdapter().adapt(targetObject).toString();
+				thisAsTermString = new ObjectToTermConverter().adapt(targetObject).toString();
 			dictionary.put(LogicMethodParser.THIS_METHOD_ARGUMENT_SYMBOL, thisAsTermString);
 		}
 		return dictionary;

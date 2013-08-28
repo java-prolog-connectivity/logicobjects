@@ -1,6 +1,6 @@
 package org.logicobjects.test.configuration;
 
-import org.logicobjects.adapter.Adapter;
+import org.logicobjects.converter.Adapter;
 
 public class DummyAdapter extends Adapter {
 

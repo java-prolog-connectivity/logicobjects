@@ -7,12 +7,12 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import org.junit.Test;
-import org.logicobjects.adapter.methodresult.solutioncomposition.ArrayWrapperAdapter;
-import org.logicobjects.adapter.methodresult.solutioncomposition.ListWrapperAdapter;
-import org.logicobjects.adapter.methodresult.solutioncomposition.WrapperAdapter;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.core.LogicMethod;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
+import org.logicobjects.methodadapter.methodresult.solutioncomposition.ArrayWrapperAdapter;
+import org.logicobjects.methodadapter.methodresult.solutioncomposition.ListWrapperAdapter;
+import org.logicobjects.methodadapter.methodresult.solutioncomposition.WrapperAdapter;
 
 public class TestWrapperAdapter extends LocalLogicTest {
 

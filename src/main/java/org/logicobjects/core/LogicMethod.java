@@ -5,12 +5,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jpc.term.Term;
-import org.logicobjects.adapter.LogicObjectAdapter;
-import org.logicobjects.adapter.adaptingcontext.MethodInvokerAdaptationContext;
 import org.logicobjects.annotation.method.LExpression;
 import org.logicobjects.annotation.method.LMethod;
 import org.logicobjects.annotation.method.LMethod.LMethodUtil;
 import org.logicobjects.annotation.method.LQuery;
+import org.logicobjects.converter.context.old.MethodInvokerAdaptationContext;
+import org.logicobjects.converter.old.LogicObjectAdapter;
 import org.logicobjects.instrumentation.LogicMethodParsingData;
 import org.logicobjects.instrumentation.ParsedLogicMethod;
 
