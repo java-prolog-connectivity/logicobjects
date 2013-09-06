@@ -10,7 +10,7 @@ import org.logicobjects.instrumentation.LogicClassParsingData;
  * @author scastro
  *
  */
-public abstract class LogicObjectDescriptor {
+public class LogicObjectDescriptor {
 	
 	private String name;
 	private List<String> args;

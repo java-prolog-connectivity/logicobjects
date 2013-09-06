@@ -1,5 +1,7 @@
 package org.logicobjects.core;
 
+import java.lang.reflect.Constructor;
+
 import org.logicobjects.descriptor.ConverterDescriptor;
 import org.logicobjects.descriptor.LogicObjectDescriptor;
 import org.minitoolbox.reflection.typewrapper.SingleTypeWrapper;
@@ -48,4 +50,41 @@ public class LogicClass extends SingleTypeWrapper {
 		return methodInvokerConverterDescriptor;
 	}
 
+	
+	
+//	public boolean hasNoArgsConstructor(Class clazz) {
+//		Constructor[] constructors = clazz.getConstructors();
+//		if(constructors.length == 0) //implicit constructor
+//			return true;
+//		try {
+//			clazz.getConstructor(); //if this method does not thrown a NoSuchMethodException exception, then there is a non-parameters constructor
+//			return true;
+//		} catch (NoSuchMethodException e) {
+//			return false;
+//		} catch (SecurityException e) {
+//			throw new RuntimeException(e);
+//		}
+//	}
+//	
+//	public boolean hasConstructorWithArgsNumber(Class clazz, int n) {
+//		for(Constructor constructor : clazz.getConstructors()) {
+//			if(constructor.getParameterTypes().length == n)
+//				return true;
+//		}	
+//		return false;
+//	}
+	
+	/**
+	 * Answers if a class has a constructor with only one declared argument that happens no be a variable args constructor
+	 * @param clazz
+	 * @return
+	 */
+//	public boolean hasConstructorWithOneVarArgs(Class clazz) {
+//		for(Constructor constructor : clazz.getConstructors()) {
+//			if(constructor.getParameterTypes().length == 1 && constructor.isVarArgs())
+//				return true;
+//		}	
+//		return false;
+//	}
+	
 }

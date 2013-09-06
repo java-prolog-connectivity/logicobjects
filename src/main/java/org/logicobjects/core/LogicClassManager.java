@@ -1,6 +1,5 @@
 package org.logicobjects.core;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,6 +9,9 @@ import org.logicobjects.annotation.LConverter;
 import org.logicobjects.annotation.LDelegationObject;
 import org.logicobjects.annotation.LDelegationObjectConverter;
 import org.logicobjects.annotation.LObject;
+import org.logicobjects.descriptor.AnnotationConverterDescriptor;
+import org.logicobjects.descriptor.AnnotationLogicObjectDescriptor;
+import org.logicobjects.descriptor.ClassLogicObjectDescriptor;
 import org.logicobjects.descriptor.ConverterDescriptor;
 import org.logicobjects.descriptor.LogicObjectDescriptor;
 import org.minitoolbox.reflection.ReflectionUtil;
@@ -18,100 +20,57 @@ import org.minitoolbox.reflection.typevisitor.TypeVisitor.InterfaceMode;
 
 public class LogicClassManager {
 
+	//private static Logger logger = LoggerFactory.getLogger(LogicClassManager.class);
+	
 	private boolean includesTermConvertableInHierarchy(Class clazz) {
 		return ReflectionUtil.includesInterfaceInHierarchy(clazz, TermConvertable.class);
 	}
 	
-//	private boolean hasLObjectAnnotation(Class clazz) {
-//		return clazz.isAnnotationPresent(LObject.class);
-//	}
-//	
-//	private boolean hasLDelegationObjectAnnotation(Class clazz) {
-//		return clazz.isAnnotationPresent(LDelegationObject.class);
-//	}
-//	
-//	private boolean hasConverterAnnotation(Class clazz) {
-//		return clazz.isAnnotationPresent(LConverter.class);
-//	}
-//	
-//	private boolean hasLDelegationConverterAnnotation(Class clazz) {
-//		return clazz.isAnnotationPresent(LDelegationObjectConverter.class);
-//	}
-	
 	public LogicClass findLogicClass(Class clazz) {
 		if(clazz.isInterface())
 			throw new RuntimeException("Interfaces cannot be defined as logic classes");
-		//Class nonSyntheticClass = ReflectionUtil.findFirstNonSyntheticClass(clazz);
 		LogicClassBuilder logicClassBuilder = new LogicClassBuilder(clazz);
-		createBuilderLogicClass(clazz, logicClassBuilder);
+		prepareLogicClassBuilder(clazz, logicClassBuilder);
 		return logicClassBuilder.build();
 	}
 	
-	private void createBuilderLogicClass(Class clazz, LogicClassBuilder logicClassBuilder) {
+	private void prepareLogicClassBuilder(Class clazz, LogicClassBuilder logicClassBuilder) {
 		if(!Object.class.equals(clazz)) { //reached the top of the hierarchy
 			if(!logicClassBuilder.definesObjectToTermStrategy()) {
 				if(!logicClassBuilder.definesMethodInvokerStrategy()) {
-					if(clazz.isAnnotationPresent(LDelegationObjectConverter.class))
-						//logicClassBuilder.setMethodInvokerConverterDescriptor(ConverterDescriptor.create((LDelegationObjectConverter) clazz.getAnnotation(LDelegationObjectConverter.class)));
-						logicClassBuilder.setMethodInvokerConverterDescriptor(new LDelegationObjectAnnotationDescriptor());
-					else if(clazz.isAnnotationPresent(LDelegationObject.class))
-						logicClassBuilder.setMethodInvokerDescriptor(LogicObjectDescriptor.create(clazz, (LDelegationObject) clazz.getAnnotation(LDelegationObject.class)));
+					if(clazz.isAnnotationPresent(LDelegationObjectConverter.class)) {
+						logicClassBuilder.setMethodInvokerConverterDescriptor(new AnnotationConverterDescriptor(clazz, (LDelegationObjectConverter)clazz.getAnnotation(LDelegationObjectConverter.class)));
+						//currently commented out the warning below since a class may define a converter, but the LObject annotation may provide information for the loader
+						/*
+						if(clazz.isAnnotationPresent(LDelegationObject.class)) {
+							logger.warn(clazz.getSimpleName() + " is annotated with both " + LDelegationObjectConverter.class.getSimpleName() + " and " + LDelegationObject.class.getSimpleName() +
+									". " + LDelegationObject.class.getSimpleName() + " will be ignored");
+						}
+						*/
+					} else if(clazz.isAnnotationPresent(LDelegationObject.class))
+						logicClassBuilder.setMethodInvokerDescriptor(new AnnotationLogicObjectDescriptor(clazz, (LDelegationObject)clazz.getAnnotation(LDelegationObject.class)));
 				}
 				if(includesTermConvertableInHierarchy(clazz))
 					logicClassBuilder.setUsingTermConvertableInteface(true);
 			}
 			if(!logicClassBuilder.isFullySpecified()) {
-				if(clazz.isAnnotationPresent(LConverter.class))
-					logicClassBuilder.setDefaultTermConverterDescriptor(ConverterDescriptor.create((LConverter) clazz.getAnnotation(LConverter.class)));
-				else if(clazz.isAnnotationPresent(LObject.class))
-					logicClassBuilder.setTermDescriptor(LogicObjectDescriptor.create(clazz, (LObject) clazz.getAnnotation(LObject.class)));
+				if(clazz.isAnnotationPresent(LConverter.class)) {
+					logicClassBuilder.setDefaultTermConverterDescriptor(new AnnotationConverterDescriptor(clazz, (LConverter)clazz.getAnnotation(LConverter.class)));
+					/*
+					if(clazz.isAnnotationPresent(LObject.class)) {
+						logger.warn(clazz.getSimpleName() + " is annotated with both " + LConverter.class.getSimpleName() + " and " + LObject.class.getSimpleName() +
+								". " + LObject.class.getSimpleName() + " will be ignored");
+					}
+					*/
+				} else if(clazz.isAnnotationPresent(LObject.class))
+					logicClassBuilder.setDefaultTermDescriptor(new AnnotationLogicObjectDescriptor(clazz, (LObject)clazz.getAnnotation(LObject.class)));
 			}
 			if(!logicClassBuilder.isFullySpecified())
-				createBuilderLogicClass(clazz.getSuperclass(), logicClassBuilder);
+				prepareLogicClassBuilder(clazz.getSuperclass(), logicClassBuilder);
 		}
 		
 	}
 
-	public LogicClass findLogicMethodInvokerClass(Class descendant) {
-		Class invokerClass = findMethodInvokerClass(descendant);
-		if(invokerClass != null) {
-			if(hasLDelegationObjectAnnotation(invokerClass)) {
-				return new LogicClass(invokerClass, LogicObjectDescriptor.create((LDelegationObject)invokerClass.getAnnotation(LDelegationObject.class)));
-			} else if(hasLObjectAnnotation(invokerClass)){
-				return new LogicClass(invokerClass, LogicObjectDescriptor.create((LObject)invokerClass.getAnnotation(LObject.class)));
-			}
-		}
-		return null;
-	}
-	
-
-	
-	public boolean isGuidingClass(Class candidateClass) {
-		return isTermObjectClass(candidateClass) || hasLObjectAnnotation(candidateClass) || hasObjectToTermConverter(candidateClass);
-	}
-	
-
-
-	/**
-	 * Answers the first class/interface in the class hierarchy specifying a logic object method invoker (e.g., annotated with LDelegationObject)
-	 * @param candidateClass
-	 * @return
-	 */
-	public Class findMethodInvokerClass(Class candidateClass) {
-		FindFirstTypeVisitor finderVisitor = new FindFirstTypeVisitor(InterfaceMode.EXCLUDE_INTERFACES) {
-			
-			@Override
-			public boolean match(Class clazz) {
-				return clazz.getAnnotation(LDelegationObject.class) != null || isGuidingClass(clazz);
-			}
-		};
-		finderVisitor.visit(candidateClass);
-		return finderVisitor.getFoundType();
-	}
-	
-	public boolean hasGuidingClass(Class clazz) {
-		return findGuidingClass(clazz) != null;
-	}
 	
 	/**
 	 * The guiding class is the first class in the hierarchy that either implements ITermObject, has a LogicObject annotation, or a LogicTerm annotation
@@ -196,46 +155,16 @@ public class LogicClassManager {
 	}
 		
 
-	public boolean hasNoArgsConstructor(Class clazz) {
-		Constructor[] constructors = clazz.getConstructors();
-		if(constructors.length == 0) //implicit constructor
-			return true;
-		try {
-			clazz.getConstructor(); //if this method does not thrown a NoSuchMethodException exception, then there is a non-parameters constructor
-			return true;
-		} catch (NoSuchMethodException e) {
-			return false;
-		} catch (SecurityException e) {
-			throw new RuntimeException(e);
-		}
-	}
+
 	
-	public boolean hasConstructorWithArgsNumber(Class clazz, int n) {
-		for(Constructor constructor : clazz.getConstructors()) {
-			if(constructor.getParameterTypes().length == n)
-				return true;
-		}	
-		return false;
-	}
-	
-	/**
-	 * Answers if a class has a constructor with only one declared argument that happens no be a variable args constructor
-	 * @param clazz
-	 * @return
-	 */
-	public boolean hasConstructorWithOneVarArgs(Class clazz) {
-		for(Constructor constructor : clazz.getConstructors()) {
-			if(constructor.getParameterTypes().length == 1 && constructor.isVarArgs())
-				return true;
-		}	
-		return false;
-	}
 	
 	class LogicClassBuilder {
 		
 		private Class wrappedClass;
+		private Class firstNonSyntheticClass;
+		
 		/**
-		 * Flag indicating that the object must be converted to a term by means of the implemented TermConvertable interface.
+		 * Flag indicating that an instance must be converted to a term by means of the TermConvertable interface.
 		 * 
 		 */
 		private boolean usingTermConvertableInteface;
@@ -249,10 +178,25 @@ public class LogicClassManager {
 
 		public LogicClassBuilder(Class wrappedClass) {
 			this.wrappedClass = wrappedClass;
+			this.firstNonSyntheticClass = ReflectionUtil.findFirstNonSyntheticClass(wrappedClass);
 		}
-		
+
+		public Class getWrappedClass() {
+			return wrappedClass;
+		}
+
+		/**
+		 * Build a LogicClass and returns it.
+		 * If the builder does not have enough data to build a LogicClass, 
+		 * will create it using a mapping descriptor based on values inferred from the first non-synthetic class in the hierarchy.
+		 * @return a LogicClass built according to the properties of the builder.
+		 */
 		public LogicClass build() {
-			return new LogicClass(wrappedClass, defaultTermDescriptor, methodInvokerDescriptor, defaultTermConverterDescriptor, methodInvokerConverterDescriptor);
+			if(!isFullySpecified()) {
+				return new LogicClass(wrappedClass, defaultTermDescriptor, methodInvokerDescriptor, defaultTermConverterDescriptor, methodInvokerConverterDescriptor);
+			} else {
+				return new LogicClass(wrappedClass, new ClassLogicObjectDescriptor(firstNonSyntheticClass), methodInvokerDescriptor, defaultTermConverterDescriptor, methodInvokerConverterDescriptor);
+			}
 		}
 		
 		public boolean isUsingTermConvertableInteface() {
@@ -261,22 +205,6 @@ public class LogicClassManager {
 
 		void setUsingTermConvertableInteface(boolean usingTermConvertableInteface) {
 			this.usingTermConvertableInteface = usingTermConvertableInteface;
-		}
-		
-		public boolean isFullySpecified() {
-			return definesObjectToTermStrategy() && definesTermToObjectStrategy();
-		}
-		
-		public boolean definesMethodInvokerStrategy() {
-			return methodInvokerDescriptor != null;
-		}
-		
-		public boolean definesObjectToTermStrategy() {
-			return defaultTermDescriptor != null || methodInvokerConverterDescriptor != null || usingTermConvertableInteface;
-		}
-		
-		public boolean definesTermToObjectStrategy() {
-			return defaultTermDescriptor != null || defaultTermConverterDescriptor != null;
 		}
 
 		public LogicObjectDescriptor getDefaultTermDescriptor() {
@@ -314,8 +242,20 @@ public class LogicClassManager {
 			this.methodInvokerConverterDescriptor = methodInvokerConverterDescriptor;
 		}
 
-		public Class getWrappedClass() {
-			return wrappedClass;
+		public boolean isFullySpecified() {
+			return definesObjectToTermStrategy() && definesTermToObjectStrategy();
+		}
+		
+		public boolean definesMethodInvokerStrategy() {
+			return methodInvokerDescriptor != null || methodInvokerConverterDescriptor != null;
+		}
+		
+		public boolean definesObjectToTermStrategy() {
+			return defaultTermDescriptor != null || defaultTermConverterDescriptor != null || usingTermConvertableInteface;
+		}
+		
+		public boolean definesTermToObjectStrategy() {
+			return defaultTermDescriptor != null || defaultTermConverterDescriptor != null;
 		}
 
 	}

@@ -3,10 +3,6 @@ package org.logicobjects.descriptor;
 import java.lang.reflect.Type;
 
 import org.jpc.converter.JpcConverter;
-import org.logicobjects.annotation.LConverter;
-import org.logicobjects.annotation.LConverter.LConverterUtil;
-import org.logicobjects.annotation.LDelegationObjectConverter;
-import org.logicobjects.annotation.LDelegationObjectConverter.LDelegationObjectConverterUtil;
 
 /**
  * Describes an inter-language conversion using JpcConverter
@@ -14,14 +10,6 @@ import org.logicobjects.annotation.LDelegationObjectConverter.LDelegationObjectC
  *
  */
 public class ConverterDescriptor {
-
-	public static ConverterDescriptor create(LConverter lConverter) {
-		return new ConverterDescriptor(LConverterUtil.getConverterClass(lConverter), lConverter.preferedClass());
-	}
-	
-	public static ConverterDescriptor create(LDelegationObjectConverter lConverter) {
-		return new ConverterDescriptor(LDelegationObjectConverterUtil.getConverterClass(lConverter), lConverter.preferedClass());
-	}
 	
 	private JpcConverter converter;
 	private Type preferedType;

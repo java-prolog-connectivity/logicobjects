@@ -7,7 +7,7 @@ import org.logicobjects.annotation.LDelegationObject;
 import org.logicobjects.annotation.LObject;
 
 
-public abstract class AnnotationLogicObjectDescriptor extends LogicObjectDescriptor {
+public class AnnotationLogicObjectDescriptor extends LogicObjectDescriptor {
 
 	private Class guidingClass;
 	private Object annotation;
