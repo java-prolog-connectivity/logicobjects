@@ -14,7 +14,7 @@
 	<name>LogicObjects</name>
 	<description>A Linguistic Symbiosis Framework for Java and Prolog</description>
 	<packaging>jar</packaging>
-	<url>https://github.com/sergio-castro/logicobjects</url>
+	<url>https://github.com/java-prolog-connectivity/logicobjects</url>
 	
 	<licenses>
 	    <license>
@@ -24,9 +24,9 @@
     </licenses>
   
 	<scm>
-		<connection>scm:git:git@github.com:sergio-castro/logicobjects.git</connection>
-		<developerConnection>scm:git:git@github.com:sergio-castro/logicobjects.git</developerConnection>
-		<url>git@github.com:sergio-castro/logicobjects.git</url>
+		<connection>scm:git:git@github.com:java-prolog-connectivity/logicobjects.git</connection>
+		<developerConnection>scm:git:git@github.com:java-prolog-connectivity/logicobjects.git</developerConnection>
+		<url>git@github.com:java-prolog-connectivity/logicobjects.git</url>
 	</scm>
     
     <developers>
