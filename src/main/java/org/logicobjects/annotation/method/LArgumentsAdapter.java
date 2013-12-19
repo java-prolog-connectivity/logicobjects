@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 import org.logicobjects.util.AnnotationConstants.NULL;
 
-//TODO: This annotation adapts the arguments of a logic method from a given initial array (the invocation arguments in Java) to an array of objects (of possible different length) to be passed to Prolog
+//TODO: This annotation adapts the arguments of a logic method from a given initial array (the invocation arguments in Java) to an array of terms (possibly of a different length) passed to Prolog
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

@@ -11,7 +11,7 @@ import org.jpc.query.Query;
 import org.jpc.term.Compound;
 import org.jpc.term.AbstractTerm;
 import org.jpc.term.Term;
-import org.jpc.term.Variable;
+import org.jpc.term.Var;
 import org.jpc.util.PrologUtil;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.LogicObjectsPreferences;
@@ -60,7 +60,7 @@ public abstract class LogicRoutine {
 	
 	/**
 	 * indicates if the query string should be parsed replacing symbols and expressions
-	 * if it has been generated from the method name then it should not be parsed
+	 * if it has been generated from the method id then it should not be parsed
 	 */
 	//protected boolean unparsedQueryString; 
 	
@@ -263,10 +263,10 @@ public abstract class LogicRoutine {
 	
 	public String logicMethodName() {
 		String logicMethodName;
-		if(hasCustomMethodName()) {  //test if a method name has been indicated at the annotation
+		if(hasCustomMethodName()) {  //test if a method id has been indicated at the annotation
 			logicMethodName = customMethodName();
 		} else {
-			logicMethodName = PrologUtil.javaNameToProlog(getWrappedMethod().getName()); //if no name is provided in the annotation, it will be the method name after converting it to prolog naming conventions
+			logicMethodName = PrologUtil.javaNameToProlog(getWrappedMethod().getName()); //if no id is provided in the annotation, it will be the method id after converting it to prolog naming conventions
 		}
 		return logicMethodName;
 	}
@@ -283,7 +283,7 @@ public abstract class LogicRoutine {
 		if(eachSolutionTerm == null) {
 			Term goal = parsedLogicMethod.asGoal();
 			if(goal.hasVariable(LogicObjectsPreferences.IMPLICIT_RETURN_VARIABLE))
-				eachSolutionTerm = new Variable(LogicObjectsPreferences.IMPLICIT_RETURN_VARIABLE);
+				eachSolutionTerm = new Var(LogicObjectsPreferences.IMPLICIT_RETURN_VARIABLE);
 		}
 		if(eachSolutionTerm == null)
 			eachSolutionTerm = asTerm(parsedLogicMethod);
@@ -331,13 +331,13 @@ public abstract class LogicRoutine {
 	}
 	
 	/**
-	 * The default implementation ignores any information in the parsedLogicMethod parameter, this could change in the future if it is found that the method name should be parsed
+	 * The default implementation ignores any information in the parsedLogicMethod parameter, this could change in the future if it is found that the method id should be parsed
 	 */
 	protected void configureParsedLogicMethodQueryString(ParsedLogicMethod parsedLogicMethod) {
 		if(hasCustomMethodName())
 			parsedLogicMethod.setComputedQueryString(parsedLogicMethod.getParsedData().getQueryString());
 		else
-			parsedLogicMethod.setComputedQueryString(logicMethodName()); //by default, the query to be executed is the method name (if arguments are present they will be taken into account)
+			parsedLogicMethod.setComputedQueryString(logicMethodName()); //by default, the query to be executed is the method id (if arguments are present they will be taken into account)
 	}
 	
 	

@@ -30,7 +30,7 @@ public class SmartWrapperAdapter extends WrapperAdapter<Object, Object>  {
 	}
 	
 	public Class findWrapperAdapterClass() {
-		Set<Class<? extends WrapperAdapter>> wrapperAdaptersClasses = LogicObjects.getWrapperAdapters();
+		Set<Class<? extends WrapperAdapter>> wrapperAdaptersClasses = LogicObjects.getCompositionAdapters();
 		TypeWrapper methodTypeWrapper = TypeWrapper.wrap(getConcreteMethodResultType());
 		
 		for(Class wrapperAdaptersClass : wrapperAdaptersClasses) {

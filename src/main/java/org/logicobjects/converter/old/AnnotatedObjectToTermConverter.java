@@ -4,7 +4,6 @@ package org.logicobjects.converter.old;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jpc.term.AbstractTerm;
 import org.jpc.term.Term;
 import org.jpc.util.ParadigmLeakUtil;
 import org.logicobjects.converter.IncompatibleAdapterException;
@@ -17,7 +16,7 @@ import org.logicobjects.descriptor.LogicObjectDescriptor;
 import org.logicobjects.methodadapter.LogicAdapter;
 import org.minitoolbox.reflection.BeansUtil;
 
-public class AnnotatedObjectToTermConverter<From> extends LogicAdapter<From, AbstractTerm> {
+public class AnnotatedObjectToTermConverter<From> extends LogicAdapter<From, Term> {
 
 	@Override
 	public Term adapt(From object) {
@@ -57,7 +56,7 @@ public class AnnotatedObjectToTermConverter<From> extends LogicAdapter<From, Abs
 		
 		
 
-		List<AbstractTerm> arguments;
+		List<Term> arguments;
 		String argsListPropertyName = logicObjectDescription.argsList();
 		if(argsListPropertyName != null && !argsListPropertyName.isEmpty()) {
 			BeanPropertyAdaptationContext adaptationContext = new BeanPropertyAdaptationContext(object.getClass(), argsListPropertyName);
@@ -77,9 +76,9 @@ public class AnnotatedObjectToTermConverter<From> extends LogicAdapter<From, Abs
 	}
 
 	/**
-	 * In case the name is not explicitly specified (e.g., with an annotation), it will have to be inferred
-	 * It can be inferred from a class name (if the transformation context is a class instance to a logic object), from a field name (if the context is the transformation of a field), etc
-	 * Different context override this method to specify how they infer the logic name of the object
+	 * In case the id is not explicitly specified (e.g., with an annotation), it will have to be inferred
+	 * It can be inferred from a class id (if the transformation context is a class instance to a logic object), from a field id (if the context is the transformation of a field), etc
+	 * Different context override this method to specify how they infer the logic id of the object
 	 * @return
 	 */
 	public String infereLogicObjectName(AnnotatedElementAdaptationContext annotatedContext) {

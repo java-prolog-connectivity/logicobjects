@@ -17,14 +17,14 @@ import org.reflections.vfs.Vfs;
 public abstract class EclipsePluginConfigurator {
 
 	/**
-	 * prepares an Eclipse plugin to be used with LOGICOBJECTS
+	 * Prepares an Eclipse plugin to be used with LOGICOBJECTS
 	 * @param plugin
 	 */
 	public static void configure(Plugin plugin) {
 		//enabling javassist to work correctly in Eclipse
 		ClassPool classPool = ClassPool.getDefault();
 		classPool.appendClassPath(new LoaderClassPath(plugin.getClass().getClassLoader()));
-		LogicObjects.setClassPool(classPool);
+		LogicObjects.getDefault().getContext().getLogicObjectFactory().setClassPool(classPool);
 		
 		Vfs.addDefaultURLTypes(new BundleUrlType(plugin.getBundle()));  //enabling the Reflections filters to work in Eclipse
 		
@@ -34,7 +34,7 @@ public abstract class EclipsePluginConfigurator {
 		 * adding all the classes in the plugin to the search path
 		 * This line has to be after the call to Vfs.addDefaultURLTypes(...)
 		 */
-		LogicObjects.addSearchUrl(urlPlugin);
+		LogicObjects.getDefault().getContext().addSearchUrl(urlPlugin);
 		try {
 			pathLogicFiles = FileLocator.toFileURL(urlPlugin).getPath();
 		} catch (IOException e) {

@@ -1,21 +1,21 @@
 package org.logicobjects.converter.context;
 
+import org.jconverter.Converter;
 import org.jpc.Jpc;
 import org.jpc.JpcProxy;
-import org.jpc.converter.JpcConverter;
 import org.logicobjects.descriptor.LogicObjectDescriptor;
 
 //TODO this class needs to be finished. when transforming terms/objects it must use the descriptors and converters if available
 public class AnnotatedContext extends JpcProxy {
 
 	private LogicObjectDescriptor logicObjectDescriptor;
-	private JpcConverter termToObjectConverter;
-	private JpcConverter objectToTermConverter;
+	private Converter termToObjectConverter;
+	private Converter objectToTermConverter;
 	
 	public AnnotatedContext(Jpc proxiedJpc, 
 			LogicObjectDescriptor logicObjectDescriptor,
-			JpcConverter termToObjectConverter,
-			JpcConverter objectToTermConverter) {
+			Converter termToObjectConverter,
+			Converter objectToTermConverter) {
 		super(proxiedJpc);
 		this.logicObjectDescriptor = logicObjectDescriptor;
 		this.termToObjectConverter = termToObjectConverter;
@@ -26,11 +26,11 @@ public class AnnotatedContext extends JpcProxy {
 		return logicObjectDescriptor;
 	}
 	
-	public JpcConverter getTermToObjectConverter() {
+	public Converter getTermToObjectConverter() {
 		return termToObjectConverter;
 	}
 	
-	public JpcConverter getObjectToTermConverter() {
+	public Converter getObjectToTermConverter() {
 		return objectToTermConverter;
 	}
 

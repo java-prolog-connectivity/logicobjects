@@ -2,8 +2,8 @@ package org.logicobjects.converter.context;
 
 import java.lang.reflect.Method;
 
+import org.jconverter.Converter;
 import org.jpc.Jpc;
-import org.jpc.converter.JpcConverter;
 import org.logicobjects.annotation.LObjectConverter;
 import org.logicobjects.annotation.LObjectConverter.LObjectConverterUtil;
 
@@ -14,7 +14,7 @@ public class LogicMethodContextFactory extends AnnotatedContextFactory {
 	}
 
 	public AnnotatedContext create(Method method) {
-		JpcConverter termToObjectConverter = null;
+		Converter termToObjectConverter = null;
 		LObjectConverter lObjectConverter = method.getAnnotation(LObjectConverter.class);
 		if(lObjectConverter != null) {
 			termToObjectConverter = LObjectConverterUtil.newConverter(lObjectConverter);

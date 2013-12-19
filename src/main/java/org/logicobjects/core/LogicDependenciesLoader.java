@@ -154,7 +154,7 @@ public class LogicDependenciesLoader {
 		allModulesNames.addAll(descriptorModules); 
 		
 		if(logicObjectClass.getLogicObjectDescriptor().automaticImport()) {
-			List<String> defaultModules = getDefaultPrologResources(logicObjectClass);  //modules defined by convention (Prolog files in the same package than the class and with the same name + Prolog extension)
+			List<String> defaultModules = getDefaultPrologResources(logicObjectClass);  //modules defined by convention (Prolog files in the same package than the class and with the same id + Prolog extension)
 			allModulesNames.addAll(defaultModules);
 		}
 		
@@ -174,7 +174,7 @@ public class LogicDependenciesLoader {
 		allImportsNames.addAll(descriptorImports);
 
 		if(logicObjectClass.getLogicObjectDescriptor().automaticImport()) {
-			List<String> defaultImports = getDefaultLogtalkResources(logicObjectClass);   //Logtalk files defined by convention (in the same package than the class and with the same name + Logtalk extension)
+			List<String> defaultImports = getDefaultLogtalkResources(logicObjectClass);   //Logtalk files defined by convention (in the same package than the class and with the same id + Logtalk extension)
 			allImportsNames.addAll(defaultImports);
 		}
 		
@@ -206,7 +206,7 @@ public class LogicDependenciesLoader {
 	
 	/**
 	 * Load the default dependencies of a class
-	 * These dependencies are based on the class name only, it does not assume that the class is annotated with LObject or LDelegationObject (e.g., it just implements the ITermObject interface or it is annotated with the LTermAdapter adapter)
+	 * These dependencies are based on the class id only, it does not assume that the class is annotated with LObject or LDelegationObject (e.g., it just implements the ITermObject interface or it is annotated with the LTermAdapter adapter)
 	 * @param clazz
 	 */
 	/*
@@ -297,8 +297,8 @@ public class LogicDependenciesLoader {
 		if(fileName == null || fileName.equals(""))
 			return false;
 		/**
-		 * the getResource method will append before the resource name the path of the class
-		 * note that this method is not case sensitive: fileName will match any file with the same name without taking into consideration its case
+		 * the getResource method will append before the resource id the path of the class
+		 * note that this method is not case sensitive: fileName will match any file with the same id without taking into consideration its case
 		 */
 		String fileWithExtension = fileName+"."+fileExtension;
 		URL url = logicObjectClass.getResource(fileWithExtension);

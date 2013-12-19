@@ -16,8 +16,8 @@ import org.minitoolbox.reflection.ReflectionUtil;
  * This class provides information about the field, getter or setter that could contain mapping information for a logic property in a class
  * The framework will inspect not only the annotations in the field, but also annotations in its accessors and mutators
  * Even if the field is not visible at the descendant class, the annotations in that field (if any) should guide the mapping
- * The relevant field to inspect, is the first with the desired name in the first logic class in the hierarchy
- * In case there are not logic classes in the hierarchy, it will be considered the first visible field with the desired name
+ * The relevant field to inspect, is the first with the desired id in the first logic class in the hierarchy
+ * In case there are not logic classes in the hierarchy, it will be considered the first visible field with the desired id
  * @author scastro
  *
  */

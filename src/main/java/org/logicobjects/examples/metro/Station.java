@@ -6,7 +6,7 @@ import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.method.LComposition;
 import org.logicobjects.annotation.method.LMethod;
 
-@LObject(args = {"name"})
+@LObject(args = {"id"})
 public abstract class Station implements IStation {
 	
 	public abstract boolean connected(IStation station);

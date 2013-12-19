@@ -4,26 +4,24 @@ import java.lang.reflect.Type;
 
 import org.jpc.converter.JpcConverter;
 
+import com.google.common.base.Optional;
+
 /**
- * Describes an inter-language conversion using JpcConverter
+ * Describes an inter-language conversion using a Converter
  * @author sergioc
  *
  */
 public class ConverterDescriptor {
 	
-	private JpcConverter converter;
-	private Type preferedType;
+	private final JpcConverter converter;
+	private final Type preferedType;
 	
-	public ConverterDescriptor(Class<? extends JpcConverter> converterClass) {
-		try {
-			this.converter = converterClass.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
+	public ConverterDescriptor(JpcConverter converter) {
+		this(converter, null);
 	}
 	
-	public ConverterDescriptor(Class<? extends JpcConverter> converterClass, Type preferedType) {
-		this(converterClass);
+	public ConverterDescriptor(JpcConverter converter, Type preferedType) {
+		this.converter = converter;
 		this.preferedType = preferedType;
 	}
 
@@ -31,8 +29,8 @@ public class ConverterDescriptor {
 		return converter;
 	}
 
-	public Type getPreferedType() {
-		return preferedType;
+	public Optional<Type> getPreferedType() {
+		return Optional.fromNullable(preferedType);
 	}
 
 }

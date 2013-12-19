@@ -23,10 +23,10 @@ public class TestMetroFactory extends AbstractMetroTest {
 	public void testNewInstance() {
 			ILine line = line("line1");
 			assertNotNull(line);
-			assertEquals(BeansUtil.getProperty(line, "name"), "line1");
+			assertEquals(BeansUtil.getProperty(line, "id"), "line1");
 			IStation station = station("station1");
 			assertNotNull(station);
-			assertEquals(BeansUtil.getProperty(station, "name"), "station1");
+			assertEquals(BeansUtil.getProperty(station, "id"), "station1");
 	}
 	
 }

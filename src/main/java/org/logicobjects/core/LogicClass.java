@@ -1,7 +1,5 @@
 package org.logicobjects.core;
 
-import java.lang.reflect.Constructor;
-
 import org.logicobjects.descriptor.ConverterDescriptor;
 import org.logicobjects.descriptor.LogicObjectDescriptor;
 import org.minitoolbox.reflection.typewrapper.SingleTypeWrapper;

@@ -110,7 +110,7 @@ public class TestReflections extends LocalLogicTest {
 	/*
 	@Test
 	public void testContextClass() {
-		LContext context = new LContext();
+		ClassPathContext context = new ClassPathContext();
 		context.addSearchPath("iv4e");
 		Class clazz = context.findLogicClass("iv", 0);
 		System.out.println(clazz.getName());
@@ -120,7 +120,7 @@ public class TestReflections extends LocalLogicTest {
 */
 	
 	/**
-	 * Test for finding resources with a given name
+	 * Test for finding resources with a given id
 	 * (Currently) does not work if the resources are in a jar.
 	 * it is commented out so maven will not complain in the automated unit tests execution in the 'installation' phase (where the project is zipped in a jar)
 	 */
@@ -149,7 +149,7 @@ public class TestReflections extends LocalLogicTest {
 		 * If the current execution path is not the base directory of the relative paths, this could lead to files having absolute paths pointing to non existing resources
 		 */
 		Set<String> propertiesFiles = reflections.getResources(predicate);  //in case a complex predicate is needed
-		//Set<String> propertiesFiles = reflections.getResources(Pattern.compile(".*\\.properties")); //in case the condition is just based on the name of the file
+		//Set<String> propertiesFiles = reflections.getResources(Pattern.compile(".*\\.properties")); //in case the condition is just based on the id of the file
 		
 		System.out.println("URL Logic Objects: " + urlLogicObjects);
 		System.out.println("Protocol: "+urlLogicObjects.getProtocol());

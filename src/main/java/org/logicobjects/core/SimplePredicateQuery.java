@@ -52,7 +52,7 @@ public class SimplePredicateQuery extends RawLogicQuery {
 	public LogicMethodParsingData getDataToParse() {
 		LogicMethodParsingData parsingData = new LogicMethodParsingData();
 		//TODO this code is duplicated, taking from LogicMethod
-		if(hasCustomMethodName()) //this is to avoid parsing method names such as $1. This is a valid Java method name, but would be interpreted by the parser as "a String given by the first argument of the logic method"
+		if(hasCustomMethodName()) //this is to avoid parsing method names such as $1. This is a valid Java method id, but would be interpreted by the parser as "a String given by the first argument of the logic method"
 			parsingData.setQueryString(logicMethodName());
 		parsingData.setMethodArguments(getLogicMethodArguments());
 		parsingData.setSolutionString(getEachSolutionValue());
@@ -64,7 +64,7 @@ public class SimplePredicateQuery extends RawLogicQuery {
 		if(isLogicExpression()) {
 			parsedLogicMethod.setComputedQueryString("true");
 		} else {
-			super.configureParsedLogicMethodQueryString(parsedLogicMethod); //the query will be the method name
+			super.configureParsedLogicMethodQueryString(parsedLogicMethod); //the query will be the method id
 		}
 	}
 	

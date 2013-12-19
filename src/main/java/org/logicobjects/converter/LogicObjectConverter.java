@@ -2,14 +2,16 @@ package org.logicobjects.converter;
 
 import java.lang.annotation.Annotation;
 
-import org.jpc.converter.JpcConverter;
 import org.logicobjects.core.LogicClass;
 
-public class LogicObjectConverter extends JpcConverter {
+import com.sun.javafx.scene.layout.region.Margins.Converter;
+
+//TODO delete
+public class LogicObjectConverter extends Converter {
 
 	protected <A extends Annotation> A getMappingAnnotationGuidingClass(Class<A> annotationClass) {
 		A annotation = null;
-		Class guidingClass = getGuidingClass();
+		Class guidingClass = getAnnotatedClass();
 		if(guidingClass != null) {
 			annotation = (A) guidingClass.getAnnotation(annotationClass);
 		}
@@ -30,6 +32,6 @@ public class LogicObjectConverter extends JpcConverter {
 	 * by default, if the guiding class (the first class in the hierarchy identified as a logic class) implements ITermObject then any annotation present in classes in the hierarchy should be ignored 
 	 */
 	public boolean shouldIgnoreHierarchyMappingAnnotations() {
-		return getGuidingClass() != null && LogicClass.isTermObjectClass(getGuidingClass());
+		return getAnnotatedClass() != null && LogicClass.isTermObjectClass(getAnnotatedClass());
 	}
 }

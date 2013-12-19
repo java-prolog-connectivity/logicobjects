@@ -11,7 +11,7 @@ import org.logicobjects.annotation.LObject;
 
 @LObject(name="tuple", args = {"items"})
 //@XmlRootElement(namespace = "iv4e.xml.jaxb.model")
-//@XmlType(name = "tuple")
+//@XmlType(id = "tuple")
 //@XmlTransient
 public class Tuple<T> /*extends ArrayList<T>*/ {
 	
@@ -36,8 +36,8 @@ public class Tuple<T> /*extends ArrayList<T>*/ {
 		setItems(list);
 	}
 
-	//@XmlElementWrapper(name = "tuple")
-	//@XmlElement(name = "value")
+	//@XmlElementWrapper(id = "tuple")
+	//@XmlElement(id = "value")
 	//@XmlValue
 	@XmlTransient
 	public List<T> getItems() {

@@ -4,7 +4,7 @@ import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.method.LMethod;
 
 
-@LObject(args = {"name"})
+@LObject(args = {"id"})
 public abstract class Line implements ILine { 
 	
 	public abstract boolean connects(IStation s1, IStation s2);

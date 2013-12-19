@@ -1,6 +1,6 @@
 package org.logicobjects;
 
-import org.jpc.JpcPreferences;
+import org.jpc.util.JpcPreferences;
 
 /**
  * Manages the LogicObjects preferences

@@ -2,14 +2,11 @@ package org.logicobjects.core;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.jpc.converter.TermConvertable;
-import org.jpc.engine.logtalk.LogtalkConstants;
 import org.jpc.engine.logtalk.LogtalkObject;
-import org.jpc.term.AbstractTerm;
 import org.jpc.term.Atom;
 import org.jpc.term.Compound;
 import org.jpc.term.Term;
@@ -22,11 +19,7 @@ import org.minitoolbox.reflection.typewrapper.ArrayTypeWrapper;
 import org.minitoolbox.reflection.typewrapper.TypeWrapper;
 
 
-public class LogicObject implements TermConvertable<Term> {
-
-	public static Compound logtalkMessage(AbstractTerm object, String messageName, List<AbstractTerm> messageArguments) {
-		return new Compound(LogtalkConstants.LOGTALK_OPERATOR, Arrays.asList(object, new Compound(messageName, messageArguments)) );
-	}
+public class LogicObject<T extends Term> implements TermConvertable<T> {
 	
 	private String name;
 	private List arguments;
@@ -66,7 +59,7 @@ public class LogicObject implements TermConvertable<Term> {
 	}
 
 	@Override
-	public AbstractTerm asTerm() {
+	public Term asTerm() {
 		if( isParametrizedObject() )
 			return new Compound(getName(), new ObjectToTermConverter().adaptObjects(getArguments()));
 		else
@@ -98,7 +91,7 @@ public class LogicObject implements TermConvertable<Term> {
 	
 	
 	
-	public static void setProperty(Object lObject, String propertyName, AbstractTerm term) {
+	public static void setProperty(Object lObject, String propertyName, Term term) {
 		BeanPropertyAdaptationContext adaptationContext = new BeanPropertyAdaptationContext(lObject.getClass(), propertyName);
 		Object value = new TermToObjectConverter().adapt(term, adaptationContext.getPropertyType(), adaptationContext);
 		BeansUtil.setProperty(lObject, propertyName, value, adaptationContext.getGuidingClass());
@@ -110,7 +103,7 @@ public class LogicObject implements TermConvertable<Term> {
 		TypeWrapper typeWrapper = TypeWrapper.wrap(field.getGenericType());
 		if(!(typeWrapper instanceof ArrayTypeWrapper))
 			throw new RuntimeException("The property " + argsList + " is not an array instance variable in object " + lObject);
-		List<AbstractTerm> termArguments = term.getArgs();
+		List<Term> termArguments = term.getArgs();
 		Object adaptedArgs = new TermToObjectConverter().adaptTerms(termArguments, adaptationContext.getPropertyType(), adaptationContext);
 		BeansUtil.setProperty(lObject, argsList, adaptedArgs, adaptationContext.getGuidingClass());
 	}
@@ -121,11 +114,11 @@ public class LogicObject implements TermConvertable<Term> {
 		}
 	}
 
-	public static List<AbstractTerm> propertiesAsTerms(Object object, List<String> propertyNames) {
-		List<AbstractTerm> arguments = new ArrayList<AbstractTerm>();
+	public static List<Term> propertiesAsTerms(Object object, List<String> propertyNames) {
+		List<Term> arguments = new ArrayList<Term>();
 		for(String propertyName : propertyNames) {
 			try {
-				AbstractTerm term = propertyAsTerm(object, propertyName);
+				Term term = propertyAsTerm(object, propertyName);
 				arguments.add(term);
 			} catch(Exception e) {
 				throw new RuntimeException(e);
@@ -134,8 +127,8 @@ public class LogicObject implements TermConvertable<Term> {
 		return arguments;
 	}
 	
-	public static AbstractTerm propertyAsTerm(Object lObject, String propertyName) {
-		AbstractTerm propertyAsTerm = null;
+	public static Term propertyAsTerm(Object lObject, String propertyName) {
+		Term propertyAsTerm = null;
 		if(propertyName.equals("this"))
 			propertyAsTerm = new ObjectToTermConverter().adapt(lObject);
 		else {

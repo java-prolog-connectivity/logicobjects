@@ -47,7 +47,7 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 
 	public static final String GENERATED_METHOD_PREFIX = "$logicobjects_";
 	
-	//WHY THESE NAMES?: http://scala-programming-language.1934581.n4.nabble.com/Why-quot-by-name-quot-parameters-are-called-this-way-td1944598.html
+	//WHY THESE NAMES?: http://scala-programming-language.1934581.n4.nabble.com/Why-quot-by-id-quot-parameters-are-called-this-way-td1944598.html
 	public static final String VALUE_EXP_EVALUATION_SYMBOL = "$";
 	public static final String DEFERRED_EXP_EVALUATION_SYMBOL = "#";
 	
@@ -370,14 +370,14 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 	
 	
 	/**
-	 * This method answers the method name returning a Java expression declared in position @position at the original logic method
-	 * The name of the method returning the expression is based on the original method name (obtained with: method.toGenericString())
-	 * Note that this name depend on the class where the method is implemented
-	 * At the time the code is generated, the method used to generate this name belongs to the abstract logic class
-	 * At the time the method is invoked, the method used to generate this name belongs to the NON-abstract generated class (with suffix GENERATED_CLASS_SUFFIX)
+	 * This method answers the method id returning a Java expression declared in position @position at the original logic method
+	 * The id of the method returning the expression is based on the original method id (obtained with: method.toGenericString())
+	 * Note that this id depend on the class where the method is implemented
+	 * At the time the code is generated, the method used to generate this id belongs to the abstract logic class
+	 * At the time the method is invoked, the method used to generate this id belongs to the NON-abstract generated class (with suffix GENERATED_CLASS_SUFFIX)
 	 * For that reason, this method attempts to return the same result at both times by means of:
-	 * - dropping any abstract keyword from the method name
-	 * - dropping the GENERATED_CLASS_SUFFIX from the method name
+	 * - dropping any abstract keyword from the method id
+	 * - dropping the GENERATED_CLASS_SUFFIX from the method id
 	 * @param method
 	 * @param position
 	 * @return
@@ -385,7 +385,7 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 	private static String methodNameForExpression(Method method, int position) {
 		String normalizedMethodName = method.toGenericString();
 		normalizedMethodName = normalizedMethodName.replaceAll(Pattern.quote(LogicObjectInstrumentation.GENERATED_CLASS_SUFFIX), "");
-		normalizedMethodName = normalizedMethodName.replaceAll("<.*?>", ""); //suppress generics information from the method name
+		normalizedMethodName = normalizedMethodName.replaceAll("<.*?>", ""); //suppress generics information from the method id
 		normalizedMethodName = normalizedMethodName.replaceAll(" abstract ", "_");
 		normalizedMethodName = normalizedMethodName.replaceAll("\\(|\\)", "_");
 		normalizedMethodName = normalizedMethodName.replaceAll(" |\\.|,", "_");
@@ -394,8 +394,8 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 	
 	/**
 	 * 
-	 * @param position the method name is a function of an expression position
-	 * @return a method name which return value will replace an expression (returns only the method simple name, parentheses are not included)
+	 * @param position the method id is a function of an expression position
+	 * @return a method id which return value will replace an expression (returns only the method simple id, parentheses are not included)
 	 */
 	private String methodNameForExpression(int position) {
 		return methodNameForExpression(getMethod(), position);
@@ -477,7 +477,7 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 				if(allArgumentsRequired || symbols.contains(paramName)) {
 					AbstractTerm termArgument = ObjectToTermConverter.asTerm(args.get(i));
 					if(!termArgument.getNamedVariablesNames().isEmpty())
-						throw new RuntimeException("Argument objects cannot contain free non-anonymous variables: "+termArgument);//in order to avoid name collisions
+						throw new RuntimeException("Argument objects cannot contain free non-anonymous variables: "+termArgument);//in order to avoid id collisions
 					dictionary.put(paramName, termArgument.toString());
 					listTerms.add(termArgument);
 				}
@@ -506,7 +506,7 @@ public abstract class LogicMethodParser<LM extends LogicRoutine> extends Abstrac
 			String expression = LogicMethodParser.getExpressionValue(delimitedExpression);  //suppress the delimiter characters
 			String substitutionValue;
 			if(LogicMethodParser.isValidJavaExpression(expression)) {
-				substitutionValue = methodNameForExpression(i + 1); //calculate a method name for this expression given the expression position. Using as index i+1 to work with 1-based index. Later the expression will be replaced by a call to this method
+				substitutionValue = methodNameForExpression(i + 1); //calculate a method id for this expression given the expression position. Using as index i+1 to work with 1-based index. Later the expression will be replaced by a call to this method
 			} else {
 				logger.warn("The expression: " + delimitedExpression + "in the method "+ getMethod().toGenericString()+" is not valid. It will be ignored.");
 				substitutionValue = "";  //the expression will be replaced by an empty string

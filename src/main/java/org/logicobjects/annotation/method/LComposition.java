@@ -11,8 +11,11 @@ import org.logicobjects.util.AnnotationConstants.NULL;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 
-/*
- * Indicates the wrapper adapter of a logic method. Wrapper adapters abstract many common usage patterns of logic methods 
+
+/**
+ * Indicates the wrapper adapter of a logic method. Wrapper adapters abstract many common usage patterns of logic methods. 
+ * @author sergioc
+ *
  */
 public @interface LComposition {
 	Class adapter() default SmartWrapperAdapter.class;

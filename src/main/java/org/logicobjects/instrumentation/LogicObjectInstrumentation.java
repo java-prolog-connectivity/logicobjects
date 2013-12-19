@@ -96,7 +96,7 @@ public class LogicObjectInstrumentation {
 	 * Answers the already loaded extending class. If the class is not loaded returns null
 	 */
 	public Class loadedExtendingClass() {
-		String extendingClassName = instrumentedClassName(classToExtend);  //derive the name of the extending class using the name of the base class
+		String extendingClassName = instrumentedClassName(classToExtend);  //derive the id of the extending class using the id of the base class
 
 		try {
 			return classPool.getClassLoader().loadClass(extendingClassName);
@@ -119,7 +119,7 @@ public class LogicObjectInstrumentation {
 				return alreadyLoadedClass;
 			}
 			else {
-				String extendingClassName = instrumentedClassName(classToExtend);  //derive the name of the extending class using the name of the base class
+				String extendingClassName = instrumentedClassName(classToExtend);  //derive the id of the extending class using the id of the base class
 				Class extendingClass = createExtendingClass(extendingClassName);  //create it
 				return extendingClass;
 			}	
@@ -129,11 +129,11 @@ public class LogicObjectInstrumentation {
 	}
 	
 	/*
-	 * @param extendingClassName the name of the class to be created
+	 * @param extendingClassName the id of the class to be created
 	 * @param parent the base class of the new class
 	 */
 	private Class createExtendingClass(String extendingClassName) {
-		CtClass newCtClass = classPool.makeClass(extendingClassName);//creating the new class with the given name
+		CtClass newCtClass = classPool.makeClass(extendingClassName);//creating the new class with the given id
 		
 		try {
 			newCtClass.setSuperclass(ctClassToExtend);
@@ -219,7 +219,7 @@ public class LogicObjectInstrumentation {
 			Class beanPropertyClass;
 			if(beanPropertyType != null)
 				beanPropertyClass = TypeWrapper.wrap(beanPropertyType).getRawClass();
-			else {//there is no property (no field, getter, or setter) with the given name in the bean, assuming the desired type of the field is Object.class
+			else {//there is no property (no field, getter, or setter) with the given id in the bean, assuming the desired type of the field is Object.class
 				beanPropertyType = Object.class;
 				beanPropertyClass = Object.class;
 			}
@@ -411,7 +411,7 @@ public class LogicObjectInstrumentation {
 		try {
 			/**
 			 * From the Javassist documentation:
-			 * "By default, all the occurrences of the names of the class declaring m and the superclass are replaced with the name of the class and the superclass that the created method is added to. 
+			 * "By default, all the occurrences of the names of the class declaring m and the superclass are replaced with the id of the class and the superclass that the created method is added to. 
 			 * This is done whichever map is null or not. To prevent this replacement, call ClassMap.fix()."
 			 */
 			ClassMap classMap = JavassistUtil.fixedClassMap(classToExtend, classPool);

@@ -1,6 +1,6 @@
 package org.logicobjects.test;
 
-import org.jpc.JpcPreferences;
+import org.jpc.util.JpcPreferences;
 import org.junit.Test;
 
 public class TestEnvironment {

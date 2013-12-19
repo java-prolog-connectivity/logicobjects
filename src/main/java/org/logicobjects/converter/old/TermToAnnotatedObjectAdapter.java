@@ -4,31 +4,30 @@ import static org.logicobjects.LogicObjects.newLogicObject;
 
 import java.lang.reflect.Type;
 
-import org.jpc.term.AbstractTerm;
 import org.jpc.term.Term;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.converter.IncompatibleAdapterException;
 import org.logicobjects.converter.context.old.AdaptationContext;
 import org.logicobjects.converter.context.old.AnnotatedElementAdaptationContext;
 import org.logicobjects.converter.context.old.ClassAdaptationContext;
-import org.logicobjects.core.LogicObject;
 import org.logicobjects.core.LogicClass;
+import org.logicobjects.core.LogicObject;
 import org.logicobjects.descriptor.LogicObjectDescriptor;
 import org.logicobjects.methodadapter.LogicAdapter;
 import org.minitoolbox.reflection.typewrapper.TypeWrapper;
 
-public class TermToAnnotatedObjectAdapter<To> extends LogicAdapter<AbstractTerm, Object> {
+public class TermToAnnotatedObjectAdapter<To> extends LogicAdapter<Term, Object> {
 
 	@Override
-	public Object adapt(AbstractTerm term) {
+	public Object adapt(Term term) {
 		return adapt(term, null);
 	}
 
-	public To adapt(AbstractTerm term, Type type) {
+	public To adapt(Term term, Type type) {
 		return adapt(term, type, null);
 	}
 
-	public To adapt(AbstractTerm term, Type type, AdaptationContext context) {
+	public To adapt(Term term, Type type, AdaptationContext context) {
 		AnnotatedElementAdaptationContext annotatedContext;
 		if(context != null) {
 			if(understandsContext(context))
@@ -49,7 +48,7 @@ public class TermToAnnotatedObjectAdapter<To> extends LogicAdapter<AbstractTerm,
 	}
 
 
-	protected Object adaptToObjectFromAdapter(AbstractTerm term, Type type, AnnotatedElementAdaptationContext annotatedContext) {
+	protected Object adaptToObjectFromAdapter(Term term, Type type, AnnotatedElementAdaptationContext annotatedContext) {
 		TypeWrapper typeWrapper = TypeWrapper.wrap(type);
 		TermToObjectConverter objectAdapter = annotatedContext.getTermToObjectConverter();
 		return typeWrapper.getRawClass().cast(objectAdapter.adapt(term));

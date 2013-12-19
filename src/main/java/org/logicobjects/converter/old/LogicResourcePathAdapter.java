@@ -5,7 +5,6 @@ import java.util.Arrays;
 
 import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
 import org.jpc.resource.LogicResource;
-import org.jpc.term.AbstractTerm;
 import org.jpc.term.Atom;
 import org.jpc.term.Compound;
 import org.jpc.term.Term;
@@ -18,7 +17,7 @@ import org.logicobjects.methodadapter.LogicAdapter;
  * or in Prolog style dir1(dir2(dir3))
  */
 
-public class LogicResourcePathAdapter extends LogicAdapter<LogicResource, AbstractTerm> {
+public class LogicResourcePathAdapter extends LogicAdapter<LogicResource, Term> {
 
 	private URL url;
 	private ResourceManager resourceManager;
@@ -66,7 +65,7 @@ public class LogicResourcePathAdapter extends LogicAdapter<LogicResource, Abstra
 		return makeCompound(symbols, 0);
 	}
 	
-	private static AbstractTerm makeCompound(String[] symbols, int next) {
+	private static Term makeCompound(String[] symbols, int next) {
 		if(symbols.length == 0) //in case the original array is empty
 			return null;
 		if(next == symbols.length-1) //no more symbols to process

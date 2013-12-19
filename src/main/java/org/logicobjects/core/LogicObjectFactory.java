@@ -25,20 +25,29 @@ public class LogicObjectFactory {
 	private LogicDependenciesLoader logicDependenciesLoader;
 	private ResourceManager resourceManager;
 	private ClassPool classPool;
-	//private 
 
 	
 	/**
 	 * This class should not be directly instantiated
 	 */
-	public LogicObjectFactory(ClassPool classPool) {
-		this.classPool = classPool;
+	public LogicObjectFactory() {
 		String tmpDir = LogicObjects.getPreferences().getTmpDirectory();
 		resourceManager = new ResourceManager(tmpDir);
 		logicDependenciesLoader = new LogicDependenciesLoader(resourceManager);
 		
 	}
 
+	
+	public ClassPool getClassPool() {
+		if(classPool == null)
+			classPool = ClassPool.getDefault();
+		return classPool;
+	}
+
+	public void setClassPool(ClassPool classPool) {
+		this.classPool = classPool;
+	}
+	
 /*
 	public ResourceManager getResourceManager(){
 		return resourceManager;
@@ -60,7 +69,7 @@ public class LogicObjectFactory {
 			throw new RuntimeException("The context object cannot be an instance of " + Class.class.getName());
 		Class instantiatingClass = null;
 		//if(clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
-			LogicObjectInstrumentation instrumentation = new LogicObjectInstrumentation(clazz, classPool);
+			LogicObjectInstrumentation instrumentation = new LogicObjectInstrumentation(clazz, getClassPool());
 			//instrumentation.run(); //instrument class and its ancestors
 			boolean extendingClassLoaded = instrumentation.isExtendingClassLoaded();
 			if(!extendingClassLoaded) { //the extending class has not been generated yet

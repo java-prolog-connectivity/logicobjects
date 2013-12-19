@@ -6,16 +6,16 @@ import org.jpc.util.ParadigmLeakUtil;
 
 public class ClassLogicObjectDescriptor extends LogicObjectDescriptor {
 	
-	protected Class guidingClass;
+	protected final Class<?> guidingClass;
 	
-	public ClassLogicObjectDescriptor(Class guidingClass) {
+	public ClassLogicObjectDescriptor(Class<?> guidingClass) {
 		super(
-				ParadigmLeakUtil.javaClassNameToProlog(guidingClass.getSimpleName()),
+				ParadigmLeakUtil.javaClassNameToProlog(guidingClass.getSimpleName()), //id inferred from the id of the class
 				Collections.<String>emptyList(),
 				Collections.<String>emptyList(),
 				Collections.<String>emptyList(),
 				true,
-				null
+				false
 				);
 		this.guidingClass = guidingClass;
 	}

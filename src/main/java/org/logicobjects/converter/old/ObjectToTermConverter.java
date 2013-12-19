@@ -2,42 +2,28 @@ package org.logicobjects.converter.old;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.jconverter.instantiation.InstantiationManager;
 import org.jpc.converter.TermConvertable;
-import org.jpc.converter.instantiation.InstantiationManager;
-import org.jpc.term.Atom;
-import org.jpc.term.FloatTerm;
 import org.jpc.term.Term;
-import org.jpc.term.IntegerTerm;
-import org.jpc.term.AbstractTerm;
 import org.jpc.util.PrologUtil;
 import org.logicobjects.converter.IncompatibleAdapterException;
 import org.logicobjects.converter.context.old.AdaptationContext;
 import org.logicobjects.converter.context.old.FieldAdaptationContext;
 import org.logicobjects.converter.context.old.MethodAdaptationContext;
-import org.logicobjects.converter.objectadapters.AnyCollectionToTermAdapter;
-import org.logicobjects.converter.objectadapters.CalendarToTermAdapter;
-import org.logicobjects.converter.objectadapters.XMLGregorianCalendarToTermAdapter;
-import org.logicobjects.converter.objectadapters.MapToTermAdapter.EntryToTermAdapter;
-import org.logicobjects.core.LogicObject;
 import org.logicobjects.core.LogicClass;
+import org.logicobjects.core.LogicObject;
 import org.logicobjects.methodadapter.LogicAdapter;
 import org.minitoolbox.reflection.ReflectionUtil;
 
-import com.google.common.primitives.Primitives;
-
-public class ObjectToTermConverter<From> extends LogicAdapter<From, AbstractTerm> {
+public class ObjectToTermConverter<From> extends LogicAdapter<From, Term> {
 	
 	@Override
 	public Term adapt(From object) {
@@ -48,7 +34,7 @@ public class ObjectToTermConverter<From> extends LogicAdapter<From, AbstractTerm
 		return adapt(object, new FieldAdaptationContext(field));
 	}
 	
-	public List<AbstractTerm> adaptField(List<From> objects, Field field) {
+	public List<Term> adaptField(List<From> objects, Field field) {
 		return adaptObjects(objects, new FieldAdaptationContext(field));
 	}
 	
@@ -56,16 +42,16 @@ public class ObjectToTermConverter<From> extends LogicAdapter<From, AbstractTerm
 		return adapt(object, new MethodAdaptationContext(method));
 	}
 	
-	public List<AbstractTerm> adaptMethod(List<From> objects, Method method) {
+	public List<Term> adaptMethod(List<From> objects, Method method) {
 		return adaptObjects(objects, new MethodAdaptationContext(method));
 	}
 	
-	public List<AbstractTerm> adaptObjects(List<From> objects) {
+	public List<Term> adaptObjects(List<From> objects) {
 		return adaptObjects(objects, null);
 	}
 	
-	public List<AbstractTerm> adaptObjects(List<From> objects, AdaptationContext adaptingContext) {
-		List<AbstractTerm> terms = new ArrayList<>();
+	public List<Term> adaptObjects(List<From> objects, AdaptationContext adaptingContext) {
+		List<Term> terms = new ArrayList<>();
 		for(From object : objects) {
 			terms.add(adapt(object, adaptingContext));
 		}
@@ -92,7 +78,7 @@ public class ObjectToTermConverter<From> extends LogicAdapter<From, AbstractTerm
 					StringBuffer.class,
 					Boolean.class,
 					Number.class)) {
-				return AbstractTerm.newTerm(object); //default conversion
+				return Term.newTerm(object); //default conversion
 			} else if(Calendar.class.isAssignableFrom(object.getClass())) {
 				return new CalendarToTermAdapter().adapt((Calendar) object);
 			} else if(XMLGregorianCalendar.class.isAssignableFrom(object.getClass())) {

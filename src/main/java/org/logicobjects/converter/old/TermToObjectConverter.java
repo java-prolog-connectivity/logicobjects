@@ -17,20 +17,14 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.jpc.engine.prolog.PrologEngine;
-import org.jpc.term.AbstractTerm;
 import org.jpc.term.Atom;
 import org.jpc.term.Compound;
+import org.jpc.term.Term;
 import org.jpc.util.PrologUtil;
 import org.logicobjects.converter.IncompatibleAdapterException;
 import org.logicobjects.converter.context.old.AdaptationContext;
 import org.logicobjects.converter.context.old.FieldAdaptationContext;
 import org.logicobjects.converter.context.old.MethodAdaptationContext;
-import org.logicobjects.converter.objectadapters.TermToArrayAdapter;
-import org.logicobjects.converter.objectadapters.TermToCalendarAdapter;
-import org.logicobjects.converter.objectadapters.TermToCollectionAdapter;
-import org.logicobjects.converter.objectadapters.TermToMapAdapter;
-import org.logicobjects.converter.objectadapters.TermToXMLGregorianCalendarAdapter;
-import org.logicobjects.converter.objectadapters.TermToMapAdapter.TermToEntryAdapter;
 import org.logicobjects.methodadapter.LogicAdapter;
 import org.minitoolbox.reflection.TypeUtil;
 import org.minitoolbox.reflection.typewrapper.ArrayTypeWrapper;
@@ -42,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.primitives.Primitives;
 
-public class TermToObjectConverter<To> extends LogicAdapter<AbstractTerm, To> {
+public class TermToObjectConverter<To> extends LogicAdapter<Term, To> {
 	
 	private static Logger logger = LoggerFactory.getLogger(TermToObjectConverter.class);
 
@@ -58,43 +52,43 @@ public class TermToObjectConverter<To> extends LogicAdapter<AbstractTerm, To> {
 	 */
 	
 	@Override
-	public To adapt(AbstractTerm term) {
+	public To adapt(Term term) {
 		return adapt(term, Object.class);
 	}
 
-	public To adapt(AbstractTerm term, Type type) {
+	public To adapt(Term term, Type type) {
 		return adapt(term, type, null);
 	}
 
-	public To adaptField(AbstractTerm term, Field field) {
+	public To adaptField(Term term, Field field) {
 		return adapt(term, field.getGenericType(), new FieldAdaptationContext(field));
 	}
 	
-	public List<To> adaptField(List<AbstractTerm> terms, Field field) {
+	public List<To> adaptField(List<Term> terms, Field field) {
 		return adaptTerms(terms, field.getGenericType(), new FieldAdaptationContext(field));
 	}
 	
-	public To adaptMethod(AbstractTerm term, Method method) {
+	public To adaptMethod(Term term, Method method) {
 		return adapt(term, method.getGenericReturnType(), new MethodAdaptationContext(method));
 	}
 	
-	public List<To> adaptMethod(List<AbstractTerm> terms, Method method) {
+	public List<To> adaptMethod(List<Term> terms, Method method) {
 		return adaptTerms(terms, method.getGenericReturnType(), new MethodAdaptationContext(method));
 	}
 	
-	public List<To> adaptTerms(List<AbstractTerm> terms) {
+	public List<To> adaptTerms(List<Term> terms) {
 		return adaptTerms(terms, Object.class, null);
 	}
 	
-	public List<To> adaptTerms(List<AbstractTerm> terms, Type type, AdaptationContext adaptingContext) {
+	public List<To> adaptTerms(List<Term> terms, Type type, AdaptationContext adaptingContext) {
 		List<To> objects = new ArrayList<>();
-		for(AbstractTerm term : terms) {
+		for(Term term : terms) {
 			objects.add(adapt(term, type, adaptingContext));
 		}
 		return objects;
 	}
 	
-	public To adapt(AbstractTerm term, Type type, AdaptationContext adaptingContext) {
+	public To adapt(Term term, Type type, AdaptationContext adaptingContext) {
 		TypeWrapper typeWrapper = TypeWrapper.wrap(type);
 		boolean errorMappingFromAnnotations = false;
 		if( (typeWrapper instanceof VariableTypeWrapper) ) //the type is erased
@@ -112,7 +106,7 @@ public class TermToObjectConverter<To> extends LogicAdapter<AbstractTerm, To> {
 			try {
 				if( typeWrapper instanceof SingleTypeWrapper ) { //the type is not an array and not an erased type (but still it can be a collection)
 					SingleTypeWrapper singleTypeWrapper = SingleTypeWrapper.class.cast(typeWrapper);
-					if(term.isVariable() && !AbstractTerm.class.isAssignableFrom(singleTypeWrapper.getRawClass())) {//found a variable, and the method is not explicitly returning terms
+					if(term.isVariable() && !Term.class.isAssignableFrom(singleTypeWrapper.getRawClass())) {//found a variable, and the method is not explicitly returning terms
 						logger.warn("Attempting to transform the variable term " + term + " to an object of class " + singleTypeWrapper.getRawClass() + ". Transformed as null.");
 						return null;
 					}
@@ -172,7 +166,7 @@ public class TermToObjectConverter<To> extends LogicAdapter<AbstractTerm, To> {
 							return (To) term;
 					}*/
 					
-					if(singleTypeWrapper.isRawClassAssignableFrom(AbstractTerm.class))
+					if(singleTypeWrapper.isRawClassAssignableFrom(Term.class))
 						return (To) term;
 				}
 			} catch(Exception e) {
@@ -204,7 +198,7 @@ public class TermToObjectConverter<To> extends LogicAdapter<AbstractTerm, To> {
 	}
 	
 	
-	private To adaptListTerm(AbstractTerm term, Type type, AdaptationContext adaptingContext) {
+	private To adaptListTerm(Term term, Type type, AdaptationContext adaptingContext) {
 		TypeWrapper typeWrapper = TypeWrapper.wrap(type);
 		if(typeWrapper instanceof ArrayTypeWrapper) {
 			return (To) new TermToArrayAdapter().adapt(term, type, adaptingContext);

@@ -1,6 +1,5 @@
 package org.logicobjects.converter;
 
-import java.lang.reflect.Type;
 
 public class IncompatibleAdapterException extends RuntimeException {
 	

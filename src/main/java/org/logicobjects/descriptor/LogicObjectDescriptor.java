@@ -12,30 +12,42 @@ import org.logicobjects.instrumentation.LogicClassParsingData;
  */
 public class LogicObjectDescriptor {
 	
-	private String name;
-	private List<String> args;
-	private List<String> imports;
-	private List<String> modules;
-	private boolean automaticImport;
-	private String id;
+	public static final int DEFAULT_TERM_INDEX = -1;
 	
-	public LogicObjectDescriptor(String name, List<String> args, List<String> imports, List<String> modules, boolean automaticImport, String id) {
+	private final String name;
+	private final List<String> args;
+	private final List<String> imports;
+	private final List<String> modules;
+	private final boolean automaticImport;
+	private final boolean referenceTerm;
+	private final int termIndex;
+	
+	public LogicObjectDescriptor(String name, List<String> args, List<String> imports, List<String> modules, boolean automaticImport, boolean referenceTerm) {
+		this(name, args, imports, modules, automaticImport, referenceTerm, LogicObjectDescriptor.DEFAULT_TERM_INDEX);
+	}
+	
+	public LogicObjectDescriptor(String name, List<String> args, List<String> imports, List<String> modules, boolean automaticImport, boolean referenceTerm, int termIndex) {
 		this.name = name;
 		this.args = args;
 		this.imports = imports;
 		this.modules = modules;
 		this.automaticImport = automaticImport;
-		this.id = id;
+		this.referenceTerm = referenceTerm;
+		this.termIndex = termIndex;
 	}
 	
 	/**
 	 * 
-	 * @return the name of the logic object. By default it is inferred from the name of the class.
+	 * @return the id of the logic object.
 	 */
 	public String name() {
 		return name;
 	}
 	
+	/**
+	 * 
+	 * @return the arguments of the logic object.
+	 */
 	public List<String> args() {
 		return args;
 	}
@@ -52,8 +64,12 @@ public class LogicObjectDescriptor {
 		return automaticImport;
 	}
 	
-	public String id() {
-		return id;
+	public boolean referenceTerm() {
+		return referenceTerm;
+	}
+	
+	public int termIndex() {
+		return termIndex;
 	}
 	
 	//TODO delete
