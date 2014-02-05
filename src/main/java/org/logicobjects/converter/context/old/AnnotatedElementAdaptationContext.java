@@ -7,10 +7,10 @@ import org.logicobjects.annotation.LObjectConverter;
 import org.logicobjects.annotation.LObjectConverter.LObjectConverterUtil;
 import org.logicobjects.annotation.LTermConverter;
 import org.logicobjects.annotation.LTermConverter.LTermConverterUtil;
+import org.logicobjects.converter.descriptor.LogicObjectDescriptor;
 import org.logicobjects.converter.old.ObjectToTermConverter;
 import org.logicobjects.converter.old.TermToObjectConverter;
 import org.logicobjects.core.LogicClass;
-import org.logicobjects.descriptor.LogicObjectDescriptor;
 
 public abstract class AnnotatedElementAdaptationContext extends JavaAdaptationContext {
 

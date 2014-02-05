@@ -2,8 +2,8 @@ package org.logicobjects.converter.context.old;
 
 import org.logicobjects.annotation.LDelegationObject;
 import org.logicobjects.annotation.LTermConverter;
+import org.logicobjects.converter.descriptor.LogicObjectDescriptor;
 import org.logicobjects.core.LogicClass;
-import org.logicobjects.descriptor.LogicObjectDescriptor;
 
 /**
  * This class represents the context of a logic method invocation

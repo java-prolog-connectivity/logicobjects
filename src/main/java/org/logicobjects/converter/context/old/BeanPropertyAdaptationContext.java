@@ -10,7 +10,7 @@ import java.util.List;
 import org.logicobjects.annotation.LObject;
 import org.logicobjects.annotation.LObjectConverter;
 import org.logicobjects.annotation.LTermConverter;
-import org.logicobjects.converter.context.LogicBeanProperty;
+import org.logicobjects.converter.old.LogicBeanProperty;
 import org.logicobjects.core.LogicClass;
 import org.minitoolbox.reflection.ReflectionUtil;
 import org.minitoolbox.reflection.typewrapper.TypeWrapper;

@@ -31,7 +31,7 @@ import javassist.bytecode.SyntheticAttribute;
 
 import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
 import org.logicobjects.converter.BadExpressionException;
-import org.logicobjects.converter.context.LogicBeanProperty;
+import org.logicobjects.converter.old.LogicBeanProperty;
 import org.logicobjects.core.LogicClass;
 import org.logicobjects.core.LogicRoutine;
 import org.logicobjects.core.NoLogicResultException;

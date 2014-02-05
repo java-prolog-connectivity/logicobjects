@@ -1,11 +1,11 @@
-package org.logicobjects.converter.context;
+package org.logicobjects.converter.old;
 
 import org.jconverter.Converter;
 import org.jpc.Jpc;
 import org.logicobjects.annotation.LObjectConverter;
 import org.logicobjects.annotation.LObjectConverter.LObjectConverterUtil;
 import org.logicobjects.annotation.LTermConverter;
-import org.logicobjects.descriptor.LogicObjectDescriptor;
+import org.logicobjects.converter.descriptor.LogicObjectDescriptor;
 
 
 public class LogicBeanContextFactory extends AnnotatedContextFactory {

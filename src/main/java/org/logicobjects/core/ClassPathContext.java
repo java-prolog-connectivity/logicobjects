@@ -153,23 +153,23 @@ public class ClassPathContext {
 	
 	
 	
-	public Class findLogicClass(Term logicName, int args) {
+	public Class<?> findLogicClass(String logicName, int args) {
 		Set<Class<?>> set = getLogicClasses();
 		for(Class clazz : set) {
 			LogicObjectClass logicClass = new LogicObjectClass(clazz);
-			if(logicClass.getLObjectName(). //TODO CONVERT THIS TO TERM
+			if(logicClass.getLObjectName().
 					equals(logicName) && logicClass.getLObjectArgs().size() == args)
 				return clazz;
 		}
 		return null;
 	}
 	
-	public Class findLogicClass(Term term) {
+	public Class<?> findLogicClass(Term term) {
 		Class logicClass = null;
 		if(term instanceof Compound) {
 			Compound compound = (Compound) term;
-			if(compound.name().equals("."))
-				logicClass = findLogicClass(compound.name(), compound.arity());
+			if(!compound.isList())
+				logicClass = findLogicClass(compound.getNameString(), compound.arity());
 		}
 		return logicClass;
 	}

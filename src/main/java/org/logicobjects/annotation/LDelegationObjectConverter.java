@@ -1,16 +1,24 @@
 package org.logicobjects.annotation;
 
 import org.jpc.converter.JpcConverter;
-import org.logicobjects.util.AnnotationConstants.NULL;
 
 
 public @interface LDelegationObjectConverter {
-	Class value() default NULL.class; //synonym of converter()
-	Class converter() default NULL.class;
-	Class preferedClass() default NULL.class;
+	Class<? extends JpcConverter> value();
 	
 	public static class LDelegationObjectConverterUtil {
-		
+		public static Class<? extends JpcConverter> getConverterClass(LDelegationObjectConverter aLConverter) {
+			return aLConverter.value();
+		}
+	}
+	
+	/*
+	Class<? extends JpcConverter> value() default NULL.class; //synonym of converter()
+	Class<? extends JpcConverter> converter() default NULL.class;
+	Class preferedClass() default NULL.class;
+	
+	
+	public static class LDelegationObjectConverterUtil {
 		public static Class<? extends JpcConverter> getConverterClass(LDelegationObjectConverter aLConverter) {
 			Class converterClass = aLConverter.converter();
 			if(converterClass == null || converterClass.equals(NULL.class))
@@ -20,5 +28,6 @@ public @interface LDelegationObjectConverter {
 			return converterClass;
 		}
 	}
+	 */
 
 }

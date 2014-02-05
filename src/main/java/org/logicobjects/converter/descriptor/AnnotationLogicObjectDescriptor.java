@@ -1,4 +1,4 @@
-package org.logicobjects.descriptor;
+package org.logicobjects.converter.descriptor;
 
 import static java.util.Arrays.asList;
 

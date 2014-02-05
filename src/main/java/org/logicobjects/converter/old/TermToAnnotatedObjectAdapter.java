@@ -10,9 +10,9 @@ import org.logicobjects.converter.IncompatibleAdapterException;
 import org.logicobjects.converter.context.old.AdaptationContext;
 import org.logicobjects.converter.context.old.AnnotatedElementAdaptationContext;
 import org.logicobjects.converter.context.old.ClassAdaptationContext;
+import org.logicobjects.converter.descriptor.LogicObjectDescriptor;
 import org.logicobjects.core.LogicClass;
 import org.logicobjects.core.LogicObject;
-import org.logicobjects.descriptor.LogicObjectDescriptor;
 import org.logicobjects.methodadapter.LogicAdapter;
 import org.minitoolbox.reflection.typewrapper.TypeWrapper;
 

@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.logicobjects.descriptor.LogicObjectDescriptor;
+import org.logicobjects.converter.descriptor.LogicObjectDescriptor;
 
 /**
  * This annotation specifies which is the Logtalk object receiving the message in the event of a logic method invocation.

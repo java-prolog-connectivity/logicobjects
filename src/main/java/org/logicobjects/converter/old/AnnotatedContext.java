@@ -1,9 +1,9 @@
-package org.logicobjects.converter.context;
+package org.logicobjects.converter.old;
 
 import org.jconverter.Converter;
 import org.jpc.Jpc;
 import org.jpc.JpcProxy;
-import org.logicobjects.descriptor.LogicObjectDescriptor;
+import org.logicobjects.converter.descriptor.LogicObjectDescriptor;
 
 //TODO this class needs to be finished. when transforming terms/objects it must use the descriptors and converters if available
 public class AnnotatedContext extends JpcProxy {

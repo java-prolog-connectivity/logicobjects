@@ -1,4 +1,4 @@
-package org.logicobjects.descriptor;
+package org.logicobjects.converter.descriptor;
 
 import java.util.List;
 

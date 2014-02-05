@@ -10,7 +10,7 @@ import java.util.Map.Entry;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.jconverter.instantiation.InstantiationManager;
+import org.jconverter.factory.FactoryManager;
 import org.jpc.converter.TermConvertable;
 import org.jpc.term.Term;
 import org.jpc.util.PrologUtil;
@@ -68,7 +68,7 @@ public class ObjectToTermConverter<From> extends LogicAdapter<From, Term> {
 			errorMappingFromAnnotations = true;
 			//catch the exception and do nothing if it is a collection object.
 			//that could mean that the adapting context is targeting the individual components of the collection instead of the entire collection itself
-			if(!InstantiationManager.isCollectionObject(object))  //TODO verify this...
+			if(!FactoryManager.isCollectionObject(object))  //TODO verify this...
 				throw e;
 		}
 		if(!errorMappingFromAnnotations) {
@@ -98,7 +98,7 @@ public class ObjectToTermConverter<From> extends LogicAdapter<From, Term> {
 			} 
 		}
 
-		if(InstantiationManager.isCollectionObject(object)) 
+		if(FactoryManager.isCollectionObject(object)) 
 			return new AnyCollectionToTermAdapter().adapt(object, adaptingContext);
 		
 		return adaptToTermFromClass(ReflectionUtil.findFirstNonSyntheticClass(object.getClass()));

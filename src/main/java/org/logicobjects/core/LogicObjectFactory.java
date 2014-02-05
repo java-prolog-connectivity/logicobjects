@@ -3,7 +3,6 @@ package org.logicobjects.core;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javassist.ClassPool;
@@ -60,11 +59,11 @@ public class LogicObjectFactory {
 	}
 	*/
 
-	public <T> T create(Class<T> clazz, Object... params) {
+	public <T> T create(Class<T> clazz, List<?> params) {
 		return create(null, clazz, params);
 	}
 	
-	public <T> T create(Object declaringObject, Class<T> clazz, Object... params) {
+	public <T> T create(Object declaringObject, Class<T> clazz, List<?> params) {
 		if(declaringObject != null && declaringObject instanceof Class)
 			throw new RuntimeException("The context object cannot be an instance of " + Class.class.getName());
 		Class instantiatingClass = null;
@@ -91,10 +90,10 @@ public class LogicObjectFactory {
 		
 
 		try {
-			List<Object> logicObjectsParamsConstructor = Arrays.asList(params);
-			List<Class> logicObjectsParamsClasses = objectsClasses(Arrays.asList(params));
+			//List<Object> logicObjectsParamsConstructor = params;
+			List<Class> logicObjectsParamsClasses = objectsClasses(params);
 			
-			List<Object> allParamsConstructor = new ArrayList(logicObjectsParamsConstructor); //the surrounding new ArrayList is to make the original list mutable
+			List<Object> allParamsConstructor = new ArrayList(params); //the surrounding new ArrayList is to make the original list mutable
 			List<Class> allParamsClasses = new ArrayList(logicObjectsParamsClasses);
 			
 			if(declaringObject != null) {

@@ -59,11 +59,11 @@ public class LogicObject<T extends Term> implements TermConvertable<T> {
 	}
 
 	@Override
-	public Term asTerm() {
+	public T asTerm() {
 		if( isParametrizedObject() )
-			return new Compound(getName(), new ObjectToTermConverter().adaptObjects(getArguments()));
+			return (T) new Compound(getName(), new ObjectToTermConverter().adaptObjects(getArguments()));
 		else
-			return new Atom(getName());
+			return (T) new Atom(getName());
 	}
 	
 	

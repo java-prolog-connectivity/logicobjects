@@ -1,7 +1,7 @@
 package org.logicobjects.core;
 
-import org.logicobjects.descriptor.ConverterDescriptor;
-import org.logicobjects.descriptor.LogicObjectDescriptor;
+import org.logicobjects.converter.descriptor.ConverterDescriptor;
+import org.logicobjects.converter.descriptor.LogicObjectDescriptor;
 import org.minitoolbox.reflection.typewrapper.SingleTypeWrapper;
 
 /**

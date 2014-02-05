@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.logicobjects.descriptor.LogicObjectDescriptor;
+import org.logicobjects.converter.descriptor.LogicObjectDescriptor;
 
 @Target({ElementType.TYPE, ElementType.FIELD}) //TODO, add compile time support for ElementType.LOCAL_VARIABLE (this annotations are not available at runtime)
 @Retention(RetentionPolicy.RUNTIME)
