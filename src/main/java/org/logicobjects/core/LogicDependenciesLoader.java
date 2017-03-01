@@ -11,9 +11,9 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
-import org.jpc.resource.LogicResource;
-import org.jpc.resource.LogtalkResource;
-import org.jpc.resource.PrologResource;
+import org.jpc.util.resource.LogicResource;
+import org.jpc.util.resource.LogtalkResource;
+import org.jpc.util.resource.PrologResource;
 import org.jpc.term.AbstractTerm;
 import org.jpc.util.PrologUtil;
 import org.jpc.util.ResourceManager;

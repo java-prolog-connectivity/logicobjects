@@ -1,6 +1,6 @@
 package org.logicobjects.annotation;
 
-import org.jpc.converter.JpcConverter;
+import org.jpc.mapping.converter.JpcConverter;
 
 
 public @interface LConverter {

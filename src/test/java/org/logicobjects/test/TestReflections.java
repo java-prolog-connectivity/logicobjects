@@ -113,9 +113,9 @@ public class TestReflections extends LocalLogicTest {
 		ClassPathContext context = new ClassPathContext();
 		context.addSearchPath("iv4e");
 		Class clazz = context.findLogicClass("iv", 0);
-		System.out.println(clazz.getName());
+		System.out.println(clazz.getNameTerm());
 		clazz = context.findLogicClass("intensional_set", 3);
-		System.out.println(clazz.getName());
+		System.out.println(clazz.getNameTerm());
 	}
 */
 	

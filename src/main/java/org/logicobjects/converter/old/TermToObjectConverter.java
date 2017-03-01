@@ -240,7 +240,7 @@ public class TermToObjectConverter<To> extends LogicAdapter<Term, To> {
 				return typeWrapper.asClass().cast(obj);
 			}
 			LObject lObjectAnnotation = (LObject)lObjectClass.getAnnotation(LObject.class);
-			//System.out.println("************"+typeWrapper.asClass().getName());
+			//System.out.println("************"+typeWrapper.asClass().getNameTerm());
 			Object lObject = null;
 			if(typeWrapper.isAssignableFrom(lObjectClass)) {
 				lObject = LogtalkObjectFactory.getDefault().create(lObjectClass);

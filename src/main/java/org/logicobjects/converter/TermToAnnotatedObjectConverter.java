@@ -4,7 +4,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import org.jpc.Jpc;
-import org.jpc.converter.FromTermConverter;
+import org.jpc.mapping.converter.FromTermConverter;
 import org.jpc.term.Term;
 import org.logicobjects.LogicObjects;
 import org.logicobjects.converter.descriptor.LogicObjectDescriptor;

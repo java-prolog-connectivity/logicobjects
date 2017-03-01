@@ -21,7 +21,7 @@ public class MultiPredicateQuery extends RawLogicQuery {
 			setUnparsedQueryString(true);
 		}
 		if(getQueryString() == null || getQueryString().isEmpty())
-			throw new RuntimeException("No query has been defined for method "+getWrappedMethod().getName());
+			throw new RuntimeException("No query has been defined for method "+getWrappedMethod().getNameTerm());
 			*/
 	}
 

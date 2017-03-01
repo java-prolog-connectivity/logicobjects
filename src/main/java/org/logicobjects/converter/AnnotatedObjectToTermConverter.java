@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jpc.Jpc;
-import org.jpc.converter.ToTermConverter;
+import org.jpc.mapping.converter.ToTermConverter;
 import org.jpc.term.Compound;
 import org.jpc.term.Term;
 import org.logicobjects.converter.descriptor.LogicObjectDescriptor;
-import org.logicobjects.converter.old.ObjectToTermConverter;
 import org.minitoolbox.reflection.BeansUtil;
 
 public class AnnotatedObjectToTermConverter<T,U extends Term> extends LogicObjectConverter implements ToTermConverter<T,U> {

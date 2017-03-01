@@ -1,6 +1,6 @@
 package org.logicobjects.converter;
 
-import org.jpc.converter.JpcConverter;
+import org.jpc.mapping.converter.JpcConverter;
 import org.logicobjects.converter.descriptor.LogicObjectDescriptor;
 
 

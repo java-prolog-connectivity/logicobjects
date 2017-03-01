@@ -393,7 +393,7 @@ public class LogicObjectInstrumentation {
 		/*
 		List<Method> methods = new ArrayList<Method>();
 		for(Method m : c.getMethods()) {
-			//System.out.println("Method candidate: "+m.getName()+". Generic string: "+m.toGenericString());
+			//System.out.println("Method candidate: "+m.getNameTerm()+". Generic string: "+m.toGenericString());
 			//if (m.getAnnotation(LMethod.class) != null || m.getAnnotation(LQuery.class) != null || m.getAnnotation(LSolution.class) != null) {
 			if(ReflectionUtil.isAbstract(m)) {
 				methods.add(m);
@@ -538,7 +538,7 @@ public class LogicObjectInstrumentation {
 			parametersAdapterClass = logicMethodAnnotation.parametersAdapter();
 		}
 		if(logicMethodName == null)  //not set in the annotation
-			logicMethodName = m.getName();
+			logicMethodName = m.getNameTerm();
 		
 
 		

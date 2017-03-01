@@ -5,8 +5,8 @@ import static java.util.Arrays.asList;
 import java.net.URL;
 import java.util.Set;
 
-import org.jgum.JGum;
-import org.jpc.DefaultJpc;
+import org.jcategory.JCategory;
+import org.jpc.JpcImpl;
 import org.jpc.engine.prolog.PrologEngine;
 import org.jpc.engine.provider.PrologEngineProvider;
 import org.jpc.term.Term;
@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * @author scastro
  *
  */
-public class LogicObjects extends DefaultJpc {
+public class LogicObjects extends JpcImpl {
 	
 	private static Logger logger = LoggerFactory.getLogger(LogicObjects.class);
 	private static LogicObjects logicObjects;
@@ -54,22 +54,22 @@ public class LogicObjects extends DefaultJpc {
 
 	
 	
-	private final JGum jgum;
+	private final JCategory categorization;
 	private final LogicObjectFactory logicObjectFactory;
 	private ClassPathContext context;
 	private final LogicObjectsPreferences preferences;
 	
 	
 	private LogicObjects() {
-		this(new JGum());
+		this(new JCategory());
 	}
 	
-	private LogicObjects(JGum jgum) {
-		this(jgum, new LogicObjectsPreferences());
+	private LogicObjects(JCategory categorization) {
+		this(categorization, new LogicObjectsPreferences());
 	}
 	
-	private LogicObjects(JGum jgum, LogicObjectsPreferences preferences) {
-		this.jgum = jgum;
+	private LogicObjects(JCategory categorization, LogicObjectsPreferences preferences) {
+		this.categorization = categorization;
 		this.preferences = preferences;
 		logicObjectFactory = new LogicObjectFactory();
 	}
@@ -117,7 +117,7 @@ public class LogicObjects extends DefaultJpc {
 
 
 	public <T extends PrologEngine> T getPrologEngine(String categoryName) {
-		PrologEngineProvider<T> provider = jgum.forName(categoryName).<PrologEngineProvider<T>>getProperty(PrologEngineProvider.class).get();
+		PrologEngineProvider<T> provider = categorization.forName(categoryName).<PrologEngineProvider<T>>getProperty(PrologEngineProvider.class).get();
 		return provider.getPrologEngine();
 	}
 

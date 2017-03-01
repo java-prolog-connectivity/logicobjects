@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.jconverter.factory.FactoryManager;
-import org.jpc.converter.TermConvertable;
+import org.jpc.mapping.converter.TermConvertable;
 import org.jpc.term.Term;
 import org.jpc.util.PrologUtil;
 import org.logicobjects.converter.IncompatibleAdapterException;

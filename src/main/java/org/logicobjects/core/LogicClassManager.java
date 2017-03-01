@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jpc.converter.TermConvertable;
+import org.jpc.mapping.converter.TermConvertable;
 import org.logicobjects.annotation.LConverter;
 import org.logicobjects.annotation.LDelegationObject;
 import org.logicobjects.annotation.LDelegationObjectConverter;

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jpc.converter.TermConvertable;
+import org.jpc.mapping.converter.TermConvertable;
 import org.jpc.engine.logtalk.LogtalkObject;
 import org.jpc.term.Atom;
 import org.jpc.term.Compound;
@@ -38,7 +38,7 @@ public class LogicObject<T extends Term> implements TermConvertable<T> {
 	}
 
 	public LogicObject(Term term) {
-		this(((Compound)term).getName(), new TermToObjectConverter().adaptTerms(term.getArgs()));
+		this(((Compound)term).getNameTerm(), new TermToObjectConverter().adaptTerms(term.getArgs()));
 	}
 	
 	public String getName() {

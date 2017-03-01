@@ -169,7 +169,7 @@ public class ClassPathContext {
 		if(term instanceof Compound) {
 			Compound compound = (Compound) term;
 			if(!compound.isList())
-				logicClass = findLogicClass(compound.getNameString(), compound.arity());
+				logicClass = findLogicClass(compound.getName(), compound.getArity());
 		}
 		return logicClass;
 	}
